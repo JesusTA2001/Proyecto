@@ -1,0 +1,129 @@
+.inicio-sesion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+}
+
+.titulo {
+    position: relative;
+    top:0;
+    font-size: 2rem;
+    margin: bottom;
+    margin-bottom: 1rem;
+    color: black;
+}
+
+.datos-usuario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 30px;
+}
+
+.login-button {
+    font-size: 1.01em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid black;
+    box-shadow: 2px 2px 10px black;
+    color:white;
+    background-color:  #8A2F83;
+}
+
+.login-button:hover {
+    background-color: #7D1D74;
+    cursor: pointer;
+}
+
+.formulario-inicio-sesion {
+    width: 60%;
+    background-color:#00903D;
+    margin:0;
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.usuario {
+    padding: 0.5rem;
+    font-size: 1rem;
+    margin:20px;
+}
+
+.password {
+    padding: 0.5rem;
+    font-size: 1rem;
+    margin:20px;
+}
+
+.logo{
+    width: 200px;
+    height: auto;
+}
+/* ====== Escritorio (>= 1024px) ======*/
+@media screen and (min-width: 1024px) {
+    .titulo {
+        font-size: 2.5rem;
+    }
+
+    .datos-usuario {
+        font-size: 28px;
+    }
+
+    .formulario-inicio-sesion {
+        /*width: 60%; más compacto en pantallas grandes */
+        height: auto;
+        padding: 2rem;
+        border-radius: 12px;
+    }
+
+    .usuario, .password {
+        width: 80%;
+        font-size: 1.1rem;
+    }
+
+    .login-button {
+        padding: 12px 30px;
+        font-size: 1.2rem;
+    }
+}
+
+/* ====== Tablets y teléfonos (<= 768px) ====== */
+@media screen and (max-width: 768px) {
+    .titulo {
+        font-size: 1.8rem;
+        text-align: center;
+        padding: 0 10px;
+    }
+
+    .datos-usuario {
+        font-size: 22px;
+    }
+
+    .formulario-inicio-sesion {
+        /*width: 60%; ocupa casi toda la pantalla */
+        height: auto;
+        padding: 1.5rem;
+    }
+
+    .usuario, .password {
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .login-button {
+        width: 100%;
+        font-size: 1rem;
+        padding: 10px;
+    }
+}

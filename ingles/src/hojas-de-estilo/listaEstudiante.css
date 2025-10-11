@@ -1,0 +1,255 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} 
+
+/* Paleta institucional */
+:root {
+  --color-bg: #f5f6f7;            /* Fondo general */
+  --color-primary: #8A2F83;      /* Principal */
+  --color-primary-hover: #7D1D74; /* Hover */
+  --color-text-on-primary: #ffffff;
+  --color-text: #1a1a1a;
+}
+
+/* ===== Body ===== */
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* ===== Menú principal ===== */
+.menu {
+  background: linear-gradient(90deg, var(--color-primary) 0%, #5a1d57 100%);
+  color: var(--color-text-on-primary);
+  height: 70px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+.menu__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+/* Logo */
+.menu__logo-image {
+  height: 80px;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.menu__logo-image:hover {
+  transform: scale(1.05);
+}
+
+.menu__logo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-left: 12px;
+  letter-spacing: 1px;
+}
+
+/* Links */
+.menu__links {
+  height: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.menu__link {
+  color: var(--color-text-on-primary);
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 0 25px;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.menu__link:hover,
+.menu__link:focus-visible {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* ===== Submenú ===== */
+.menu__item {
+  list-style: none;
+  position: relative;
+  height: 100%;
+  --clip: polygon(0 0, 100% 0, 100% 0, 0 0);
+  --transform: rotate(-90deg);
+}
+
+.menu__item:hover {
+  --clip: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+  --transform: rotate(0deg);
+}
+
+.menu__nesting {
+  list-style: none;
+  transition: clip-path .5s, opacity .3s ease;
+  clip-path: var(--clip);
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: max-content;
+  transform: translateY(100%);
+  background: rgba(138, 47, 131, 0.95);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.2);
+  overflow: hidden;
+}
+
+.menu__item:hover .menu__nesting {
+  opacity: 1;
+}
+
+.menu__link--inside {
+  padding: 15px 40px 15px 20px;
+  font-size: 0.95rem;
+  color: var(--color-text-on-primary);
+  white-space: nowrap;
+  transition: background-color .25s ease, padding-left .3s ease;
+}
+
+.menu__link--inside:hover,
+.menu__link--inside:focus-visible {
+  background-color: var(--color-primary-hover);
+  padding-left: 25px;
+  outline: none;
+}
+
+/* titulo lista de estudiantes */
+.lista-estudiante {
+  margin:15px;
+  padding:10px;
+  width: auto;
+  color: #ffffff;
+  text-align:center;
+  font-size: 14px;
+  background-color: #73266e;
+  border: 2px solid black;
+}
+/* botones de lista estudiante  */
+.button-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;        
+  gap: 25px;
+  margin-top: 20px;
+}
+
+/* botones para crear alumno/profesor/admin */
+.createbutton {
+    font-size: 1.01em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid black;
+    box-shadow: 2px 2px 10px black;
+    color:white;
+    background-color:  #8A2F83;
+}
+
+.createbutton:hover {
+    background-color: #7D1D74;
+    cursor: pointer;
+}
+/* boton modificar alumno/profesor/admin */
+.modifybutton {
+    font-size: 1.01em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid black;
+    box-shadow: 2px 2px 10px black;
+    color:white;
+    background-color:  #8A2F83;
+}
+
+.modifybutton:hover {
+    background-color: #7D1D74;
+    cursor: pointer;
+}
+/* boton eliminar alumno/profesor/admin */
+.deletebutton {
+    font-size: 1.01em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid black;
+    box-shadow: 2px 2px 10px black;
+    color:white;
+    background-color:  #8A2F83;
+}
+
+.deletebutton:hover {
+    background-color: #7D1D74;
+    cursor: pointer;
+}
+
+.campos-estudiante {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 20px;
+}
+
+.campos-estudiante p {
+  flex:0%;
+  background-color: #00903D; /* Fondo blanco o claro */
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  color: black; /* Texto negro */
+  font-weight: bold;
+  border: 2px solid black;
+}
+.campos-profesor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 20px;
+}
+
+.campos-profesor p {
+  flex:0%;
+  background-color: #00903D; /* Fondo */
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  color: black; /* Texto negro */
+  font-weight: bold;
+  border: 2px solid black;
+}
+
+.lista-administrador {
+  margin:15px;
+  padding:10px;
+  width: auto;
+  color: #ffffff;
+  text-align:center;
+  font-size: 14px;
+  background-color: #73266e;
+  border: 2px solid black;
+}
