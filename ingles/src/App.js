@@ -1,4 +1,5 @@
 import './App.css';
+import Layout from './Layout/Layout'; // 1. Importamos el nuevo Layout
 import PerfilUsuario from './perfil/perfil-usuario';
 import ListaEstudiante from './listaEstudiante/listaEstudiante';
 import ListaProfesor from './listaProfesor/listaProfesor';
@@ -25,25 +26,82 @@ function App() {
         {/* <Login/> */}
         
         <Routes>
+          {/* 2. Envolvemos cada componente con el Layout y le pasamos el título */}
+
           {/* Página principal */}
-          <Route path="/" element={<PerfilUsuario />} />
+          <Route path="/" element={
+            <Layout titulo="Bienvenido">
+              <PerfilUsuario />
+            </Layout>
+          } />
 
           {/* Rutas del menú */}
-          <Route path="/lista-estudiantes" element={<ListaEstudiante />} />
-          <Route path="/lista-profesores" element={<ListaProfesor />} />
-          <Route path="/lista-administradores" element={<ListaAdministrador />} />
-          {/* rutas del CRUD Alumno*/}
-          <Route path="/crear-alumno" element={<CrearAlumno />} />
-          <Route path="/modificar-alumno" element={<ModificarAlumno />} />
-          <Route path="/eliminar-alumno" element={<EliminarAlumno />} />
+          <Route path="/lista-estudiantes" element={
+            <Layout titulo="Lista de Estudiantes">
+              <ListaEstudiante />
+            </Layout>
+          } />
+          <Route path="/lista-profesores" element={
+            <Layout titulo="Lista de Profesores">
+              <ListaProfesor />
+            </Layout>
+          } />
+          <Route path="/lista-administradores" element={
+            <Layout titulo="Lista de Administradores">
+              <ListaAdministrador />
+            </Layout>
+          } />
+
+          {/* rutas del CRUD Alumno */}
+          <Route path="/crear-alumno" element={
+            <Layout titulo="Crear Alumno">
+              <CrearAlumno />
+            </Layout>
+          } />
+          <Route path="/modificar-alumno" element={
+            <Layout titulo="Modificar Alumno">
+              <ModificarAlumno />
+            </Layout>
+          } />
+          <Route path="/eliminar-alumno" element={
+            <Layout titulo="Eliminar Alumno">
+              <EliminarAlumno />
+            </Layout>
+          } />
+
           {/* Rutas del CRUD Profesor */}
-          <Route path="/crear-profesor" element={<CrearProfesor />} />
-          <Route path="/modificar-profesor" element={<ModificarProfesor />} />
-          <Route path="/eliminar-profesor" element={<EliminarProfesor />} />
+          <Route path="/crear-profesor" element={
+            <Layout titulo="Crear Profesor">
+              <CrearProfesor />
+            </Layout>
+          } />
+          <Route path="/modificar-profesor" element={
+            <Layout titulo="Modificar Profesor">
+              <ModificarProfesor />
+            </Layout>
+          } />
+          <Route path="/eliminar-profesor" element={
+            <Layout titulo="Eliminar Profesor">
+              <EliminarProfesor />
+            </Layout>
+          } />
+
           {/* CRUD Administrador */}
-          <Route path="/crear-administrador" element={<CrearAdministrador />} />
-          <Route path="/modificar-administrador" element={<ModificarAdministrador />} />
-          <Route path="/eliminar-administrador" element={<EliminarAdministrador />} />
+          <Route path="/crear-administrador" element={
+            <Layout titulo="Crear Administrador">
+              <CrearAdministrador />
+            </Layout>
+          } />
+          <Route path="/modificar-administrador" element={
+            <Layout titulo="Modificar Administrador">
+              <ModificarAdministrador />
+            </Layout>
+          } />
+          <Route path="/eliminar-administrador" element={
+            <Layout titulo="Eliminar Administrador">
+              <EliminarAdministrador />
+            </Layout>
+          } />
         </Routes>
       </div>
     </Router>
