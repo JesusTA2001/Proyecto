@@ -136,3 +136,172 @@ body {
   padding-left: 25px;
   outline: none;
 }
+
+
+/* ===== SIMULACION DEL CANVA PARA ANALISIS DE CODIGO ===== */
+
+/* src/hojas-de-estilo/perfil-usuario.css (CORREGIDO) */
+
+/* --- Tus variables de color y estilos del menú (si los tienes aquí) --- */
+/* ... puedes mantener tus variables :root y los estilos del menú aquí ... */
+
+/* --- Estilos para el Dashboard (Panel de Control) --- */
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  margin-bottom: 2rem;
+}
+
+.main-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.main-subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+}
+
+/* Rejilla de métricas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Enlace de la tarjeta */
+.stat-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Estilo general de la tarjeta de métricas */
+.stat-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 5px solid transparent;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Colores de borde específicos */
+.students-card { border-color: #8A2F83; } /* Color primario */
+.teachers-card { border-color: #3b82f6; } /* Un azul */
+.admins-card { border-color: #6b7280; }   /* Un gris */
+
+.stat-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin: 0.25rem 0;
+}
+
+.stat-card-detail {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.positive-detail {
+  color: #28a745; /* Verde para crecimiento */
+}
+
+.stat-card-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card-icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* Colores de fondo e íconos */
+.students-card .stat-card-icon-wrapper { background-color: #f3e8ff; color: #8A2F83; }
+.teachers-card .stat-card-icon-wrapper { background-color: #dbeafe; color: #3b82f6; }
+.admins-card .stat-card-icon-wrapper { background-color: #f3f4f6; color: #6b7280; }
+
+
+/* --- Estilos para la Tarjeta de Niveles Académicos --- */
+/* (Asegúrate de que estas clases coincidan con tu JSX si también las usas) */
+.card.academic-levels-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+}
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.level-item, .level-item-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #faf5ff;
+    border-radius: 0.5rem;
+}
+
+.level-item span, .level-item-total span { 
+  font-weight: 500; 
+  color: #4b5563; 
+}
+.level-item strong, .level-item-total strong { 
+  font-size: 1.125rem; 
+  font-weight: bold; 
+  color: #7c3aed; 
+}
+
+.level-item-total {
+    border: 2px dashed #d1d5db;
+    background-color: #f9fafb;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+}
+
+.level-item-total strong { 
+  font-size: 1.5rem; 
+}

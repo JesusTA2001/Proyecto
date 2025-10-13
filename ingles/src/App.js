@@ -30,24 +30,24 @@ function App() {
 
           {/* Página principal */}
           <Route path="/" element={
-            <Layout titulo="Bienvenido">
+            <Layout titulo="Bienvenido al Sistema de Gestión Escolar">
               <PerfilUsuario />
             </Layout>
           } />
 
           {/* Rutas del menú */}
           <Route path="/lista-estudiantes" element={
-            <Layout titulo="Lista de Estudiantes">
+            <Layout titulo="Gestion de Estudiantes">
               <ListaEstudiante />
             </Layout>
           } />
           <Route path="/lista-profesores" element={
-            <Layout titulo="Lista de Profesores">
+            <Layout titulo="Gestion de Profesores">
               <ListaProfesor />
             </Layout>
           } />
           <Route path="/lista-administradores" element={
-            <Layout titulo="Lista de Administradores">
+            <Layout titulo="Gestion de Administradores">
               <ListaAdministrador />
             </Layout>
           } />

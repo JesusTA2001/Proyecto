@@ -6,7 +6,7 @@ function ListaAdministrador() {
   return (
     <>
       <div className="campos-estudiante">
-        <p>Número de Control</p>
+        <p>Número de Empleado</p>
         <p>Nombre</p>
         <p>Apellido Paterno</p>
         <p>Apellido Materno</p>
