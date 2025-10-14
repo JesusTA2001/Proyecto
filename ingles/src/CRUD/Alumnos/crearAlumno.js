@@ -21,7 +21,7 @@ function crearAlumno() {
           <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
           <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
         <div className="button">
-            <button className='createbutton' type='submit'>Crear Alumno </button>
+            <button className='createbutton' type='submit'>Nuevo Alumno </button>
         </div>
         </div>
   );

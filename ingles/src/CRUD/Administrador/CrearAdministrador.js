@@ -21,7 +21,7 @@ function crearAdministrador() {
       <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
       <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
     <div className="create-button">
-        <button className='boton' type='submit'>Crear Administrador </button>
+        <button className='createbutton' type='submit'>Nuevo Administrador </button>
     </div>
     </div>
   );

@@ -54,7 +54,7 @@ function App() {
 
           {/* rutas del CRUD Alumno */}
           <Route path="/crear-alumno" element={
-            <Layout titulo="Crear Alumno">
+            <Layout titulo="Nuevo Alumno">
               <CrearAlumno />
             </Layout>
           } />
@@ -71,7 +71,7 @@ function App() {
 
           {/* Rutas del CRUD Profesor */}
           <Route path="/crear-profesor" element={
-            <Layout titulo="Crear Profesor">
+            <Layout titulo="Nuevo Profesor">
               <CrearProfesor />
             </Layout>
           } />
@@ -88,7 +88,7 @@ function App() {
 
           {/* CRUD Administrador */}
           <Route path="/crear-administrador" element={
-            <Layout titulo="Crear Administrador">
+            <Layout titulo="Nuevo Administrador">
               <CrearAdministrador />
             </Layout>
           } />

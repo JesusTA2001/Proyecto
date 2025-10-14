@@ -165,14 +165,15 @@ body {
     border-radius: 10px;
     border: 2px solid black;
     box-shadow: 2px 2px 10px black;
-    color:white;
-    background-color:  #8A2F83;
+    color: white;
+    background-color: #00903D; /* Verde institucional */
 }
 
 .createbutton:hover {
-    background-color: #7D1D74;
+    background-color: #007a33; /* Verde institucional (oscuro) */
     cursor: pointer;
 }
+
 /* boton modificar alumno/profesor/admin */
 .modifybutton {
     font-size: 1.01em;
@@ -181,14 +182,15 @@ body {
     border-radius: 10px;
     border: 2px solid black;
     box-shadow: 2px 2px 10px black;
-    color:white;
-    background-color:  #8A2F83;
+    color: white;
+    background-color: #00903D; /* Verde institucional */
 }
 
 .modifybutton:hover {
-    background-color: #7D1D74;
+    background-color: #007a33; /* Verde institucional (oscuro) */
     cursor: pointer;
 }
+
 /* boton eliminar alumno/profesor/admin */
 .deletebutton {
     font-size: 1.01em;
@@ -197,12 +199,12 @@ body {
     border-radius: 10px;
     border: 2px solid black;
     box-shadow: 2px 2px 10px black;
-    color:white;
-    background-color:  #8A2F83;
+    color: white;
+    background-color: #00903D; /* Verde institucional */
 }
 
 .deletebutton:hover {
-    background-color: #7D1D74;
+    background-color: #007a33; /* Verde institucional (oscuro) */
     cursor: pointer;
 }
 
@@ -252,4 +254,155 @@ body {
   font-size: 14px;
   background-color: #73266e;
   border: 2px solid black;
+}
+
+/* nuevo diseño */
+/* --- ESTILOS GENERALES Y CONTENEDOR --- */
+.lista-container {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 95%;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.lista-header {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.lista-titulo {
+  color: #333;
+  font-size: 2em;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+/* --- BARRA DE BÚSQUEDA --- */
+.search-input {
+  flex-grow: 1; /* <-- Añadimos esta línea mágica */
+  padding: 12px 15px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(138, 47, 131, 0.2);
+}
+
+/* --- TABLA DE ALUMNOS --- */
+.alumnos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.alumnos-table th,
+.alumnos-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.alumnos-table thead th {
+  background-color: #00903D; /* Verde INSTITUCIONAL PARA LA BARRA DE DATOS DE LOS ALUMNOS*/
+  color: var(--color-text-on-primary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.alumnos-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.alumnos-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* --- CELDA DE ACCIONES Y BOTONES --- */
+.acciones-cell {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.accion-link {
+  display: inline-block;
+  margin: 0 8px;
+  font-size: 1.3rem;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.accion-link:hover {
+  transform: scale(1.2);
+}
+
+.icon-edit {
+  color: #007bff; /* Azul para editar */
+}
+
+.icon-delete {
+  color: #dc3545; /* Rojo para eliminar */
+}
+
+/* --- BOTÓN 'NUEVO ALUMNO' (Reutilizando tu clase) --- */
+.createbutton {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 25px;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  color: white;
+  background-color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.createbutton:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+/* --- AÑADE ESTA CLASE AL FINAL DE TU ARCHIVO CSS --- */
+
+/* Estilo para botones que solo contienen un ícono */
+.icon-button {
+  padding: 8px 12px; /* Reduce el padding para que no sea tan ancho */
+  font-size: 1.2rem;   /* Aumenta el tamaño del ícono */
+  line-height: 1;      /* Mejora el alineamiento vertical del ícono */
+}
+
+/* --- AÑADE ESTO AL FINAL DE TU CSS --- */
+
+/* Estilos específicos para los botones de acción DENTRO de la tabla */
+.acciones-cell .modifybutton,
+.acciones-cell .deletebutton {
+  background: none; /* Quita el fondo morado */
+  border: none;     /* Quita el borde */
+  box-shadow: none; /* Quita la sombra */
+  color: #8A2F83;   /* Pone el ícono de color morado para que combine */
+  padding: 0 5px;   /* Ajusta el espaciado */
+  transition: transform 0.2s ease;
+}
+
+/* Efecto al pasar el cursor */
+.acciones-cell .modifybutton:hover,
+.acciones-cell .deletebutton:hover {
+  transform: scale(1.2); /* Agrandamos un poco el ícono */
+  background-color: transparent; /* Nos aseguramos que no aparezca un fondo */
 }

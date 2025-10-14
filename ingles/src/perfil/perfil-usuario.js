@@ -7,8 +7,8 @@ function PerfilUsuario() {
   return (
     <main className="dashboard-container">
       <div className="welcome-section">
-        <h2 className="main-title">Panel de Control</h2>
-        <p className="main-subtitle">Bienvenido al sistema de gestión escolar - Resumen ejecutivo</p>
+        <h2 className="main-title">Dashboard</h2>
+        <p className="main-subtitle">Bienvenido al sistema de gestión escolar.</p>
       </div>
 
       {/* --- Rejilla de Métricas con Enlaces --- */}

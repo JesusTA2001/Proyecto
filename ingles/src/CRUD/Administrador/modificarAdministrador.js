@@ -21,7 +21,7 @@ function modificarAdministrador() {
       <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
       <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
     <div className="create-button">
-        <button className='boton' type='submit'>Modificar Administrador </button>
+        <button className='modifybutton' type='submit'>Modificar Administrador </button>
     </div>
     </div>
   );
