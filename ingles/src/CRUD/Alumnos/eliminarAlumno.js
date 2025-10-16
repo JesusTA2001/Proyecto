@@ -1,31 +1,40 @@
 import React from "react";
-import '../../imagenes/TecZamora.png';
-import '../../hojas-de-estilo/listaEstudiante.css';
+import { useParams, useNavigate } from "react-router-dom";
+import '../../hojas-de-estilo/listaEstudiante.css'; 
 
-import { Link } from "react-router-dom";
-function eliminarAlumno() {
-  return (
-    <div>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Numero de Control"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Nombre"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Paterno"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Materno"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Correo Electronico"></input>
-      <label for="genero">Género:</label>
-      <select id="genero" name="genero" className="usuario">
-        <option value="">Seleccione una opción</option>
-        <option value="Masculino">Masculino</option>
-        <option value="Femenino">Femenino</option>
-      </select>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Numero de Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="CURP"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
-        <div className="button">
-          <button className='deletebutton' type='submit'>Eliminar Alumno </button>
+function EliminarAlumno({ alumnos, eliminarAlumno }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const alumno = alumnos.find(a => a.numero_control === id);
+
+  const handleDelete = () => {
+    eliminarAlumno(id);
+    navigate("/lista-estudiantes");
+  };
+
+  if (!alumno) {
+    return (
+        <div style={{ padding: '20px' }}>
+            <h2>Alumno no encontrado</h2>
+            <p>El alumno que intentas eliminar ya no existe.</p>
         </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <h2>¿Estás seguro que deseas eliminar a este alumno?</h2>
+      <div style={{ margin: '20px 0', border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
+        <p><strong>Número de Control:</strong> {alumno.numero_control}</p>
+        <p><strong>Nombre:</strong> {alumno.nombre}</p>
+        <p><strong>Correo:</strong> {alumno.correo}</p>
+      </div>
+      <div className="button-list">
+        <button className='deletebutton' onClick={handleDelete}>Sí, Eliminar Alumno</button>
+        <button className='createbutton' onClick={() => navigate("/lista-estudiantes")}>Cancelar</button>
+      </div>
     </div>
   );
 }
 
-export default eliminarAlumno;
+export default EliminarAlumno;

@@ -1,30 +1,43 @@
 import React from "react";
-import '../../imagenes/TecZamora.png';
+import { useParams, useNavigate, Link } from "react-router-dom";
 import '../../hojas-de-estilo/listaEstudiante.css';
 
-import { Link } from "react-router-dom";
-function eliminarProfesor() {
+function EliminarProfesor({ profesores, eliminarProfesor }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const profesor = profesores.find(p => p.numero_empleado === id);
+
+  const handleDelete = () => {
+    eliminarProfesor(id);
+    navigate("/lista-profesores");
+  };
+
+  if (!profesor) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h2>Profesor no encontrado</h2>
+        <p>El profesor que intentas eliminar ya no existe.</p>
+        <Link to="/lista-profesores">
+            <button className="createbutton" style={{marginTop: '20px'}}>Volver a la lista</button>
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <input className='usuario' type="number" id="usuario" name="usuario" placeholder="Numero de Control"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Nombre"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Paterno"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Materno"></input>
-      <input className='usuario' type="email" id="usuario" name="usuario" placeholder="Correo Electronico"></input>
-      <select id="genero" name="genero" className="usuario">
-        <option value="">Seleccione una opción</option>
-        <option value="Masculino">Masculino</option>
-        <option value="Femenino">Femenino</option>
-      </select>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Numero de Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="CURP"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
-    <div className="create-button">
-        <button className='deletebutton' type='submit'>Eliminar Profesor </button>
-    </div>
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <h2>¿Estás seguro que deseas eliminar a este profesor?</h2>
+      <div style={{ margin: '20px 0', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', display: 'inline-block', textAlign: 'left' }}>
+        <p><strong>Número de Empleado:</strong> {profesor.numero_empleado}</p>
+        <p><strong>Nombre:</strong> {profesor.nombre}</p>
+        <p><strong>Correo:</strong> {profesor.correo}</p>
+      </div>
+      <div className="button-list">
+        <button className='deletebutton' onClick={handleDelete}>Sí, Eliminar Profesor</button>
+        <button className='createbutton' onClick={() => navigate("/lista-profesores")}>Cancelar</button>
+      </div>
     </div>
   );
 }
 
-export default eliminarProfesor;
+export default EliminarProfesor;

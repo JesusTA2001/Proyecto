@@ -39,7 +39,7 @@ function Layout({children, titulo}) {
               <ul className="menu__nesting">
                 <li className="menu__inside">
                   <Link to="/lista-profesores" className="menu__link menu__link--inside">
-                    Lista Profesores
+                    Lista De Profesores
                   </Link>
                 </li>
                 <li className="menu__inside">
@@ -64,10 +64,14 @@ function Layout({children, titulo}) {
                   <a href="#" className="menu__link menu__link--inside">Grupos De Estudiantes</a>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Inscripción Estudiante</a>
+                  <Link to="/lista-niveles" className="menu__link menu__link--inside">
+                    Niveles
+                  </Link>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Avance Por Nivel</a>
+                  <Link to="/lista-modalidad" className="menu__link menu__link--inside">
+                  Modalidad
+                  </Link>
                 </li>
               </ul>
             </li>

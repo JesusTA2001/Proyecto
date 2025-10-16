@@ -1,30 +1,49 @@
-import React from "react";
-import '../../imagenes/TecZamora.png';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import '../../hojas-de-estilo/listaEstudiante.css';
 
-import { Link } from "react-router-dom";
-function modificarAdministrador() {
+// 1. Recibe 'administradores' y la función 'actualizarAdministrador'
+function ModificarAdministrador({ administradores, actualizarAdministrador }) {
+  const { id } = useParams(); // Obtiene el ID (ej: "ADM01")
+  const navigate = useNavigate();
+  const [admin, setAdmin] = useState(null);
+
+  // 2. Busca el administrador en el arreglo cuando el componente carga
+  useEffect(() => {
+    const adminAEditar = administradores.find(a => a.numero_empleado === id);
+    if (adminAEditar) {
+      setAdmin(adminAEditar);
+    } else {
+      navigate("/lista-administradores");
+    }
+  }, [id, administradores, navigate]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setAdmin({ ...admin, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    actualizarAdministrador(admin); // Llama a la función de App.js
+    navigate("/lista-administradores"); // Redirige
+  };
+  
+  if (!admin) return <p style={{textAlign: 'center', margin: '20px'}}>Cargando datos del administrador...</p>;
+
   return (
-    <div>
-      <input className='usuario' type="number" id="usuario" name="usuario" placeholder="Numero de Control"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Nombre"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Paterno"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Materno"></input>
-      <input className='usuario' type="email" id="usuario" name="usuario" placeholder="Correo Electronico"></input>
-      <select id="genero" name="genero" className="usuario">
-        <option value="">Seleccione una opción</option>
-        <option value="Masculino">Masculino</option>
-        <option value="Femenino">Femenino</option>
-      </select>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Numero de Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="CURP"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
-    <div className="create-button">
-        <button className='modifybutton' type='submit'>Modificar Administrador </button>
-    </div>
-    </div>
+    <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <input className='usuario' name="numero_empleado" value={admin.numero_empleado} readOnly disabled title="El número de empleado no se puede modificar"/>
+      <input className='usuario' name="nombre" value={admin.nombre} onChange={handleChange} placeholder="Nombre Completo" required />
+      <input className='usuario' name="correo" type="email" value={admin.correo} onChange={handleChange} placeholder="Correo Electrónico" required />
+      <input className='usuario' name="telefono" value={admin.telefono} onChange={handleChange} placeholder="Teléfono" />
+      <input className='usuario' name="curp" value={admin.curp} onChange={handleChange} placeholder="CURP" />
+      <input className='usuario' name="direccion" value={admin.direccion} onChange={handleChange} placeholder="Dirección" />
+      <div className="button-list">
+        <button className='modifybutton' type='submit'>Guardar Cambios</button>
+      </div>
+    </form>
   );
 }
 
-export default modificarAdministrador;
+export default ModificarAdministrador;

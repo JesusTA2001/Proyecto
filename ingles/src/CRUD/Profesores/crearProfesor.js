@@ -1,30 +1,36 @@
-import React from "react";
-import '../../imagenes/TecZamora.png';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import '../../hojas-de-estilo/listaEstudiante.css';
 
-import { Link } from "react-router-dom";
-function crearProfesor() {
+function CrearProfesor({ agregarProfesor }) {
+  const navigate = useNavigate();
+  const [profesor, setProfesor] = useState({
+    nombre: '', correo: '', telefono: '', curp: '', direccion: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfesor({ ...profesor, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    agregarProfesor(profesor);
+    navigate("/lista-profesores");
+  };
+
   return (
-    <div>
-      <input className='usuario' type="number" id="usuario" name="usuario" placeholder="Numero de Control"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Nombre"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Paterno"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Apellido Materno"></input>
-      <input className='usuario' type="email" id="usuario" name="usuario" placeholder="Correo Electronico"></input>
-      <select id="genero" name="genero" className="usuario">
-        <option value="">Seleccione una opción</option>
-        <option value="Masculino">Masculino</option>
-        <option value="Femenino">Femenino</option>
-      </select>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Numero de Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="CURP"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Telefono"></input>
-      <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Dirección"></input>
-    <div className="create-button">
-        <button className='createbutton' type='submit'>Crear Profesor </button>
-    </div>
-    </div>
+    <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <input className='usuario' name="nombre" value={profesor.nombre} onChange={handleChange} placeholder="Nombre Completo" required />
+      <input className='usuario' name="correo" type="email" value={profesor.correo} onChange={handleChange} placeholder="Correo Electrónico" required />
+      <input className='usuario' name="telefono" value={profesor.telefono} onChange={handleChange} placeholder="Teléfono" />
+      <input className='usuario' name="curp" value={profesor.curp} onChange={handleChange} placeholder="CURP" />
+      <input className='usuario' name="direccion" value={profesor.direccion} onChange={handleChange} placeholder="Dirección" />
+      <div className="button-list">
+        <button className='createbutton' type='submit'>Crear Profesor</button>
+      </div>
+    </form>
   );
 }
 
-export default crearProfesor;
+export default CrearProfesor;
