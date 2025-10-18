@@ -14,7 +14,7 @@ function EliminarAdministrador({ administradores, eliminarAdministrador }) {
 
   if (!admin) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
+      <div className="detail-container">
         <h2>Administrador no encontrado</h2>
         <p>El administrador que intentas eliminar ya no existe.</p>
         <Link to="/lista-administradores">
@@ -25,14 +25,13 @@ function EliminarAdministrador({ administradores, eliminarAdministrador }) {
   }
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div className="detail-container" style={{ textAlign: 'center' }}>
       <h2>¿Estás seguro que deseas eliminar a este administrador?</h2>
       <div style={{ margin: '20px 0', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', display: 'inline-block', textAlign: 'left' }}>
-        <p><strong>Número de Empleado:</strong> {admin.numero_empleado}</p>
+        <p><strong>N° de Empleado:</strong> {admin.numero_empleado}</p>
         <p><strong>Nombre:</strong> {admin.nombre}</p>
-        <p><strong>Correo:</strong> {admin.correo}</p>
       </div>
-      <div className="button-list">
+      <div className="button-list" style={{marginTop: '20px'}}>
         <button className='deletebutton' onClick={handleDelete}>Sí, Eliminar Administrador</button>
         <button className='createbutton' onClick={() => navigate("/lista-administradores")}>Cancelar</button>
       </div>

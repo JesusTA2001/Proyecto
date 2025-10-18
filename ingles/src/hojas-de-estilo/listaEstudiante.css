@@ -163,7 +163,7 @@ body {
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 10px;
-    border: 2px solid black;
+    border: 2px solid green;
     box-shadow: 2px 2px 10px black;
     color: white;
     background-color: #00903D; /* Verde institucional */
@@ -180,7 +180,7 @@ body {
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 10px;
-    border: 2px solid black;
+    border: 2px solid green;
     box-shadow: 2px 2px 10px black;
     color: white;
     background-color: #00903D; /* Verde institucional */
@@ -197,7 +197,7 @@ body {
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 10px;
-    border: 2px solid black;
+    border: 2px solid green;
     box-shadow: 2px 2px 10px black;
     color: white;
     background-color: #00903D; /* Verde institucional */
@@ -385,8 +385,6 @@ body {
   line-height: 1;      /* Mejora el alineamiento vertical del ícono */
 }
 
-/* --- AÑADE ESTO AL FINAL DE TU CSS --- */
-
 /* Estilos específicos para los botones de acción DENTRO de la tabla */
 .acciones-cell .modifybutton,
 .acciones-cell .deletebutton {
@@ -403,4 +401,91 @@ body {
 .acciones-cell .deletebutton:hover {
   transform: scale(1.2); /* Agrandamos un poco el ícono */
   background-color: transparent; /* Nos aseguramos que no aparezca un fondo */
+}
+
+/* nuevas lineas  */
+/* --- Estilos para el botón de Estado en la tabla --- */
+.estado-button {
+    padding: 5px 12px;
+    border-radius: 15px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 90px;
+    transition: transform 0.2s ease;
+}
+.estado-button:hover {
+    transform: scale(1.05);
+}
+.estado-button.activo { background-color: #28a745; }
+.estado-button.inactivo { background-color: #dc3545; }
+
+/* --- Estilo para el nuevo botón de Ver (ojo) --- */
+.view-button {
+    background: none;
+    border: none;
+    color: #17a2b8; /* Un color cian para diferenciar */
+    font-size: 1.5rem;
+    padding: 0 5px;
+    cursor: pointer;
+}
+.view-button:hover {
+    transform: scale(1.3) !important; /* Importante para sobreescribir otros hovers */
+    background-color: transparent !important;
+}
+
+/* --- Estilos para la Vista de Detalles --- */
+.detail-container {
+    margin: 20px auto;
+    padding: 30px;
+    max-width: 800px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+.detail-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    color: #333;
+}
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    text-align: left;
+}
+.detail-grid p {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 5px solid var(--color-verde-institucional);
+    margin: 0;
+}
+.estado-activo { color: #28a745; font-weight: bold; }
+.estado-inactivo { color: #dc3545; font-weight: bold; }
+
+/* Estilo para los formularios CRUD */
+.form-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 600px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* mensaje amigable para el usuario cuando no hay datos en la busqueda*/
+
+.no-results-cell {
+  text-align: center;
+  padding: 40px 20px;
+  color: black;
+  font-style: italic;
+  font-size: 1.1rem;
 }

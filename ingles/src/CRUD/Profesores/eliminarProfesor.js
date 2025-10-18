@@ -14,7 +14,7 @@ function EliminarProfesor({ profesores, eliminarProfesor }) {
 
   if (!profesor) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
+      <div className="detail-container">
         <h2>Profesor no encontrado</h2>
         <p>El profesor que intentas eliminar ya no existe.</p>
         <Link to="/lista-profesores">
@@ -25,7 +25,7 @@ function EliminarProfesor({ profesores, eliminarProfesor }) {
   }
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div className="detail-container" style={{ textAlign: 'center' }}>
       <h2>¿Estás seguro que deseas eliminar a este profesor?</h2>
       <div style={{ margin: '20px 0', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', display: 'inline-block', textAlign: 'left' }}>
         <p><strong>Número de Empleado:</strong> {profesor.numero_empleado}</p>
