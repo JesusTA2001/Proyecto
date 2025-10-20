@@ -489,3 +489,43 @@ body {
   font-style: italic;
   font-size: 1.1rem;
 }
+
+/* --- AÑADE ESTO AL FINAL DE TU ARCHIVO CSS --- */
+
+/* Contenedor para los filtros desplegables */
+.filter-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+/* Grupo para cada filtro (etiqueta + select) */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+}
+
+/* Estilo para los select, similar al search-input */
+.filter-select {
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  min-width: 200px; /* Ancho mínimo para que se vean bien */
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-verde-institucional);
+  box-shadow: 0 0 0 3px rgba(0, 144, 61, 0.2);
+}
