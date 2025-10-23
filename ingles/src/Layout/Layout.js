@@ -16,7 +16,7 @@ function Layout({children, titulo}) {
           <h1 className="menu__logo">Administrador</h1>
 
           <ul className="menu__links">
-            {/* Inicio */}
+            {/* ... (otros enlaces del menú: Inicio, Administrador, Profesor) ... */}
             <li className="menu__item">
               <Link to="/" className="menu__link">Inicio</Link>
             </li>
@@ -51,6 +51,7 @@ function Layout({children, titulo}) {
               </ul>
             </li>
 
+
             {/* Estudiantes */}
             <li className="menu__item menu__item--show">
               <span className="menu__link">Estudiantes</span>
@@ -61,7 +62,11 @@ function Layout({children, titulo}) {
                   </Link>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Grupos De Estudiantes</a>
+                  {/* --- MODIFICADO --- */}
+                  <Link to="/lista-grupos" className="menu__link menu__link--inside">
+                    Grupos De Estudiantes
+                  </Link>
+                  {/* --- FIN MODIFICADO --- */}
                 </li>
                 <li className="menu__inside">
                   <Link to="/lista-niveles" className="menu__link menu__link--inside">
@@ -71,6 +76,11 @@ function Layout({children, titulo}) {
                 <li className="menu__inside">
                   <Link to="/lista-modalidad" className="menu__link menu__link--inside">
                   Modalidad
+                  </Link>
+                </li>
+                <li className="menu__inside">
+                  <Link to="/lista-horario" className="menu__link menu__link--inside">
+                  Horarios
                   </Link>
                 </li>
               </ul>

@@ -1,9 +1,43 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../hojas-de-estilo/perfil-usuario.css'; // Asegúrate de que este archivo CSS tenga los estilos que te proporcioné.
+import '../hojas-de-estilo/perfil-usuario.css';
 import '../imagenes/TecZamora.png';
 
-function PerfilUsuario() {
+// 1. Acepta los props de App.js
+function PerfilUsuario({ alumnos, profesores, administradores, niveles, modalidades }) {
+  
+  // 2. Calcula los totales
+  const totalAlumnos = alumnos.length;
+  // Puedes ser más específico, por ejemplo, solo contar activos
+  const totalAlumnosActivos = alumnos.filter(a => a.estado === 'Activo').length;
+  const totalProfesoresActivos = profesores.filter(p => p.estado === 'Activo').length;
+  const totalAdministradores = administradores.length;
+
+  // 3. Calcula los conteos por Nivel y Modalidad
+  // (Usamos useMemo para evitar recalcular en cada render, pero por simplicidad lo haremos directo)
+  // (Si el rendimiento se vuelve lento, se puede optimizar con React.useMemo)
+
+  const conteoPorNivel = {};
+  for (const nivel of niveles) {
+      conteoPorNivel[nivel.nombre] = 0; // Inicializa todos los niveles en 0
+  }
+  for (const alumno of alumnos) {
+      if (conteoPorNivel.hasOwnProperty(alumno.nivel)) {
+          conteoPorNivel[alumno.nivel]++; // Suma 1 si el alumno tiene ese nivel
+      }
+  }
+
+  const conteoPorModalidad = {};
+  for (const mod of modalidades) {
+      conteoPorModalidad[mod.nombre] = 0; // Inicializa todas las modalidades en 0
+  }
+  for (const alumno of alumnos) {
+      if (conteoPorModalidad.hasOwnProperty(alumno.modalidad)) {
+          conteoPorModalidad[alumno.modalidad]++; // Suma 1
+      }
+  }
+
+
   return (
     <main className="dashboard-container">
       <div className="welcome-section">
@@ -11,16 +45,17 @@ function PerfilUsuario() {
         <p className="main-subtitle">Bienvenido al Sistema de Gestión Escolar.</p>
       </div>
 
-      {/* --- Rejilla de Métricas con Enlaces --- */}
+      {/* --- Rejilla de Métricas con Enlaces (DATOS DINÁMICOS) --- */}
       <div className="stats-grid">
         
         {/* Tarjeta de Alumnos */}
         <Link to="/lista-estudiantes" className="stat-card-link">
           <div className="stat-card students-card">
             <div className="stat-card-info">
-              <p className="stat-card-title">ALUMNOS REGISTRADOS</p>
-              <p className="stat-card-value">1,247</p>
-              <p className="stat-card-detail positive-detail">+12% este mes</p>
+              <p className="stat-card-title">ALUMNOS REGISTRADOS (Activos)</p>
+              {/* 4. Muestra la variable calculada */}
+              <p className="stat-card-value">{totalAlumnosActivos}</p> 
+              <p className="stat-card-detail">Total: {totalAlumnos}</p>
             </div>
             <div className="stat-card-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -35,8 +70,9 @@ function PerfilUsuario() {
           <div className="stat-card teachers-card">
             <div className="stat-card-info">
               <p className="stat-card-title">PROFESORES ACTIVOS</p>
-              <p className="stat-card-value">89</p>
-              <p className="stat-card-detail">3 nuevos contratados</p>
+               {/* 4. Muestra la variable calculada */}
+              <p className="stat-card-value">{totalProfesoresActivos}</p>
+              <p className="stat-card-detail">Total: {profesores.length}</p>
             </div>
             <div className="stat-card-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -51,7 +87,8 @@ function PerfilUsuario() {
           <div className="stat-card admins-card">
             <div className="stat-card-info">
               <p className="stat-card-title">ADMINISTRADORES</p>
-              <p className="stat-card-value">12</p>
+               {/* 4. Muestra la variable calculada */}
+              <p className="stat-card-value">{totalAdministradores}</p>
               <p className="stat-card-detail">Personal completo</p>
             </div>
             <div className="stat-card-icon-wrapper">
@@ -63,53 +100,40 @@ function PerfilUsuario() {
         </Link>
       </div>
 
-      {/* --- Sección de Niveles Académicos (sin cambios) --- */}
+      {/* --- Sección de Niveles Académicos (DATOS DINÁMICOS) --- */}
       <div className="card academic-levels-card">
-        <h3 className="card-section-title">Niveles Académicos</h3>
+        <h3 className="card-section-title">Alumnos por Nivel Académico</h3>
         <div className="levels-grid">
-            <div className="level-item"><span>Kids 1</span> <strong>89</strong></div>
-            <div className="level-item"><span>Kids 2</span> <strong>89</strong></div>
-            <div className="level-item"><span>Kids 3</span> <strong>89</strong></div>
-            <div className="level-item"><span>Kids 4</span> <strong>89</strong></div>
-            <div className="level-item"><span>kids 5</span> <strong>89</strong></div>
-            <div className="level-item"><span>Kids 6</span> <strong>89</strong></div>
-            <div className="level-item"><span>Teens 1</span> <strong>89</strong></div>
-            <div className="level-item"><span>Teens 2</span> <strong>89</strong></div>
-            <div className="level-item"><span>Teens 3</span> <strong>89</strong></div>
-            <div className="level-item"><span>Teens 4</span> <strong>89</strong></div>
-            <div className="level-item"><span>Nivel Intro</span> <strong>89</strong></div>
-            <div className="level-item"><span>Nivel 1</span> <strong>156</strong></div>
-            <div className="level-item"><span>Nivel 2</span> <strong>203</strong></div>
-            <div className="level-item"><span>Nivel 3</span> <strong>187</strong></div>
-            <div className="level-item"><span>Nivel 4</span> <strong>234</strong></div>
-            <div className="level-item"><span>Nivel 5</span> <strong>198</strong></div>
-            <div className="level-item"><span>Nivel 6</span> <strong>180</strong></div>
-            <div className="level-item"><span>Conversacion 1</span> <strong>25</strong></div>
-            <div className="level-item"><span>Conversacion 2</span> <strong>20</strong></div>
-            <div className="level-item"><span>Diplomado 1</span> <strong>15</strong></div>
-            <div className="level-item"><span>Diplomado 2</span> <strong>15</strong></div>
+            {/* 4. Mapea sobre la lista de niveles y muestra el conteo */}
+            {niveles.map(nivel => (
+              <div className="level-item" key={nivel.id}>
+                  <span>{nivel.nombre}</span>
+                  <strong>{conteoPorNivel[nivel.nombre] || 0}</strong>
+              </div>
+            ))}
+            
             <div className="level-item-total">
-                <span>Total</span>
-                <strong>1,247</strong>
+                <span>Total Alumnos</span>
+                <strong>{totalAlumnos}</strong>
             </div>
         </div>
       </div>
-      {/* --- Sección de Modalidad (sin cambios) --- */}
+      
+      {/* --- Sección de Modalidad (DATOS DINÁMICOS) --- */}
         <div className="card academic-levels-card">
-        <h3 className="card-section-title">Modalidad</h3>
+        <h3 className="card-section-title">Alumnos por Modalidad</h3>
         <div className="levels-grid">
-            <div className="level-item"><span>Matutino</span> <strong>234</strong></div>
-
-            <div className="level-item"><span>Vespertino</span> <strong>198</strong></div>
-
-            <div className="level-item"><span>Sabatino</span> <strong>180</strong></div>
-
-            <div className="level-item"><span>Dominical</span> <strong>25</strong></div>
-
-            <div className="level-item"><span>Intensivo</span> <strong>20</strong></div>
+            {/* 4. Mapea sobre la lista de modalidades y muestra el conteo */}
+            {modalidades.map(mod => (
+                 <div className="level-item" key={mod.id}>
+                    <span>{mod.nombre}</span>
+                    <strong>{conteoPorModalidad[mod.nombre] || 0}</strong>
+                 </div>
+            ))}
+           
             <div className="level-item-total">
-                <span>Total</span>
-                <strong>1,247</strong>
+                <span>Total Alumnos</span>
+                <strong>{totalAlumnos}</strong>
             </div>
         </div>
       </div>
