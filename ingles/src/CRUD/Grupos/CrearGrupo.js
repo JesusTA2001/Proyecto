@@ -11,12 +11,31 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
         modalidad: '',
         ubicacion: 'Tecnologico', // Valor inicial
         profesorId: '',
-        alumnoIds: []
+        alumnoIds: [],
+        // --- CAMPOS DE HORARIO AÑADIDOS ---
+        dia: '',
+        horaInicio: '',
+        horaFin: ''
+        // ------------------------------------
     });
     const [nivelesDisponibles, setNivelesDisponibles] = useState([]);
     const [profesoresDisponibles, setProfesoresDisponibles] = useState([]);
     const [alumnosDisponibles, setAlumnosDisponibles] = useState([]); // Alumnos que cumplen requisitos
     const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(new Set()); // IDs seleccionados
+
+    // Opciones para el select de días
+    const diasSemana = [
+        { value: 'Lunes', label: 'Lunes' },
+        { value: 'Martes', label: 'Martes' },
+        { value: 'Miercoles', label: 'Miércoles' },
+        { value: 'Jueves', label: 'Jueves' },
+        { value: 'Viernes', label: 'Viernes' },
+        { value: 'Sabado', label: 'Sábado' },
+        { value: 'Domingo', label: 'Domingo' },
+        { value: 'Lunes-Miercoles', label: 'Lunes y Miércoles' },
+        { value: 'Martes-Jueves', label: 'Martes y Jueves' },
+        { value: 'Lunes-Viernes', label: 'Lunes a Viernes' },
+    ];
 
     // --- Filtrar Niveles por Ubicación ---
     useEffect(() => {
@@ -56,16 +75,12 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
             return;
         }
         // Encuentra alumnos activos, en la ubicación correcta, y CON EL NIVEL SELECCIONADO
-        // OJO: Esta lógica asume que buscas alumnos que YA están en ese nivel
-        // Si buscas alumnos SIN nivel para asignarles uno, la lógica cambia.
-        // Por simplicidad inicial, buscamos alumnos que YA están en el nivel seleccionado.
         const filtered = alumnos.filter(a =>
             a.estado === 'Activo' &&
             a.ubicacion === grupo.ubicacion &&
             a.nivel === grupo.nivel
         );
         setAlumnosDisponibles(filtered);
-        // Podrías querer limpiar alumnosSeleccionados si cambian nivel/ubicación
          setAlumnosSeleccionados(new Set()); // Limpia selección al cambiar filtro principal
 
     }, [grupo.ubicacion, grupo.nivel, alumnos]);
@@ -90,8 +105,9 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!grupo.nombre || !grupo.nivel || !grupo.modalidad || !grupo.ubicacion || !grupo.profesorId) {
-            alert("Por favor completa todos los campos principales del grupo.");
+        // --- VALIDACIÓN ACTUALIZADA ---
+        if (!grupo.nombre || !grupo.nivel || !grupo.modalidad || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
+            alert("Por favor completa todos los campos del grupo, incluyendo día y horas.");
             return;
         }
          if (alumnosSeleccionados.size === 0) {
@@ -103,7 +119,7 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
             ...grupo,
             alumnoIds: Array.from(alumnosSeleccionados) // Convertir Set a Array
         };
-        agregarGrupo(grupoFinal);
+        agregarGrupo(grupoFinal); // Esta función debe incluir la validación de empalme
         navigate("/lista-grupos");
     };
 
@@ -130,6 +146,36 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
                 <option value="">Selecciona un Profesor</option>
                 {profesoresDisponibles.map(p => <option key={p.numero_empleado} value={p.numero_empleado}>{p.nombre}</option>)}
             </select>
+            
+            {/* --- INICIO: CAMPOS DE HORARIO AÑADIDOS --- */}
+            <select name="dia" value={grupo.dia} onChange={handleChange} className="usuario" required>
+                <option value="">Selecciona el día/días</option>
+                {diasSemana.map(dia => (
+                    <option key={dia.value} value={dia.value}>{dia.label}</option>
+                ))}
+            </select>
+
+            <input 
+                type="time" 
+                name="horaInicio" 
+                value={grupo.horaInicio} 
+                onChange={handleChange} 
+                className="usuario" 
+                placeholder="Hora de Inicio"
+                required 
+            />
+            
+            <input 
+                type="time" 
+                name="horaFin" 
+                value={grupo.horaFin} 
+                onChange={handleChange} 
+                className="usuario" 
+                placeholder="Hora de Fin"
+                required 
+            />
+            {/* --- FIN: CAMPOS DE HORARIO AÑADIDOS --- */}
+
 
             {/* --- Selección de Alumnos (Ejemplo simple con checkboxes) --- */}
             <fieldset style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px', maxHeight: '300px', overflowY: 'auto' }}>

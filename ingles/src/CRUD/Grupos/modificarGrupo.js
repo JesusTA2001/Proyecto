@@ -51,11 +51,32 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
     const [profesoresDisponibles, setProfesoresDisponibles] = useState([]);
     const [alumnosDisponibles, setAlumnosDisponibles] = useState([]);
 
+    // Opciones para el select de días
+    const diasSemana = [
+        { value: 'Lunes', label: 'Lunes' },
+        { value: 'Martes', label: 'Martes' },
+        { value: 'Miercoles', label: 'Miércoles' },
+        { value: 'Jueves', label: 'Jueves' },
+        { value: 'Viernes', label: 'Viernes' },
+        { value: 'Sabado', label: 'Sábado' },
+        { value: 'Domingo', label: 'Domingo' },
+        { value: 'Lunes-Miercoles', label: 'Lunes y Miércoles' },
+        { value: 'Martes-Jueves', label: 'Martes y Jueves' },
+        { value: 'Lunes-Viernes', label: 'Lunes a Viernes' },
+    ];
+
     // --- Cargar datos del grupo ---
     useEffect(() => {
         const grupoAEditar = grupos.find(g => g.id === id);
         if (grupoAEditar) {
-            setGrupo(grupoAEditar);
+            // --- MODIFICADO: Asegura valores por defecto ---
+            setGrupo({
+                dia: '',
+                horaInicio: '',
+                horaFin: '',
+                ...grupoAEditar
+            });
+            // ----------------------------------------------
             setAlumnosSeleccionados(new Set(grupoAEditar.alumnoIds)); // Cargar IDs de alumnos
         } else {
             navigate("/lista-grupos"); // Si no existe, volver
@@ -73,7 +94,6 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
             filtered = niveles;
         }
         setNivelesDisponibles(filtered);
-        // No reseteamos nivel aquí para permitir ver el nivel actual aunque se cambie la ubicación
     }, [grupo?.ubicacion, niveles]);
 
      // --- Filtrar Profesores por Ubicación ---
@@ -87,20 +107,15 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
     // --- Filtrar Alumnos Disponibles ---
     useEffect(() => {
         if (!grupo) return;
-        // Muestra alumnos que:
-        // 1. Están en la ubicación correcta, son activos Y están en el nivel correcto
-        // 2. O ya están seleccionados (para que puedas verlos y quitarlos si es necesario)
         const filtered = alumnos.filter(a =>
             (a.estado === 'Activo' &&
              a.ubicacion === grupo.ubicacion &&
              a.nivel === grupo.nivel) ||
-            alumnosSeleccionados.has(a.numero_control) // Incluye los ya seleccionados
+            alumnosSeleccionados.has(a.numero_control) 
         );
-         // Eliminar duplicados si un alumno seleccionado también cumple el filtro
          const uniqueAlumnos = Array.from(new Map(filtered.map(a => [a.numero_control, a])).values());
         setAlumnosDisponibles(uniqueAlumnos);
         
-        // No reseteamos seleccionados, ya que estamos modificando
     }, [grupo?.ubicacion, grupo?.nivel, alumnos, alumnosSeleccionados]);
 
 
@@ -108,8 +123,6 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
         const { name, value } = e.target;
         setGrupo(prev => {
             const newState = { ...prev, [name]: value };
-             // Si cambia ubicación o nivel, limpia la selección de alumnos
-             // para forzar a re-seleccionar de la nueva lista
              if (name === 'ubicacion' || name === 'nivel') {
                  setAlumnosSeleccionados(new Set());
              }
@@ -131,11 +144,18 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // --- VALIDACIÓN AÑADIDA ---
+        if (!grupo.nombre || !grupo.nivel || !grupo.modalidad || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
+            alert("Por favor completa todos los campos del grupo, incluyendo día y horas.");
+            return;
+        }
+        // -------------------------
+
         const grupoFinal = {
             ...grupo,
             alumnoIds: Array.from(alumnosSeleccionados)
         };
-        actualizarGrupo(grupoFinal);
+        actualizarGrupo(grupoFinal); // Esta función debe incluir la validación de empalme
         navigate("/lista-grupos");
     };
 
@@ -175,6 +195,36 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
                 <option value="">Selecciona un Profesor</option>
                 {profesoresDisponibles.map(p => <option key={p.numero_empleado} value={p.numero_empleado}>{p.nombre} ({p.numero_empleado})</option>)}
             </select>
+
+            {/* --- INICIO: CAMPOS DE HORARIO AÑADIDOS --- */}
+            <label>Día/Días:</label>
+            <select name="dia" value={grupo.dia} onChange={handleChange} className="usuario" required>
+                <option value="">Selecciona el día/días</option>
+                {diasSemana.map(dia => (
+                    <option key={dia.value} value={dia.value}>{dia.label}</option>
+                ))}
+            </select>
+
+            <label>Hora de Inicio:</label>
+            <input 
+                type="time" 
+                name="horaInicio" 
+                value={grupo.horaInicio} 
+                onChange={handleChange} 
+                className="usuario" 
+                required 
+            />
+            
+            <label>Hora de Fin:</label>
+            <input 
+                type="time" 
+                name="horaFin" 
+                value={grupo.horaFin} 
+                onChange={handleChange} 
+                className="usuario" 
+                required 
+            />
+            {/* --- FIN: CAMPOS DE HORARIO AÑADIDOS --- */}
 
             {/* --- Selección de Alumnos --- */}
             <MultiSelectAlumnos

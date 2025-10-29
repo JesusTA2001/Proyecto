@@ -46,7 +46,9 @@ function Layout({children, titulo}) {
                   <a href="#" className="menu__link menu__link--inside">Grupos Profesores</a>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Asignar Profesor</a>
+                  <Link to="/lista-horarios" className="menu__link menu__link--inside">
+                  Horarios
+                  </Link>
                 </li>
               </ul>
             </li>
@@ -76,11 +78,6 @@ function Layout({children, titulo}) {
                 <li className="menu__inside">
                   <Link to="/lista-modalidad" className="menu__link menu__link--inside">
                   Modalidad
-                  </Link>
-                </li>
-                <li className="menu__inside">
-                  <Link to="/lista-horario" className="menu__link menu__link--inside">
-                  Horarios
                   </Link>
                 </li>
               </ul>

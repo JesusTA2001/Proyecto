@@ -130,13 +130,113 @@ function App() {
   const eliminarModalidad = (id) =>
     setModalidades(modalidades.filter(m => m.id !== id));
 
+  // --- INICIO: FUNCIONES DE AYUDA PARA VALIDACIÓN DE HORARIOS ---
+
+  /**
+   * Convierte una hora "HH:MM" a un valor numérico (ej: "09:30" -> 9.5)
+   */
+  const horaANumero = (horaStr) => {
+    // Si la hora no está definida (grupo antiguo o error), devuelve 0 para evitar fallos
+    if (!horaStr || typeof horaStr !== 'string' || !horaStr.includes(':')) {
+        return 0; 
+    }
+    const [hora, minuto] = horaStr.split(':').map(Number);
+    return hora + (minuto / 60);
+  };
+
+  /**
+   * Revisa si un nuevo bloque de horario choca con los existentes de un profesor.
+   * Devuelve el grupo en conflicto si lo encuentra, o null si no hay conflicto.
+   */
+  function checkScheduleConflict(
+    allGrupos,
+    profesorId,
+    dia,
+    nuevaHoraInicio,
+    nuevaHoraFin,
+    grupoIdAExcluir = null // ID del grupo que estamos modificando (para no compararlo consigo mismo)
+  ) {
+      // 1. Convertir las nuevas horas a números
+      const nuevoInicioNum = horaANumero(nuevaHoraInicio);
+      const nuevoFinNum = horaANumero(nuevaHoraFin);
+
+      // 2. Encontrar los grupos existentes del MISMO profesor
+      const gruposDelProfesor = allGrupos.filter(g =>
+          g.profesorId === profesorId && // Mismo profesor
+          g.id !== grupoIdAExcluir       // No es el mismo grupo que estamos editando
+      );
+
+      // 3. Revisar cada grupo existente
+      for (const grupoExistente of gruposDelProfesor) {
+          
+          // 4. Si los días coinciden (o se solapan)
+          // Lógica simple: "Lunes" incluye "Lunes", "Lunes-Miercoles" incluye "Lunes"
+          if (grupoExistente.dia.includes(dia) || dia.includes(grupoExistente.dia)) {
+              
+              // 5. Convertir horas existentes a números
+              const existenteInicioNum = horaANumero(grupoExistente.horaInicio);
+              const existenteFinNum = horaANumero(grupoExistente.horaFin);
+
+              // 6. Lógica de colisión (Si el nuevo bloque se superpone con el existente)
+              // (El nuevo inicia ANTES de que el viejo termine) Y (El nuevo termina DESPUÉS de que el viejo inicie)
+              if (nuevoInicioNum < existenteFinNum && nuevoFinNum > existenteInicioNum) {
+                  // ¡Conflicto!
+                  return grupoExistente; // Devuelve el grupo con el que choca
+              }
+          }
+      }
+
+      return null; // No hay conflictos
+  }
+
+  // --- FIN: FUNCIONES DE AYUDA PARA VALIDACIÓN DE HORARIOS ---
+
+
   // --- CRUD Grupos ---
+  
+  // --- MODIFICADO: agregarGrupo ahora incluye validación ---
   const agregarGrupo = (grupo) => {
+    // VALIDACIÓN DE EMPALME
+    const conflicto = checkScheduleConflict(
+      grupos,
+      grupo.profesorId,
+      grupo.dia,
+      grupo.horaInicio,
+      grupo.horaFin
+      // No se pasa ID a excluir, porque es un grupo nuevo
+    );
+
+    if (conflicto) {
+      alert(`Error: Empalme de horario.\nEl profesor ya tiene asignado el grupo "${conflicto.nombre}" (${conflicto.dia} de ${conflicto.horaInicio} a ${conflicto.horaFin}) en ese horario.`);
+      return; // Detiene la ejecución y no agrega el grupo
+    }
+    // FIN VALIDACIÓN
+
     const newId = grupo.id || `GRP-${Date.now()}`;
     setGrupos([{ ...grupo, id: newId }, ...grupos]);
   };
-  const actualizarGrupo = (grupoActualizado) =>
+
+  // --- MODIFICADO: actualizarGrupo ahora incluye validación ---
+  const actualizarGrupo = (grupoActualizado) => {
+    // VALIDACIÓN DE EMPALME
+    const conflicto = checkScheduleConflict(
+      grupos,
+      grupoActualizado.profesorId,
+      grupoActualizado.dia,
+      grupoActualizado.horaInicio,
+      grupoActualizado.horaFin,
+      grupoActualizado.id // Excluimos este mismo grupo de la comprobación
+    );
+
+    if (conflicto) {
+      alert(`Error: Empalme de horario.\nEl profesor ya tiene asignado el grupo "${conflicto.nombre}" (${conflicto.dia} de ${conflicto.horaInicio} a ${conflicto.horaFin}) en ese horario.`);
+      return; // Detiene la ejecución y no actualiza el grupo
+    }
+    // FIN VALIDACIÓN
+
     setGrupos(grupos.map(g => g.id === grupoActualizado.id ? grupoActualizado : g));
+  };
+  
   const eliminarGrupo = (id) =>
     setGrupos(grupos.filter(g => g.id !== id));
 
