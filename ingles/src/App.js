@@ -7,16 +7,16 @@ import Layout from './features/Layout/Layout';
 import PerfilUsuario from './features/Dashboard/Dashboard'; // usar el archivo Dashboard.js que exporta PerfilUsuario
 
 // Componentes de Listas
-import ListaEstudiante from './features/Alumnos/AlumnosList';
-import ListaProfesor from './features/Profesores/ProfesorList';
-import ListaAdministrador from './features/Administradores/AdminList';
+import ListaEstudiante from './features/Alumnos/ListaEstudianteMUI';
+import ListaProfesor from './features/Profesores/ListaProfesorMUI';
+import ListaAdministrador from './features/Administradores/ListaAdministradorMUI';
 import ListaNiveles from './features/Niveles/NivelesList';
 import ListaModalidad from './features/Modalidad/ModalidadList';
 import ListaGrupos from './features/Grupos/GruposList';
 import ListaHorarios from './features/Horario/HorarioList';
 
 // CRUD Alumnos (Corregido a PascalCase: CrearAlumno.js)
-import CrearAlumno from './features/Alumnos/CrearAlumno';
+import CrearAlumno from './features/Alumnos/CrearAlumnoStepper';
 import ModificarAlumno from './features/Alumnos/ModificarAlumno';
 import EliminarAlumno from './features/Alumnos/EliminarAlumno';
 import VerAlumno from './features/Alumnos/VerAlumno';
@@ -205,21 +205,21 @@ function App() {
           />
 
           {/* Estudiantes */}
-          <Route path="/lista-estudiantes" element={<Layout titulo="Gestión de Estudiantes"><ListaEstudiante alumnos={alumnos} toggleEstado={toggleEstado} /></Layout>} />
+          <Route path="/lista-estudiantes" element={<Layout titulo="Gestión de Estudiantes"><ListaEstudiante alumnos={alumnos} toggleEstado={toggleEstado} agregarAlumno={agregarAlumno} actualizarAlumno={actualizarAlumno} eliminarAlumno={eliminarAlumno} /></Layout>} />
           <Route path="/crear-alumno" element={<Layout titulo="Crear Alumno"><CrearAlumno agregarAlumno={agregarAlumno} /></Layout>} />
           <Route path="/modificar-alumno/:id" element={<Layout titulo="Modificar Alumno"><ModificarAlumno alumnos={alumnos} actualizarAlumno={actualizarAlumno} /></Layout>} />
           <Route path="/eliminar-alumno/:id" element={<Layout titulo="Eliminar Alumno"><EliminarAlumno alumnos={alumnos} eliminarAlumno={eliminarAlumno} /></Layout>} />
           <Route path="/ver-alumno/:id" element={<Layout titulo="Detalles del Alumno"><VerAlumno alumnos={alumnos} /></Layout>} />
 
           {/* Profesores */}
-          <Route path="/lista-profesores" element={<Layout titulo="Gestión de Profesores"><ListaProfesor profesores={profesores} toggleEstado={toggleEstado} /></Layout>} />
+          <Route path="/lista-profesores" element={<Layout titulo="Gestión de Profesores"><ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} /></Layout>} />
           <Route path="/crear-profesor" element={<Layout titulo="Crear Profesor"><CrearProfesor agregarProfesor={agregarProfesor} /></Layout>} />
           <Route path="/modificar-profesor/:id" element={<Layout titulo="Modificar Profesor"><ModificarProfesor profesores={profesores} actualizarProfesor={actualizarProfesor} /></Layout>} />
           <Route path="/eliminar-profesor/:id" element={<Layout titulo="Eliminar Profesor"><EliminarProfesor profesores={profesores} eliminarProfesor={eliminarProfesor} /></Layout>} />
           <Route path="/ver-profesor/:id" element={<Layout titulo="Detalles del Profesor"><VerProfesor profesores={profesores} /></Layout>} />
 
           {/* Administradores */}
-          <Route path="/lista-administradores" element={<Layout titulo="Gestión de Administradores"><ListaAdministrador administradores={administradores} toggleEstado={toggleEstado} /></Layout>} />
+          <Route path="/lista-administradores" element={<Layout titulo="Gestión de Administradores"><ListaAdministrador administradores={administradores} toggleEstado={toggleEstado} agregarAdministrador={agregarAdministrador} actualizarAdministrador={actualizarAdministrador} eliminarAdministrador={eliminarAdministrador} /></Layout>} />
           <Route path="/crear-administrador" element={<Layout titulo="Crear Administrador"><CrearAdministrador agregarAdministrador={agregarAdministrador} /></Layout>} />
           <Route path="/modificar-administrador/:id" element={<Layout titulo="Modificar Administrador"><ModificarAdministrador administradores={administradores} actualizarAdministrador={actualizarAdministrador} /></Layout>} />
           <Route path="/eliminar-administrador/:id" element={<Layout titulo="Eliminar Administrador"><EliminarAdministrador administradores={administradores} eliminarAdministrador={eliminarAdministrador} /></Layout>} />

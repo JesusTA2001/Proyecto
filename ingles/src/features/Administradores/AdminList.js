@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import '../../styles/listaEstudiante.css';
+import CrearAdministradorModal from './CrearAdministradorModal';
+import VerAdministradorModal from './VerAdministradorModal';
+import ModificarAdministradorModal from './ModificarAdministradorModal';
+import EliminarAdministradorModal from './EliminarAdministradorModal';
 
-function ListaAdministrador({ administradores, toggleEstado }) {
+function ListaAdministrador({ administradores, toggleEstado, agregarAdministrador, actualizarAdministrador, eliminarAdministrador }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredAdmins = administradores.filter(admin => {
@@ -18,6 +22,12 @@ function ListaAdministrador({ administradores, toggleEstado }) {
     );
   });
 
+  const [openCreate, setOpenCreate] = React.useState(false);
+  const [openView, setOpenView] = React.useState(false);
+  const [openEdit, setOpenEdit] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [selectedAdmin, setSelectedAdmin] = React.useState(null);
+
   return (
     <div className="lista-container">
       <div className="lista-header">
@@ -29,9 +39,7 @@ function ListaAdministrador({ administradores, toggleEstado }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Link to="/crear-administrador">
-            <button className='createbutton'>Nuevo Administrador</button>
-          </Link>
+          <button className='createbutton' onClick={() => setOpenCreate(true)}>Nuevo Administrador</button>
         </div>
       </div>
 
@@ -60,15 +68,9 @@ function ListaAdministrador({ administradores, toggleEstado }) {
                   </button>
                 </td>
                 <td className="acciones-cell">
-                  <Link to={`/ver-administrador/${admin.numero_empleado}`} title="Ver Detalles">
-                    <button className='view-button icon-button'>👁️</button>
-                  </Link>
-                  <Link to={`/modificar-administrador/${admin.numero_empleado}`} title="Modificar">
-                    <button className='modifybutton icon-button'>✏️</button>
-                  </Link>
-                  <Link to={`/eliminar-administrador/${admin.numero_empleado}`} title="Eliminar">
-                    <button className='deletebutton icon-button'>🗑️</button>
-                  </Link>
+                  <button className='view-button icon-button' title="Ver Detalles" onClick={() => { setSelectedAdmin(admin); setOpenView(true); }}>👁️</button>
+                  <button className='modifybutton icon-button' title="Modificar" onClick={() => { setSelectedAdmin(admin); setOpenEdit(true); }}>✏️</button>
+                  <button className='deletebutton icon-button' title="Eliminar" onClick={() => { setSelectedAdmin(admin); setOpenDelete(true); }}>🗑️</button>
                 </td>
               </tr>
             ))
@@ -81,6 +83,11 @@ function ListaAdministrador({ administradores, toggleEstado }) {
           )}
         </tbody>
       </table>
+  {/* Modales para Administradores */}
+  <CrearAdministradorModal open={openCreate} onClose={() => setOpenCreate(false)} agregarAdministrador={agregarAdministrador} />
+  <VerAdministradorModal open={openView} onClose={() => setOpenView(false)} admin={selectedAdmin} />
+  <ModificarAdministradorModal open={openEdit} onClose={() => setOpenEdit(false)} admin={selectedAdmin} actualizarAdministrador={actualizarAdministrador} />
+  <EliminarAdministradorModal open={openDelete} onClose={() => setOpenDelete(false)} admin={selectedAdmin} eliminarAdministrador={eliminarAdministrador} />
     </div>
   );
 }

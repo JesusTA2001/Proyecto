@@ -2,17 +2,26 @@ import React, { useState, useEffect } from "react"; // Importar useEffect
 import { Link } from "react-router-dom";
 import '../../styles/listaEstudiante.css'; // Reutilizamos los mismos estilos
 import { gradoEstudioOptions } from '../../data/mapping'; // Importamos las opciones de grado
+import CrearProfesorModal from './CrearProfesorModal';
+import VerProfesorModal from './VerProfesorModal';
+import ModificarProfesorModal from './ModificarProfesorModal';
+import EliminarProfesorModal from './EliminarProfesorModal';
 
 // 1. Define how many items per page
 const ITEMS_PER_PAGE = 50;
 
-function ListaProfesor({ profesores, toggleEstado }) {
+function ListaProfesor({ profesores, toggleEstado, agregarProfesor, actualizarProfesor, eliminarProfesor }) {
   // --- Estados para filtros y paginación ---
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openView, setOpenView] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectedProfesor, setSelectedProfesor] = useState(null);
 
   // --- Lógica de Filtrado ---
   const filteredProfesores = profesores.filter(profesor => {
@@ -75,9 +84,7 @@ function ListaProfesor({ profesores, toggleEstado }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Link to="/crear-profesor">
-            <button className='createbutton'>Nuevo Profesor</button>
-          </Link>
+          <button className='createbutton' onClick={() => setOpenCreate(true)}>Nuevo Profesor</button>
         </div>
 
         {/* --- Sección de Filtros (Botones y Selects) --- */}
@@ -170,15 +177,9 @@ function ListaProfesor({ profesores, toggleEstado }) {
                   </button>
                 </td>
                 <td className="acciones-cell" style={{ fontSize: 0 }}> {/* font-size: 0 para arreglar espacios */}
-                   <Link to={`/ver-profesor/${profesor.numero_empleado}`} title="Ver Detalles">
-                    <button className='view-button icon-button'>👁️</button>
-                  </Link>
-                  <Link to={`/modificar-profesor/${profesor.numero_empleado}`} title="Modificar">
-                    <button className='modifybutton icon-button'>✏️</button>
-                  </Link>
-                  <Link to={`/eliminar-profesor/${profesor.numero_empleado}`} title="Eliminar">
-                    <button className='deletebutton icon-button'>🗑️</button>
-                  </Link>
+                  <button className='view-button icon-button' title="Ver Detalles" onClick={() => { setSelectedProfesor(profesor); setOpenView(true); }}>👁️</button>
+                  <button className='modifybutton icon-button' title="Modificar" onClick={() => { setSelectedProfesor(profesor); setOpenEdit(true); }}>✏️</button>
+                  <button className='deletebutton icon-button' title="Eliminar" onClick={() => { setSelectedProfesor(profesor); setOpenDelete(true); }}>🗑️</button>
                 </td>
               </tr>
             ))
@@ -192,6 +193,12 @@ function ListaProfesor({ profesores, toggleEstado }) {
           )}
         </tbody>
       </table>
+
+  {/* Modales para Profesores */}
+  <CrearProfesorModal open={openCreate} onClose={() => setOpenCreate(false)} agregarProfesor={agregarProfesor} />
+  <VerProfesorModal open={openView} onClose={() => setOpenView(false)} profesor={selectedProfesor} />
+  <ModificarProfesorModal open={openEdit} onClose={() => setOpenEdit(false)} profesor={selectedProfesor} actualizarProfesor={actualizarProfesor} />
+  <EliminarProfesorModal open={openDelete} onClose={() => setOpenDelete(false)} profesor={selectedProfesor} eliminarProfesor={eliminarProfesor} />
 
       {/* --- Controles de Paginación --- */}
       <div className="pagination-controls">
