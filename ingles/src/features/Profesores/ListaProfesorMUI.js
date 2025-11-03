@@ -9,35 +9,40 @@ import ModificarProfesorModal from './ModificarProfesorModal';
 import EliminarProfesorModal from './EliminarProfesorModal';
 
 export default function ListaProfesorMUI({ profesores = [], toggleEstado, agregarProfesor, actualizarProfesor, eliminarProfesor }) {
+  // --- Estados de Filtro (Solo término de búsqueda) ---
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedLocation, setSelectedLocation] = React.useState('');
-  const [selectedStatus, setSelectedStatus] = React.useState('');
+  // Se eliminaron selectedLocation y selectedStatus
   const apiRef = useGridApiRef();
 
+  // --- Estados de Modales ---
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [selectedProfesor, setSelectedProfesor] = React.useState(null);
 
+  // --- Lógica de Filtrado (Simplificada) ---
   const filtered = (profesores || []).filter(p => {
     const term = (searchTerm || '').toLowerCase();
     const textMatch = !term || (p.nombre || '').toLowerCase().includes(term) || (p.numero_empleado || '').toLowerCase().includes(term);
-    const locationMatch = !selectedLocation || p.ubicacion === selectedLocation;
-    const statusMatch = !selectedStatus || p.estado === selectedStatus;
-    return textMatch && locationMatch && statusMatch;
+    // Se eliminaron locationMatch y statusMatch
+    return textMatch;
   });
 
+  // --- Filas para el DataGrid ---
   const rows = filtered.map(p => ({ id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombre, ubicacion: p.ubicacion, grado: p.gradoEstudio, estado: p.estado }));
 
+  // --- Lógica de Exportación (Mejorada para usar la vista del DataGrid) ---
   const exportToCSV = () => {
-    let exportRows = filtered;
+    let exportRows = filtered; // Fallback
     try {
       if (apiRef && apiRef.current) {
         const visible = Array.from(apiRef.current.getVisibleRowModels().values());
         if (visible && visible.length) exportRows = visible.map(r => r);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error al obtener filas visibles, exportando filas filtradas manualmente.", e);
+    }
 
     if (!exportRows || exportRows.length === 0) { alert('No hay registros para exportar.'); return; }
 
@@ -57,6 +62,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
     URL.revokeObjectURL(url);
   };
 
+  // --- Definición de Columnas ---
   const columns = [
     { field: 'numero_empleado', headerName: 'N° Empleado', width: 150 },
     { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 200 },
@@ -83,26 +89,34 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
 
   return (
     <div className="lista-container">
+      {/* --- ENCABEZADO MODIFICADO --- */}
       <div className="lista-header">
-        <div className="header-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <input className="search-input" placeholder="🔍 Buscar por nombre o N° empleado..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <select className="filter-select" value={selectedLocation} onChange={e => setSelectedLocation(e.target.value)}>
-              <option value="">Todos</option>
-              <option value="Tecnologico">Tecnológico</option>
-              <option value="Centro de Idiomas">Centro de Idiomas</option>
-              <option value="Ambos">Ambos</option>
-            </select>
-            <select className="filter-select" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
-              <option value="">Todos</option>
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
+        <div className="header-actions" style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', // Alinea izquierda y derecha
+            alignItems: 'center',            // Centra verticalmente
+            width: '100%'
+        }}>
+          
+          {/* 1. Barra de búsqueda (Izquierda) */}
+          <input 
+            className="search-input" 
+            placeholder="🔍 Buscar por nombre o N° empleado..." 
+            value={searchTerm} 
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{ flexGrow: 1, marginRight: '16px' }} // Ocupa espacio disponible
+          />
+          
+          {/* 2. Contenedor de Botones (Derecha) */}
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            {/* Los <select> fueron eliminados de aquí */}
             <button className='createbutton' onClick={() => setOpenCreate(true)}>Nuevo Profesor</button>
             <button className='createbutton' onClick={exportToCSV}>Exportar a Excel</button>
           </div>
+
         </div>
       </div>
+      {/* --- FIN DE MODIFICACIÓN --- */}
 
       <Box sx={{ height: 600, width: '100%', mt: 2 }}>
         <DataGrid
@@ -118,6 +132,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
           sx={{ backgroundColor: 'white', borderRadius: 2, boxShadow: 2 }}
         />
       </Box>
+      
       {/* Modales de Profesor */}
       <CrearProfesorModal open={openCreate} onClose={() => setOpenCreate(false)} agregarProfesor={agregarProfesor} />
       <VerProfesorModal open={openView} onClose={() => setOpenView(false)} profesor={selectedProfesor} />

@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 import Layout from './features/Layout/Layout';
 import PerfilUsuario from './features/Dashboard/Dashboard'; // usar el archivo Dashboard.js que exporta PerfilUsuario
+import Login from './features/Auth/Login';
 
 // Componentes de Listas
 import ListaEstudiante from './features/Alumnos/ListaEstudianteMUI';
@@ -12,26 +13,24 @@ import ListaProfesor from './features/Profesores/ListaProfesorMUI';
 import ListaAdministrador from './features/Administradores/ListaAdministradorMUI';
 import ListaNiveles from './features/Niveles/NivelesList';
 import ListaModalidad from './features/Modalidad/ModalidadList';
-import ListaGrupos from './features/Grupos/GruposList';
-import ListaHorarios from './features/Horario/HorarioList';
+import ListaGrupos from './features/Grupos/ListaGruposMUI';
+import ListaHorarios from './features/Horario/ListaHorarioMUI';
+
+// Dashboard Profesor
+import DashboardProfesor from './features/Dashboard/DashboardProfesor';
+import LayoutProfesor from './features/Layout/LayoutProfesor';
+import AsignarCalificaciones from './features/Profesores/AsignarCalificaciones';
 
 // CRUD Alumnos (Corregido a PascalCase: CrearAlumno.js)
 import CrearAlumno from './features/Alumnos/CrearAlumnoStepper';
-import ModificarAlumno from './features/Alumnos/ModificarAlumno';
-import EliminarAlumno from './features/Alumnos/EliminarAlumno';
-import VerAlumno from './features/Alumnos/VerAlumno';
 
 // CRUD Profesores (Corregido a PascalCase: CrearProfesor.js)
 import CrearProfesor from './features/Profesores/CrearProfesor';
-import ModificarProfesor from './features/Profesores/ModificarProfesor';
-import EliminarProfesor from './features/Profesores/EliminarProfesor';
-import VerProfesor from './features/Profesores/VerProfesor';
+// (Modificación/Eliminación/Ver estaban eliminados por el usuario)
 
 // CRUD Administradores (Corregido a PascalCase: CrearAdministrador.js, etc.)
 import CrearAdministrador from './features/Administradores/CrearAdmin';
-import ModificarAdministrador from './features/Administradores/ModificarAdmin';
-import EliminarAdministrador from './features/Administradores/EliminarAdmin';
-import VerAdministrador from './features/Administradores/VerAdmin';
+// (Modificación/Eliminación/Ver estaban eliminados por el usuario)
 
 // CRUD Niveles (Corregido a PascalCase: CrearNivel.js)
 import CrearNivel from './features/Niveles/CrearNivel';
@@ -184,46 +183,60 @@ function App() {
   const eliminarGrupo = (id) =>
     setGrupos(grupos.filter(g => g.id !== id));
 
+  // --- Autenticación simple basada en localStorage ---
+  const getCurrentUser = () => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const HomeOrRedirect = () => {
+    const user = getCurrentUser();
+    if (!user) return <Navigate to="/login" replace />;
+    if (user.role === 'profesor') return <Navigate to="/dashboard-profesor" replace />;
+
+    // Por defecto (administrador u otros) mostrar el dashboard principal
+    return (
+      <Layout titulo="Bienvenido al Sistema">
+        <PerfilUsuario
+          alumnos={alumnos}
+          profesores={profesores}
+          administradores={administradores}
+          niveles={niveles}
+          modalidades={modalidades}
+          grupos={grupos}
+        />
+      </Layout>
+    );
+  };
+
   return (
     <Router>
       <div className="App">
         <Routes>
-          {/* Dashboard */}
+          {/* Página raíz: mostrar login si no hay sesión, redirigir por rol si existe */}
           <Route
             path="/"
-            element={
-              <Layout titulo="Bienvenido al Sistema">
-                <PerfilUsuario
-                  alumnos={alumnos}
-                  profesores={profesores}
-                  administradores={administradores}
-                  niveles={niveles}
-                  modalidades={modalidades}
-                />
-              </Layout>
-            }
+            element={<HomeOrRedirect />}
           />
+
+          {/* Login (vista independiente, sin layout de administrador) */}
+          <Route path="/login" element={<Login />} />
 
           {/* Estudiantes */}
           <Route path="/lista-estudiantes" element={<Layout titulo="Gestión de Estudiantes"><ListaEstudiante alumnos={alumnos} toggleEstado={toggleEstado} agregarAlumno={agregarAlumno} actualizarAlumno={actualizarAlumno} eliminarAlumno={eliminarAlumno} /></Layout>} />
           <Route path="/crear-alumno" element={<Layout titulo="Crear Alumno"><CrearAlumno agregarAlumno={agregarAlumno} /></Layout>} />
-          <Route path="/modificar-alumno/:id" element={<Layout titulo="Modificar Alumno"><ModificarAlumno alumnos={alumnos} actualizarAlumno={actualizarAlumno} /></Layout>} />
-          <Route path="/eliminar-alumno/:id" element={<Layout titulo="Eliminar Alumno"><EliminarAlumno alumnos={alumnos} eliminarAlumno={eliminarAlumno} /></Layout>} />
-          <Route path="/ver-alumno/:id" element={<Layout titulo="Detalles del Alumno"><VerAlumno alumnos={alumnos} /></Layout>} />
 
           {/* Profesores */}
           <Route path="/lista-profesores" element={<Layout titulo="Gestión de Profesores"><ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} /></Layout>} />
           <Route path="/crear-profesor" element={<Layout titulo="Crear Profesor"><CrearProfesor agregarProfesor={agregarProfesor} /></Layout>} />
-          <Route path="/modificar-profesor/:id" element={<Layout titulo="Modificar Profesor"><ModificarProfesor profesores={profesores} actualizarProfesor={actualizarProfesor} /></Layout>} />
-          <Route path="/eliminar-profesor/:id" element={<Layout titulo="Eliminar Profesor"><EliminarProfesor profesores={profesores} eliminarProfesor={eliminarProfesor} /></Layout>} />
-          <Route path="/ver-profesor/:id" element={<Layout titulo="Detalles del Profesor"><VerProfesor profesores={profesores} /></Layout>} />
 
           {/* Administradores */}
           <Route path="/lista-administradores" element={<Layout titulo="Gestión de Administradores"><ListaAdministrador administradores={administradores} toggleEstado={toggleEstado} agregarAdministrador={agregarAdministrador} actualizarAdministrador={actualizarAdministrador} eliminarAdministrador={eliminarAdministrador} /></Layout>} />
           <Route path="/crear-administrador" element={<Layout titulo="Crear Administrador"><CrearAdministrador agregarAdministrador={agregarAdministrador} /></Layout>} />
-          <Route path="/modificar-administrador/:id" element={<Layout titulo="Modificar Administrador"><ModificarAdministrador administradores={administradores} actualizarAdministrador={actualizarAdministrador} /></Layout>} />
-          <Route path="/eliminar-administrador/:id" element={<Layout titulo="Eliminar Administrador"><EliminarAdministrador administradores={administradores} eliminarAdministrador={eliminarAdministrador} /></Layout>} />
-          <Route path="/ver-administrador/:id" element={<Layout titulo="Detalles del Administrador"><VerAdministrador administradores={administradores} /></Layout>} />
 
           {/* Niveles y Modalidades */}
           <Route path="/lista-niveles" element={<Layout titulo="Gestión de Niveles"><ListaNiveles niveles={niveles} /></Layout>} />
@@ -236,15 +249,17 @@ function App() {
           <Route path="/eliminar-modalidad/:id" element={<Layout titulo="Eliminar Modalidad"><EliminarModalidad modalidades={modalidades} eliminarModalidad={eliminarModalidad} /></Layout>} />
 
           {/* Grupos */}
-          <Route path="/lista-grupos" element={<Layout titulo="Gestión de Grupos"><ListaGrupos grupos={grupos} profesores={profesores} alumnos={alumnos} /></Layout>} />
+          <Route path="/lista-grupos" element={<Layout titulo="Gestión de Grupos"><ListaGrupos grupos={grupos} profesores={profesores} alumnos={alumnos} niveles={niveles} modalidades={modalidades} agregarGrupo={agregarGrupo} actualizarGrupo={actualizarGrupo} eliminarGrupo={eliminarGrupo} /></Layout>} />
           <Route path="/crear-grupo" element={<Layout titulo="Crear Grupo"><CrearGrupo agregarGrupo={agregarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} /></Layout>} />
-          <Route path="/ver-grupo/:id" element={<Layout titulo="Detalles del Grupo"><VerGrupo grupos={grupos} profesores={profesores} alumnos={alumnos} /></Layout>} />
-          <Route path="/modificar-grupo/:id" element={<Layout titulo="Modificar Grupo"><ModificarGrupo grupos={grupos} actualizarGrupo={actualizarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} /></Layout>} />
-          <Route path="/eliminar-grupo/:id" element={<Layout titulo="Eliminar Grupo"><EliminarGrupo grupos={grupos} eliminarGrupo={eliminarGrupo} /></Layout>} />
 
           {/* Horarios */}
-          <Route path="/lista-horarios" element={<Layout titulo="Horarios de Profesores"><ListaHorarios profesores={profesores} /></Layout>} />
-          <Route path="/ver-horario/:id" element={<Layout titulo="Ver Horario del Profesor"><VerHorario profesores={profesores} grupos={grupos} /></Layout>} />
+          <Route path="/lista-horarios" element={<Layout titulo="Horarios de Profesores"><ListaHorarios profesores={profesores} grupos={grupos} /></Layout>} />
+
+          {/* Dashboard profesor (ruta para usuarios tipo profesor) */}
+          <Route path="/dashboard-profesor" element={<LayoutProfesor titulo="Panel del Profesor"><DashboardProfesor data={alumnos} profesor={profesores[0] || null} /></LayoutProfesor>} />
+
+          {/* Ruta para asignar calificaciones (panel profesor) */}
+          <Route path="/profesor/calificaciones" element={<LayoutProfesor titulo="Calificaciones"><AsignarCalificaciones profesores={profesores} alumnos={alumnos} grupos={grupos} /></LayoutProfesor>} />
 
           {/* Redirección */}
           <Route path="*" element={<Navigate to="/" />} />

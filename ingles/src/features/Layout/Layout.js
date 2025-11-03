@@ -1,9 +1,26 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../../styles/perfil-usuario.css';
 
 
 function Layout({children, titulo}) {
+  const navigate = useNavigate();
+
+  const getCurrentUserName = () => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.usuario || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const handleLogout = () => {
+    try { localStorage.removeItem('currentUser'); } catch (e) {}
+    navigate('/login');
+  };
   return (
     <div className="perfil-usuario">
       <nav className="menu">
@@ -43,16 +60,12 @@ function Layout({children, titulo}) {
                   </Link>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Grupos Profesores</a>
-                </li>
-                <li className="menu__inside">
                   <Link to="/lista-horarios" className="menu__link menu__link--inside">
                   Horarios
                   </Link>
                 </li>
               </ul>
             </li>
-
 
             {/* Estudiantes */}
             <li className="menu__item menu__item--show">
@@ -95,6 +108,20 @@ function Layout({children, titulo}) {
                 </li>
                 <li className="menu__inside">
                   <a href="#" className="menu__link menu__link--inside">Reporte Grupos</a>
+                </li>
+              </ul>
+            </li>
+
+            {/* Cuenta / Cerrar sesión (al lado de Reportes) */}
+            <li className="menu__item menu__item--show">
+              <span className="menu__link" style={{ cursor: 'default' }}>
+                Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
+              </span>
+              <ul className="menu__nesting">
+                <li className="menu__inside">
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                    Cerrar Sesión
+                  </a>
                 </li>
               </ul>
             </li>

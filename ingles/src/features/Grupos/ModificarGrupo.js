@@ -5,7 +5,7 @@ import '../../styles/listaEstudiante.css';
 // Componente de multi-selección (puedes moverlo a un archivo separado e importarlo)
 function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
     const [filtro, setFiltro] = useState('');
-    const alumnosFiltrados = alumnos.filter(a =>
+    const alumnosFiltrados = (alumnos || []).filter(a =>
         a.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
         a.numero_control.toLowerCase().includes(filtro.toLowerCase())
     );
@@ -42,7 +42,7 @@ function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
     );
 }
 
-function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profesores, alumnos }) {
+function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, modalidades, profesores, alumnos, onClose }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const [grupo, setGrupo] = useState(null); // Estado para el grupo a editar
@@ -67,21 +67,28 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
 
     // --- Cargar datos del grupo ---
     useEffect(() => {
-        const grupoAEditar = grupos.find(g => g.id === id);
-        if (grupoAEditar) {
-            // --- MODIFICADO: Asegura valores por defecto ---
-            setGrupo({
-                dia: '',
-                horaInicio: '',
-                horaFin: '',
-                ...grupoAEditar
-            });
-            // ----------------------------------------------
-            setAlumnosSeleccionados(new Set(grupoAEditar.alumnoIds)); // Cargar IDs de alumnos
-        } else {
-            navigate("/lista-grupos"); // Si no existe, volver
+        // Si se recibe el grupo directamente (cuando se usa en modal), úsalo
+        if (grupoProp) {
+            setGrupo({ dia: '', horaInicio: '', horaFin: '', ...grupoProp });
+            setAlumnosSeleccionados(new Set(grupoProp.alumnoIds || []));
+            return;
         }
-    }, [id, grupos, navigate]);
+        // Si no, intenta buscar en el array 'grupos' usando el id de la ruta
+        if (grupos && id) {
+            const grupoAEditar = grupos.find(g => g.id === id);
+            if (grupoAEditar) {
+                setGrupo({ dia: '', horaInicio: '', horaFin: '', ...grupoAEditar });
+                setAlumnosSeleccionados(new Set(grupoAEditar.alumnoIds || []));
+                return;
+            }
+        }
+        // Si no encontramos el grupo, navegar o cerrar modal si aplica
+        if (onClose) {
+            onClose();
+        } else {
+            navigate("/lista-grupos");
+        }
+    }, [id, grupos, navigate, grupoProp, onClose]);
 
     // --- Filtrar Niveles por Ubicación ---
     useEffect(() => {
@@ -98,16 +105,16 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
 
      // --- Filtrar Profesores por Ubicación ---
     useEffect(() => {
-         if (!grupo) return;
-         const filtered = profesores.filter(p => p.estado === 'Activo' && (p.ubicacion === grupo.ubicacion || p.ubicacion === 'Ambos'));
-         setProfesoresDisponibles(filtered);
+        if (!grupo) return;
+        const filtered = (profesores || []).filter(p => p.estado === 'Activo' && (p.ubicacion === grupo.ubicacion || p.ubicacion === 'Ambos'));
+        setProfesoresDisponibles(filtered);
     }, [grupo?.ubicacion, profesores]);
 
 
     // --- Filtrar Alumnos Disponibles ---
     useEffect(() => {
         if (!grupo) return;
-        const filtered = alumnos.filter(a =>
+        const filtered = (alumnos || []).filter(a =>
             (a.estado === 'Activo' &&
              a.ubicacion === grupo.ubicacion &&
              a.nivel === grupo.nivel) ||
@@ -156,7 +163,11 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
             alumnoIds: Array.from(alumnosSeleccionados)
         };
         actualizarGrupo(grupoFinal); // Esta función debe incluir la validación de empalme
-        navigate("/lista-grupos");
+        if (onClose) {
+            onClose();
+        } else {
+            navigate("/lista-grupos");
+        }
     };
 
     // Mensaje de carga mientras se busca el grupo
@@ -181,19 +192,19 @@ function ModificarGrupo({ grupos, actualizarGrupo, niveles, modalidades, profeso
             <label>Nivel:</label>
             <select name="nivel" value={grupo.nivel} onChange={handleChange} className="usuario" required>
                 <option value="">Selecciona un Nivel</option>
-                {nivelesDisponibles.map(n => <option key={n.id} value={n.nombre}>{n.nombre}</option>)}
+                { (nivelesDisponibles || []).map(n => <option key={n.id} value={n.nombre}>{n.nombre}</option>)}
             </select>
 
             <label>Modalidad:</label>
             <select name="modalidad" value={grupo.modalidad} onChange={handleChange} className="usuario" required>
                 <option value="">Selecciona una Modalidad</option>
-                {modalidades.map(m => <option key={m.id} value={m.nombre}>{m.nombre}</option>)}
+                {(modalidades || []).map(m => <option key={m.id} value={m.nombre}>{m.nombre}</option>)}
             </select>
 
             <label>Profesor:</label>
              <select name="profesorId" value={grupo.profesorId} onChange={handleChange} className="usuario" required>
                 <option value="">Selecciona un Profesor</option>
-                {profesoresDisponibles.map(p => <option key={p.numero_empleado} value={p.numero_empleado}>{p.nombre} ({p.numero_empleado})</option>)}
+                {(profesoresDisponibles || []).map(p => <option key={p.numero_empleado} value={p.numero_empleado}>{p.nombre} ({p.numero_empleado})</option>)}
             </select>
 
             {/* --- INICIO: CAMPOS DE HORARIO AÑADIDOS --- */}
