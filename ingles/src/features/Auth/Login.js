@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import '../../styles/Login.css';
 
-// Usuarios de prueba
+// Usuarios de prueba actualizados con 'numero_empleado'
 const usuariosPrueba = {
   administrador: [
-    { usuario: 'admin1', contrasena: 'admin123' },
-    { usuario: 'admin2', contrasena: 'admin123' },
-    { usuario: 'admin3', contrasena: 'admin123' }
+    { usuario: 'admin1', contrasena: 'admin123', numero_empleado: 'ADM01' },
+    { usuario: 'admin2', contrasena: 'admin123', numero_empleado: 'ADM02' },
+    { usuario: 'admin3', contrasena: 'admin123', numero_empleado: 'ADM03' } // Asumiendo que ADM03 existe
   ],
   profesor: [
-    { usuario: 'prof1', contrasena: 'prof123' },
-    { usuario: 'prof2', contrasena: 'prof123' },
-    { usuario: 'prof3', contrasena: 'prof123' }
+    // Vinculados a los IDs de data/profesores.js
+    { usuario: 'prof1', contrasena: 'prof123', numero_empleado: 'EMP001' }, // Juan Carlos Pérez
+    { usuario: 'prof2', contrasena: 'prof123', numero_empleado: 'EMP002' }, // María Rodriguez Lima
+    { usuario: 'prof3', contrasena: 'prof123', numero_empleado: 'EMP003' }  // Ana Lopez Pérez
   ]
 };
 
@@ -27,8 +28,12 @@ function Login() {
     // Buscar en administradores
     const adminMatch = usuariosPrueba.administrador.find(u => u.usuario === usuario && u.contrasena === contrasena);
     if (adminMatch) {
-      // Guardar sesión simple en localStorage y redirigir al dashboard admin (/)
-      localStorage.setItem('currentUser', JSON.stringify({ role: 'administrador', usuario }));
+      // MODIFICADO: Guardar sesión con rol, usuario y numero_empleado
+      localStorage.setItem('currentUser', JSON.stringify({ 
+        role: 'administrador', 
+        usuario: adminMatch.usuario,
+        numero_empleado: adminMatch.numero_empleado // <--- AÑADIDO
+      }));
       // Recargar para garantizar que App.js lea el user y muestre el layout correcto
       window.location.href = '/';
       return;
@@ -36,7 +41,12 @@ function Login() {
 
     const profMatch = usuariosPrueba.profesor.find(u => u.usuario === usuario && u.contrasena === contrasena);
     if (profMatch) {
-      localStorage.setItem('currentUser', JSON.stringify({ role: 'profesor', usuario }));
+      // MODIFICADO: Guardar sesión con rol, usuario y numero_empleado
+      localStorage.setItem('currentUser', JSON.stringify({ 
+        role: 'profesor', 
+        usuario: profMatch.usuario,
+        numero_empleado: profMatch.numero_empleado // <--- AÑADIDO
+      }));
       window.location.href = '/dashboard-profesor';
       return;
     }

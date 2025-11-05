@@ -3,39 +3,44 @@ import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import "../../styles/dashboardProfesor.css"; // opcional si luego quieres CSS personalizado
 
-function DashboardProfesor({ data, profesor }) {
+// MODIFICADO: Añadimos 'gruposAsignados'
+function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
+  
+  // MODIFICADO: Usamos 'gruposAsignados' para el total
   const [totalGrupos, setTotalGrupos] = useState(0);
   const [totalEstudiantes, setTotalEstudiantes] = useState(0);
   const [promedioGeneral, setPromedioGeneral] = useState(0);
   const [asistenciaHoy, setAsistenciaHoy] = useState(0);
 
-  // Calcular valores dinámicos a partir del arreglo "data"
+  // Calcular valores dinámicos
   useEffect(() => {
+    // MODIFICADO: Lógica de grupos
+    setTotalGrupos(gruposAsignados.length); 
+
     if (data && data.length > 0) {
-      // Ejemplo: agrupar por nivel o grupo
-      const grupos = new Set(data.map((alumno) => alumno.nivel));
-      setTotalGrupos(grupos.size);
       setTotalEstudiantes(data.length);
 
-      // Promedio general simulado si no hay campo de calificación
-      const promedio = 8 + Math.random() * 1; // simula 8.0 - 9.0
+      // Promedio general simulado (como lo tenías)
+      const promedio = 8 + Math.random() * 1; 
       setPromedioGeneral(promedio.toFixed(1));
 
-      // Asistencia simulada (en %)
+      // Asistencia simulada (como lo tenías)
       const asistencia = 85 + Math.random() * 10;
       setAsistenciaHoy(asistencia.toFixed(0));
     }
-  }, [data]);
+  // MODIFICADO: Añadimos 'gruposAsignados' a las dependencias
+  }, [data, gruposAsignados]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
+      {/* Header (Tu código original) */}
       <header className="bg-[#7A1F5C] text-white shadow-lg p-4 flex justify-between items-center">
+        {/* Tu header aquí */}
       </header>
 
       {/* Contenido principal */}
       <main className="flex-1 p-6 flex flex-col gap-6">
-        {/* Tarjetas de estadísticas rápidas (usar mismo estilo que Dashboard admin) */}
+        {/* Tarjetas de estadísticas (Tu código original) */}
         <div className="stats-grid">
           <Link to="/lista-grupos" className="stat-card-link">
             <div className="stat-card" style={{ borderLeft: '4px solid #7A1F5C' }}>
@@ -57,13 +62,17 @@ function DashboardProfesor({ data, profesor }) {
             </div>
           </Link>
 
-          <div className="stat-card" style={{ borderLeft: '4px solid #16a34a' }}>
-            <div className="stat-card-info">
-              <p className="stat-card-title">ASISTENCIA HOY</p>
-              <p className="stat-card-value">{`${asistenciaHoy}%`}</p>
+          {/* --- AÑADIDO: Botón Asistencia Hoy --- */}
+          {/* Usa el emoji 📅 que ya tenías para "Asistencia Hoy" simulada */}
+          <Link to="/profesor/asistencia" className="stat-card-link">
+            <div className="stat-card" style={{ borderLeft: '4px solid #16a34a' }}>
+              <div className="stat-card-info">
+                <p className="stat-card-title">ASISTENCIA HOY</p>
+                <p className="stat-card-value">Ir</p>
+              </div>
+              <div className="stat-card-icon-wrapper">📅</div>
             </div>
-            <div className="stat-card-icon-wrapper">📅</div>
-          </div>
+          </Link>
 
           <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
             <div className="stat-card-info">
@@ -83,53 +92,64 @@ function DashboardProfesor({ data, profesor }) {
               <div className="stat-card-icon-wrapper">✏️</div>
             </div>
           </Link>
+          
+          {/* --- AÑADIDO: Botón Portal de Alumnos --- */}
+          <Link to="/profesor/portal-calificaciones" className="stat-card-link">
+            <div className="stat-card" style={{ borderLeft: '4px solid #0891b2' }}> {/* Color cian */}
+              <div className="stat-card-info">
+                <p className="stat-card-title">PORTAL DE ALUMNOS</p>
+                <p className="stat-card-value">Ver</p>
+              </div>
+              <div className="stat-card-icon-wrapper">📓</div>
+            </div>
+          </Link>
+
         </div>
 
-        {/* Sección de grupos */}
+        {/* Sección de grupos (Tu código original) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Mis Grupos Asignados */}
           <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col gap-3">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               📘 Mis Grupos Asignados
             </h2>
-            {Array.from(new Set(data.map((a) => a.nivel))).map((nivel) => {
-              const grupoAlumnos = data.filter((a) => a.nivel === nivel);
+            {/* MODIFICADO: Usamos gruposAsignados para la lista */
+            gruposAsignados.map((grupo) => {
+              const grupoAlumnos = data.filter((a) => a.grupo_actual_id === grupo.id); // Asumiendo que 'data' (alumnos) tiene 'grupo_actual_id'
               return (
                 <div
-                  key={nivel}
+                  key={grupo.id}
                   className="flex justify-between bg-gray-50 p-3 rounded-lg items-center"
                 >
                   <div>
-                    <p className="font-medium text-gray-800">{nivel}</p>
+                    <p className="font-medium text-gray-800">{grupo.nombre}</p>
                     <p className="text-sm text-gray-600">
-                      {grupoAlumnos[0]?.modalidad || "Modalidad desconocida"}
+                      {grupo.modalidad} - {grupo.dia}
                     </p>
                   </div>
                   <span className="bg-purple-100 text-[#7A1F5C] px-3 py-1 rounded-full text-sm font-medium">
-                    {grupoAlumnos.length} estudiantes
+                    {grupo.alumnoIds.length} estudiantes
                   </span>
                 </div>
               );
             })}
           </div>
 
-          {/* Estudiantes por Grupo */}
+          {/* Estudiantes por Grupo (Tu código original) */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               📊 Estudiantes por Grupo
             </h2>
             <div className="flex flex-col gap-3">
-              {Array.from(new Set(data.map((a) => a.nivel))).map((nivel) => {
-                const grupoAlumnos = data.filter((a) => a.nivel === nivel);
+              {gruposAsignados.map((grupo) => {
                 const porcentaje = Math.min(
                   100,
-                  (grupoAlumnos.length / totalEstudiantes) * 100
+                  (grupo.alumnoIds.length / totalEstudiantes) * 100
                 );
                 return (
-                  <div key={nivel}>
+                  <div key={grupo.id}>
                     <div className="flex justify-between text-sm font-medium text-gray-700">
-                      <span>{nivel}</span>
-                      <span>{grupoAlumnos.length}</span>
+                      <span>{grupo.nombre}</span>
+                      <span>{grupo.alumnoIds.length}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                       <div
@@ -148,7 +168,7 @@ function DashboardProfesor({ data, profesor }) {
   );
 }
 
-// Subcomponente para tarjetas de estadísticas
+// (Tu subcomponente StatCard - no se usa en este código, pero lo dejo por si acaso)
 function StatCard({ color, icon, label, value }) {
   return (
     <div

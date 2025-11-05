@@ -647,7 +647,6 @@ body {
     font-size: 0.9rem;
 }
 
-
 /* Títulos de sección */
 .detail-section-title {
     margin-top: 25px; /* Espacio antes de cada título de sección */
@@ -701,4 +700,35 @@ body {
     color: white;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- Botones dentro del DataGrid (sin borde, tamaño uniforme) --- */
+.accion-link {
+  border: none;
+  background: none;
+  padding: 15px;            /* Aumenta el área clickeable */
+  margin: 0;           /* Espacio pequeño entre íconos */
+  cursor: pointer;
+  font-size: 30px;         /* Tamaño de ícono cómodo */
+  line-height: 1;
+  color: #333;
+  transition: transform 0.15s ease-in-out;
+}
+
+/* Efecto al pasar el mouse */
+.accion-link:hover {
+  transform: scale(1.15);
+}
+
+/* Elimina contornos al hacer clic */
+.accion-link:focus {
+  outline: none;
+}
+
+/* Mantiene consistencia en todos los íconos */
+.icon-button,
+.view-button {
+  border: none;
+  background: none;
+  box-shadow: none;
 }

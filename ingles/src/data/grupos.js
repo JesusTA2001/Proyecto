@@ -18,7 +18,7 @@ export const initialGrupos = [
     horaInicio: '09:00',
     horaFin: '11:00',
     // ---------------------------------
-    alumnoIds: ['2144002', '2144014', '2144045', '2144062', '2144079', '2144081']
+    alumnoIds: ['T0901', 'T0902', 'T0903', 'T0904', 'T0905', 'T0906']
   },
   {
     id: 'GRP-TEC-N2-VES-A',
@@ -32,7 +32,7 @@ export const initialGrupos = [
     horaInicio: '16:00',
     horaFin: '18:00',
     // ---------------------------------
-    alumnoIds: ['2144003', '2144013', '2144023', '2144025', '2144028', '2144046']
+    alumnoIds: ['T0002', 'T0003', 'T0004', 'T0005', 'T0006', 'T0007']
   },
   {
     id: 'GRP-TEC-N3-SAB-A',
@@ -46,7 +46,7 @@ export const initialGrupos = [
     horaInicio: '08:00',
     horaFin: '13:00',
     // ---------------------------------
-    alumnoIds: ['2144001', '2144006', '2144007', '2144008', '2144012']
+    alumnoIds: ['T0001', 'T0011', 'T0111', 'T0221', 'T0331']
   },
   // ... (Añade campos de horario a tus otros 7 grupos)
   {
@@ -61,6 +61,6 @@ export const initialGrupos = [
     horaInicio: '16:00',
     horaFin: '20:00',
     // ---------------------------------
-    alumnoIds: ['2244002', '2244005', '2244038', '2244041', '2244053']
+    alumnoIds: ['C0001', 'C0011', 'C0022', 'C0031', 'C0025']
   },
 ];

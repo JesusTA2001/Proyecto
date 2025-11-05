@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react'; // Importa useMemo
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Estilos e Layout
@@ -20,36 +20,35 @@ import ListaHorarios from './features/Horario/ListaHorarioMUI';
 import DashboardProfesor from './features/Dashboard/DashboardProfesor';
 import LayoutProfesor from './features/Layout/LayoutProfesor';
 import AsignarCalificaciones from './features/Profesores/AsignarCalificaciones';
+import PortalCalificaciones from './features/Profesores/PortalCalificaciones'; // <-- 1. IMPORTAR NUEVO COMPONENTE
 
-// CRUD Alumnos (Corregido a PascalCase: CrearAlumno.js)
+// CRUD Alumnos
 import CrearAlumno from './features/Alumnos/CrearAlumnoStepper';
 
-// CRUD Profesores (Corregido a PascalCase: CrearProfesor.js)
+// CRUD Profesores
 import CrearProfesor from './features/Profesores/CrearProfesor';
-// (Modificación/Eliminación/Ver estaban eliminados por el usuario)
 
-// CRUD Administradores (Corregido a PascalCase: CrearAdministrador.js, etc.)
+// CRUD Administradores
 import CrearAdministrador from './features/Administradores/CrearAdmin';
-// (Modificación/Eliminación/Ver estaban eliminados por el usuario)
 
-// CRUD Niveles (Corregido a PascalCase: CrearNivel.js)
+// CRUD Niveles
 import CrearNivel from './features/Niveles/CrearNivel';
 import ModificarNivel from './features/Niveles/ModificarNivel';
 import EliminarNivel from './features/Niveles/EliminarNivel';
 
-// CRUD Modalidad (Corregido a PascalCase: CrearModalidad.js)
+// CRUD Modalidad
 import CrearModalidad from './features/Modalidad/CrearModalidad';
 import ModificarModalidad from './features/Modalidad/ModificarModalidad';
 import EliminarModalidad from './features/Modalidad/EliminarModalidad';
 
-// CRUD Grupos (Corregido a PascalCase: CrearGrupo.js)
+// CRUD Grupos
 import CrearGrupo from './features/Grupos/CrearGrupo';
 import ModificarGrupo from './features/Grupos/ModificarGrupo';
 import EliminarGrupo from './features/Grupos/EliminarGrupo';
 import VerGrupo from './features/Grupos/VerGrupo';
 
-// NUEVO: Horarios
-import VerHorario from './features/Horario/VerHorario'; // RUTA Y NOMBRE CORREGIDOS
+// Horarios
+import VerHorario from './features/Horario/VerHorario'; 
 
 // Datos iniciales
 import { initialAlumnos } from './data/alumnos';
@@ -183,7 +182,7 @@ function App() {
   const eliminarGrupo = (id) =>
     setGrupos(grupos.filter(g => g.id !== id));
 
-  // --- Autenticación simple basada en localStorage ---
+  // --- Autenticación (Sin cambios) ---
   const getCurrentUser = () => {
     try {
       const raw = localStorage.getItem('currentUser');
@@ -193,12 +192,36 @@ function App() {
     }
   };
 
+  // --- Lógica para datos de profesor (Sin cambios) ---
+  const currentUser = useMemo(() => getCurrentUser(), []);
+
+  const profesorLogueado = useMemo(() => {
+    if (!currentUser || currentUser.role !== 'profesor' || !currentUser.numero_empleado) {
+      return null;
+    }
+    return profesores.find(p => p.numero_empleado === currentUser.numero_empleado) || null;
+  }, [currentUser, profesores]);
+
+  const { gruposAsignados, alumnosAsignados } = useMemo(() => {
+    if (!profesorLogueado) {
+      return { gruposAsignados: [], alumnosAsignados: [] };
+    }
+    const asignados = grupos.filter(g => g.profesorId === profesorLogueado.numero_empleado);
+    const alumnoIdsSet = new Set();
+    asignados.forEach(g => {
+      (g.alumnoIds || []).forEach(id => alumnoIdsSet.add(id));
+    });
+    const alumnosDeEsosGrupos = alumnos.filter(a => alumnoIdsSet.has(a.numero_control));
+    return { gruposAsignados: asignados, alumnosAsignados: alumnosDeEsosGrupos };
+  }, [profesorLogueado, grupos, alumnos]);
+  
+  // --- Fin lógica profesor ---
+
+
   const HomeOrRedirect = () => {
-    const user = getCurrentUser();
+    const user = currentUser; 
     if (!user) return <Navigate to="/login" replace />;
     if (user.role === 'profesor') return <Navigate to="/dashboard-profesor" replace />;
-
-    // Por defecto (administrador u otros) mostrar el dashboard principal
     return (
       <Layout titulo="Bienvenido al Sistema">
         <PerfilUsuario
@@ -217,13 +240,10 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Página raíz: mostrar login si no hay sesión, redirigir por rol si existe */}
-          <Route
-            path="/"
-            element={<HomeOrRedirect />}
-          />
-
-          {/* Login (vista independiente, sin layout de administrador) */}
+          {/* ... (Rutas Admin, Login, Estudiantes, Profesores, Administradores, Niveles, Modalidad, Grupos, Horarios... SIN CAMBIOS) ... */}
+          
+          {/* Página raíz */}
+          <Route path="/" element={<HomeOrRedirect />} />
           <Route path="/login" element={<Login />} />
 
           {/* Estudiantes */}
@@ -251,15 +271,72 @@ function App() {
           {/* Grupos */}
           <Route path="/lista-grupos" element={<Layout titulo="Gestión de Grupos"><ListaGrupos grupos={grupos} profesores={profesores} alumnos={alumnos} niveles={niveles} modalidades={modalidades} agregarGrupo={agregarGrupo} actualizarGrupo={actualizarGrupo} eliminarGrupo={eliminarGrupo} /></Layout>} />
           <Route path="/crear-grupo" element={<Layout titulo="Crear Grupo"><CrearGrupo agregarGrupo={agregarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} /></Layout>} />
+          <Route path="/modificar-grupo/:id" element={<Layout titulo="Modificar Grupo"><ModificarGrupo grupos={grupos} actualizarGrupo={actualizarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} /></Layout>} />
+          <Route path="/eliminar-grupo/:id" element={<Layout titulo="Eliminar Grupo"><EliminarGrupo grupos={grupos} eliminarGrupo={eliminarGrupo} /></Layout>} />
+          <Route path="/ver-grupo/:id" element={<Layout titulo="Ver Grupo"><VerGrupo grupos={grupos} profesores={profesores} alumnos={alumnos} /></Layout>} />
+
 
           {/* Horarios */}
           <Route path="/lista-horarios" element={<Layout titulo="Horarios de Profesores"><ListaHorarios profesores={profesores} grupos={grupos} /></Layout>} />
+          <Route path="/ver-horario/:id" element={<Layout titulo="Ver Horario"><VerHorario profesores={profesores} grupos={grupos} /></Layout>} />
 
-          {/* Dashboard profesor (ruta para usuarios tipo profesor) */}
-          <Route path="/dashboard-profesor" element={<LayoutProfesor titulo="Panel del Profesor"><DashboardProfesor data={alumnos} profesor={profesores[0] || null} /></LayoutProfesor>} />
 
-          {/* Ruta para asignar calificaciones (panel profesor) */}
-          <Route path="/profesor/calificaciones" element={<LayoutProfesor titulo="Calificaciones"><AsignarCalificaciones profesores={profesores} alumnos={alumnos} grupos={grupos} /></LayoutProfesor>} />
+          {/* --- RUTAS DEL PROFESOR --- */}
+          
+          <Route 
+            path="/dashboard-profesor" 
+            element={
+              <LayoutProfesor titulo="Panel del Profesor">
+                <DashboardProfesor 
+                  data={alumnosAsignados} 
+                  profesor={profesorLogueado} 
+                />
+              </LayoutProfesor>
+            } 
+          />
+
+          <Route 
+            path="/dashboard-profesor" 
+            element={
+              <LayoutProfesor titulo="Panel del Profesor">
+                <DashboardProfesor 
+                  data={alumnosAsignados} 
+                  profesor={profesorLogueado} 
+                  gruposAsignados={gruposAsignados} // <-- AÑADE ESTA PROP
+                />
+              </LayoutProfesor>
+            } 
+          />
+
+          <Route 
+            path="/profesor/calificaciones" 
+            element={
+              <LayoutProfesor titulo="Calificaciones">
+                <AsignarCalificaciones 
+                  profesor={profesorLogueado}
+                  alumnos={alumnosAsignados}  
+                  grupos={gruposAsignados}
+                  profesores={profesores} // Pasamos todos por si es necesario (aunque el componente actual no lo usa)
+                />
+              </LayoutProfesor>
+            } 
+          />
+
+          {/* --- 2. AÑADIR LA NUEVA RUTA --- */}
+          <Route 
+            path="/profesor/portal-calificaciones" 
+            element={
+              <LayoutProfesor titulo="Portal de Calificaciones">
+                <PortalCalificaciones 
+                  profesor={profesorLogueado} // El profesor logueado
+                  alumnos={alumnos}           // TODOS los alumnos (para que pueda buscar)
+                  grupos={gruposAsignados}      // Solo sus grupos (para el 1er select)
+                  profesores={profesores}     // TODOS los profesores (para buscar nombres)
+                />
+              </LayoutProfesor>
+            } 
+          />
+          {/* --- FIN DE RUTA AÑADIDA --- */}
 
           {/* Redirección */}
           <Route path="*" element={<Navigate to="/" />} />

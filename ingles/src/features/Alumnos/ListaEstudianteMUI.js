@@ -110,10 +110,10 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     {
       field: 'acciones',
       headerName: 'Acciones',
-      width: 200,
+      width: 230,
       sortable: false,
       renderCell: (params) => (
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <div>
           <button
             className="accion-link view-button"
             title="Ver"

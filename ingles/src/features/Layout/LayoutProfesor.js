@@ -33,38 +33,31 @@ function LayoutProfesor({ children, titulo }) {
 
           <ul className="menu__links">
             <li className="menu__item">
-              <Link to="/profesor/inicio" className="menu__link">Inicio</Link>
+              {/* MODIFICADO: Enlace a /dashboard-profesor en lugar de /profesor/inicio */}
+              <Link to="/dashboard-profesor" className="menu__link">Inicio</Link>
             </li>
 
             <li className="menu__item menu__item--show">
               <span className="menu__link">Mis Clases</span>
               <ul className="menu__nesting">
+                {/* Opcional: puedes agregar un enlace a /lista-grupos 
+                  pero filtrado solo para este profesor si lo deseas.
+                */}
                 <li className="menu__inside">
-                  <Link to="/profesor/grupos" className="menu__link menu__link--inside">
-                    Grupos Asignados
+                  <Link to="/profesor/calificaciones" className="menu__link menu__link--inside">
+                    Asignar Calificaciones
                   </Link>
                 </li>
+                {/* --- AÑADIDO --- */}
                 <li className="menu__inside">
-                  <Link to="/profesor/horarios" className="menu__link menu__link--inside">
-                    Horarios
+                  <Link to="/profesor/portal-calificaciones" className="menu__link menu__link--inside">
+                    Portal de Alumnos
                   </Link>
                 </li>
-                    <li className="menu__inside">
-                      <Link to="/profesor/calificaciones" className="menu__link menu__link--inside">
-                        Calificaciones
-                      </Link>
-                    </li>
-              </ul>
-            </li>
-
-            <li className="menu__item menu__item--show">
-              <span className="menu__link">Reportes</span>
-              <ul className="menu__nesting">
-                <li className="menu__inside">
-                  <Link to="/profesor/reporte-asistencia" className="menu__link menu__link--inside">
-                    Asistencias
-                  </Link>
-                </li>
+                {/* --- FIN AÑADIDO --- */}
+                {/* Opcional: puedes agregar un enlace a /lista-horarios
+                  filtrado para este profesor si lo deseas.
+                */}
               </ul>
             </li>
 
