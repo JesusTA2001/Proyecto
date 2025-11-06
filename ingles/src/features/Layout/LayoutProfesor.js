@@ -33,35 +33,42 @@ function LayoutProfesor({ children, titulo }) {
 
           <ul className="menu__links">
             <li className="menu__item">
-              {/* MODIFICADO: Enlace a /dashboard-profesor en lugar de /profesor/inicio */}
               <Link to="/dashboard-profesor" className="menu__link">Inicio</Link>
             </li>
 
             <li className="menu__item menu__item--show">
               <span className="menu__link">Mis Clases</span>
               <ul className="menu__nesting">
-                {/* Opcional: puedes agregar un enlace a /lista-grupos 
-                  pero filtrado solo para este profesor si lo deseas.
-                */}
+                
+                {/* --- ENLACE NUEVO AÑADIDO AQUÍ --- */}
+                <li className="menu__inside">
+                  <Link to="/profesor/mis-grupos" className="menu__link menu__link--inside">
+                    Mis Grupos
+                  </Link>
+                </li>
+
+                <li className="menu__inside">
+                  <Link to="/profesor/asistencia" className="menu__link menu__link--inside">
+                    Asistencia
+                  </Link>
+                </li>
+                
                 <li className="menu__inside">
                   <Link to="/profesor/calificaciones" className="menu__link menu__link--inside">
                     Asignar Calificaciones
                   </Link>
                 </li>
-                {/* --- AÑADIDO --- */}
+                
                 <li className="menu__inside">
                   <Link to="/profesor/portal-calificaciones" className="menu__link menu__link--inside">
                     Portal de Alumnos
                   </Link>
                 </li>
-                {/* --- FIN AÑADIDO --- */}
-                {/* Opcional: puedes agregar un enlace a /lista-horarios
-                  filtrado para este profesor si lo deseas.
-                */}
+                
               </ul>
             </li>
 
-            {/* Cuenta / Cerrar sesión (al lado de Reportes) */}
+            {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>
                 Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}

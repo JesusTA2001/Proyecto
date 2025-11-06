@@ -20,8 +20,10 @@ import ListaHorarios from './features/Horario/ListaHorarioMUI';
 import DashboardProfesor from './features/Dashboard/DashboardProfesor';
 import LayoutProfesor from './features/Layout/LayoutProfesor';
 import AsignarCalificaciones from './features/Profesores/AsignarCalificaciones';
-import PortalCalificaciones from './features/Profesores/PortalCalificaciones'; // <-- 1. IMPORTAR NUEVO COMPONENTE
-
+import PortalCalificaciones from './features/Profesores/PortalCalificaciones'; 
+// --- 1. IMPORTAR NUEVO COMPONENTE DE ASISTENCIA ---
+import ControlAsistencia from './features/Profesores/ControlAsistencia';
+import MisGrupos from './features/Profesores/MisGrupos';
 // CRUD Alumnos
 import CrearAlumno from './features/Alumnos/CrearAlumnoStepper';
 
@@ -283,18 +285,7 @@ function App() {
 
           {/* --- RUTAS DEL PROFESOR --- */}
           
-          <Route 
-            path="/dashboard-profesor" 
-            element={
-              <LayoutProfesor titulo="Panel del Profesor">
-                <DashboardProfesor 
-                  data={alumnosAsignados} 
-                  profesor={profesorLogueado} 
-                />
-              </LayoutProfesor>
-            } 
-          />
-
+          {/* MODIFICADO: Se pasa 'gruposAsignados' al Dashboard del Profesor */}
           <Route 
             path="/dashboard-profesor" 
             element={
@@ -314,15 +305,28 @@ function App() {
               <LayoutProfesor titulo="Calificaciones">
                 <AsignarCalificaciones 
                   profesor={profesorLogueado}
-                  alumnos={alumnosAsignados}  
+                  alumnos={alumnos} // Pasamos TODOS los alumnos
                   grupos={gruposAsignados}
-                  profesores={profesores} // Pasamos todos por si es necesario (aunque el componente actual no lo usa)
                 />
               </LayoutProfesor>
             } 
           />
 
-          {/* --- 2. AÑADIR LA NUEVA RUTA --- */}
+          {/* --- 2. AÑADIR LA NUEVA RUTA DE ASISTENCIA --- */}
+          <Route 
+            path="/profesor/asistencia" 
+            element={
+              <LayoutProfesor titulo="Control de Asistencia">
+                <ControlAsistencia 
+                  profesor={profesorLogueado}
+                  alumnos={alumnos}           // Pasamos TODOS los alumnos
+                  grupos={gruposAsignados}      // Solo sus grupos
+                />
+              </LayoutProfesor>
+            } 
+          />
+          {/* --- FIN DE RUTA AÑADIDA --- */}
+
           <Route 
             path="/profesor/portal-calificaciones" 
             element={
@@ -336,8 +340,20 @@ function App() {
               </LayoutProfesor>
             } 
           />
-          {/* --- FIN DE RUTA AÑADIDA --- */}
-
+          {/* --- 2. AÑADIR LA NUEVA RUTA DE "MIS GRUPOS" --- */}
+          <Route 
+            path="/profesor/mis-grupos" 
+            element={
+              <LayoutProfesor titulo="Mis Grupos">
+                <MisGrupos 
+                  profesor={profesorLogueado}
+                  gruposAsignados={gruposAsignados}
+                  alumnos={alumnos}
+                  profesores={profesores}
+                />
+              </LayoutProfesor>
+            } 
+          />
           {/* Redirección */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

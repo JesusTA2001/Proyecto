@@ -1,0 +1,81 @@
+/*
+ * Estilos para la vista "Mis Grupos" del Profesor
+ * Adaptado de tu diseño de Canva.
+ */
+
+/* Re-utilizamos las clases base de PortalCalificaciones (flex, grid, p-6, mb-6, etc.) */
+@import url('./PortalCalificaciones.css');
+
+/* Contenedor del gráfico (si se usara en el futuro) */
+.chart-container {
+    position: relative;
+    height: 200px; /* Ajustado de tu CSS */
+    width: 100%;
+}
+
+/* Barra de progreso para asistencia */
+.progress-bar {
+    height: 6px;
+    background-color: #f3f4f6; /* bg-gray-200 */
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    /* Usamos el color primario de tu proyecto */
+    background: var(--color-primary, #7A1F5C);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+/* Colores de la barra de progreso de asistencia */
+.progress-fill.bg-green-500 { background: #10b981; }
+.progress-fill.bg-blue-500 { background: #3b82f6; }
+.progress-fill.bg-yellow-500 { background: #f59e0b; }
+.progress-fill.bg-red-500 { background: #ef4444; }
+
+
+/* Tarjeta individual de grupo */
+.group-card {
+    transition: all 0.2s ease;
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 1rem; /* p-4 */
+}
+
+.group-card:hover {
+    transform: translateY(-2px);
+    background-color: #f3f4f6; /* hover:bg-gray-100 */
+}
+
+/* Estilo para el ID del grupo en la tarjeta */
+.group-card-icon {
+    width: 3rem; /* w-12 */
+    height: 3rem; /* h-12 */
+    background-color: #f3e8ff; /* bg-purple-100 */
+    color: var(--color-primary, #7A1F5C);
+    border-radius: 0.5rem; /* rounded-lg */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* Botón "Ver Detalles" en la tarjeta */
+.group-card-button {
+    padding: 0.25rem 0.75rem; /* py-1 px-3 */
+    background-color: #f3e8ff; /* bg-purple-100 */
+    color: var(--color-primary, #7A1F5C);
+    border-radius: 0.5rem; /* rounded-lg */
+    transition: background-color 0.2s;
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    border: none;
+    cursor: pointer;
+}
+
+.group-card-button:hover {
+    background-color: #e9d5ff; /* hover:bg-purple-200 */
+}
