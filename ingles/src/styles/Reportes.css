@@ -1,0 +1,104 @@
+/* src/styles/Reportes.css */
+
+/* --- Estilos base de Canva --- */
+.card-shadow {
+  background-color: #ffffff;
+  border-radius: 0.5rem; /* 8px */
+  padding: 1.5rem; /* 24px */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+.card-shadow:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Contenedor de la página --- */
+.report-container {
+  padding: 1.5rem; /* 24px */
+  background-color: #f9fafb; /* bg-gray-50 */
+  min-height: 100vh;
+}
+
+/* --- Encabezado del reporte --- */
+.report-header {
+  margin-bottom: 1.5rem; /* 24px */
+}
+
+.report-header-title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700; /* bold */
+  color: #1f2937; /* text-gray-800 */
+  margin-bottom: 0.5rem; /* 8px */
+}
+
+.report-header-subtitle {
+  color: #4b5563; /* text-gray-600 */
+}
+
+.report-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem; /* 16px */
+}
+
+.report-filters-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* 16px */
+}
+
+.report-search {
+  padding: 0.5rem 0.75rem; /* 8px 12px */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* 8px */
+  font-size: 0.875rem; /* 14px */
+}
+
+.report-select {
+  padding: 0.5rem 0.75rem; /* 8px 12px */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* 8px */
+  font-size: 0.875rem; /* 14px */
+  background-color: #fff;
+}
+
+.report-export-button {
+  padding: 0.5rem 1rem; /* 8px 16px */
+  background-color: #2563eb; /* bg-blue-600 */
+  color: white;
+  border-radius: 0.5rem; /* 8px */
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500; /* medium */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.report-export-button:hover {
+  background-color: #1d4ed8; /* bg-blue-700 */
+}
+
+/* --- Estilos para Badges de Estado --- */
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-excellent { background-color: #dcfce7; color: #166534; }
+.status-good { background-color: #dbeafe; color: #1d4ed8; }
+.status-regular { background-color: #fef3c7; color: #92400e; }
+.status-poor { background-color: #fee2e2; color: #dc2626; }

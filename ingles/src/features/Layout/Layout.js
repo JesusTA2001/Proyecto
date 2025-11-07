@@ -96,18 +96,27 @@ function Layout({children, titulo}) {
               </ul>
             </li>
 
-            {/* Reportes */}
+            {/* Reportes*/}
             <li className="menu__item menu__item--show">
               <span className="menu__link">Reportes</span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Reporte Profesores</a>
+                  {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
+                  <Link to="/reporte-profesores" className="menu__link menu__link--inside">
+                    Reporte Profesores
+                  </Link>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Reporte Estudiantes</a>
+                  {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
+                  <Link to="/reporte-estudiantes" className="menu__link menu__link--inside">
+                    Reporte Estudiantes
+                  </Link>
                 </li>
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside">Reporte Grupos</a>
+                  {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
+                  <Link to="/reporte-grupos" className="menu__link menu__link--inside">
+                    Reporte Grupos
+                  </Link>
                 </li>
               </ul>
             </li>

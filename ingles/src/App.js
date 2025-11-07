@@ -52,6 +52,11 @@ import VerGrupo from './features/Grupos/VerGrupo';
 // Horarios
 import VerHorario from './features/Horario/VerHorario'; 
 
+// reportes
+import ReporteProfesores from './features/Reportes/ReporteProfesores';
+import ReporteEstudiantes from './features/Reportes/ReporteEstudiantes';
+import ReporteGrupos from './features/Reportes/ReporteGrupos';
+
 // Datos iniciales
 import { initialAlumnos } from './data/alumnos';
 import { initialProfesores } from './data/profesores';
@@ -282,7 +287,44 @@ function App() {
           <Route path="/lista-horarios" element={<Layout titulo="Horarios de Profesores"><ListaHorarios profesores={profesores} grupos={grupos} /></Layout>} />
           <Route path="/ver-horario/:id" element={<Layout titulo="Ver Horario"><VerHorario profesores={profesores} grupos={grupos} /></Layout>} />
 
-
+{/* --- 2. AÑADIR NUEVAS RUTAS DE REPORTE --- */}
+          <Route 
+            path="/reporte-profesores" 
+            element={
+              <Layout titulo="Reporte de Profesores">
+                <ReporteProfesores 
+                  profesores={profesores} 
+                  grupos={grupos}
+                  alumnos={alumnos}
+                />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/reporte-estudiantes" 
+            element={
+              <Layout titulo="Reporte de Estudiantes">
+                <ReporteEstudiantes 
+                  alumnos={alumnos}
+                  grupos={grupos}
+                  profesores={profesores}
+                />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/reporte-grupos" 
+            element={
+              <Layout titulo="Reporte de Grupos">
+                <ReporteGrupos 
+                  grupos={grupos}
+                  alumnos={alumnos}
+                  profesores={profesores}
+                />
+              </Layout>
+            } 
+          />
+          
           {/* --- RUTAS DEL PROFESOR --- */}
           
           {/* MODIFICADO: Se pasa 'gruposAsignados' al Dashboard del Profesor */}
