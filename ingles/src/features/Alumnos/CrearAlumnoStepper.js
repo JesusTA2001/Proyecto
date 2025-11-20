@@ -9,6 +9,7 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
 import '../../styles/listaEstudiante.css';
 import { carrerasOptions } from '../../data/mapping';
 import { initialModalidades } from '../../data/modalidad';
@@ -34,6 +35,8 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
     ubicacion: 'Tecnologico',
   });
 
+  const [errors, setErrors] = useState({ curp: '', telefono: '' });
+
   const [nivelesDisponibles, setNivelesDisponibles] = useState([]);
 
   useEffect(() => {
@@ -47,7 +50,18 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
   }, [alumno.ubicacion]);
 
   const handleChange = (field) => (e) => {
-    const value = e.target.value;
+    let value = e.target.value;
+    // Sanitizaciones específicas
+    if (field === 'telefono') {
+      // solo dígitos y máximo 10
+      value = String(value).replace(/\D/g, '').slice(0, 10);
+      setErrors(prev => ({ ...prev, telefono: value && value.length !== 10 ? 'Debe tener 10 dígitos' : '' }));
+    }
+    if (field === 'curp') {
+      // CURP: alfanumérico, mayúsculas, máximo 18
+      value = String(value).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18);
+      setErrors(prev => ({ ...prev, curp: value && value.length !== 18 ? 'CURP debe tener 18 caracteres' : '' }));
+    }
     setAlumno(prev => ({ ...prev, [field]: value }));
   };
 
@@ -56,6 +70,15 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
     if (activeStep === 0) {
       if (!alumno.nombre || !alumno.correo) {
         alert('Por favor completa el nombre y correo.');
+        return;
+      }
+      // Validaciones de formato
+      if (alumno.curp && alumno.curp.length !== 18) {
+        setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
+        return;
+      }
+      if (alumno.telefono && alumno.telefono.length !== 10) {
+        setErrors(prev => ({ ...prev, telefono: 'Teléfono debe tener 10 dígitos' }));
         return;
       }
     }
@@ -97,52 +120,122 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
 
         {activeStep === 0 && (
           <Box>
-            <TextField fullWidth label="Nombre completo" value={alumno.nombre} onChange={handleChange('nombre')} margin="normal" required />
-            <TextField fullWidth label="Correo" value={alumno.correo} onChange={handleChange('correo')} margin="normal" required />
-            <TextField fullWidth label="Teléfono" value={alumno.telefono} onChange={handleChange('telefono')} margin="normal" />
-            <TextField fullWidth label="CURP" value={alumno.curp} onChange={handleChange('curp')} margin="normal" />
-            <TextField fullWidth label="Dirección" value={alumno.direccion} onChange={handleChange('direccion')} margin="normal" />
-            <Select
-              fullWidth
-              value={alumno.genero}
-                onChange={handleChange('genero')}
-                displayEmpty
-                margin="normal"
-            >
-              <MenuItem value="">Selecciona un género</MenuItem>
-              <MenuItem value="Masculino">Masculino</MenuItem>
-                <MenuItem value="Femenino">Femenino</MenuItem>
-                <MenuItem value="Otro">Otro</MenuItem>
-            </Select>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Nombre completo" value={alumno.nombre} onChange={handleChange('nombre')} margin="dense" required />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Correo" value={alumno.correo} onChange={handleChange('correo')} margin="dense" required />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Teléfono"
+                  value={alumno.telefono}
+                  onChange={handleChange('telefono')}
+                  margin="dense"
+                  inputProps={{ maxLength: 10 }}
+                  helperText={errors.telefono || '10 dígitos'}
+                  error={Boolean(errors.telefono)}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="CURP"
+                  value={alumno.curp}
+                  onChange={handleChange('curp')}
+                  margin="dense"
+                  inputProps={{ maxLength: 18 }}
+                  helperText={errors.curp || '18 caracteres (alfanumérico)'}
+                  error={Boolean(errors.curp)}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField fullWidth size="small" label="Dirección" value={alumno.direccion} onChange={handleChange('direccion')} margin="dense" />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  value={alumno.genero}
+                  onChange={handleChange('genero')}
+                  displayEmpty
+                  size="small"
+                  sx={{ mt: 0.5 }}
+                >
+                  <MenuItem value="">Selecciona un género</MenuItem>
+                  <MenuItem value="Masculino">Masculino</MenuItem>
+                  <MenuItem value="Femenino">Femenino</MenuItem>
+                  <MenuItem value="Otro">Otro</MenuItem>
+                </Select>
+              </Grid>
+            </Grid>
           </Box>
         )}
 
         {activeStep === 1 && (
           <Box>
-            <label>Ubicación</label>
-            <Select fullWidth value={alumno.ubicacion} onChange={handleChange('ubicacion')} sx={{ mt: 1, mb: 2 }}>
-              <MenuItem value="Tecnologico">Tecnológico</MenuItem>
-              <MenuItem value="Centro de Idiomas">Centro de Idiomas</MenuItem>
-            </Select>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  value={alumno.ubicacion}
+                  onChange={handleChange('ubicacion')}
+                  size="small"
+                  displayEmpty
+                >
+                  <MenuItem value="Tecnologico">Tecnológico</MenuItem>
+                  <MenuItem value="Centro de Idiomas">Centro de Idiomas</MenuItem>
+                </Select>
+              </Grid>
 
-            <label>Modalidad</label>
-            <Select fullWidth value={alumno.modalidad} onChange={handleChange('modalidad')} sx={{ mt: 1, mb: 2 }}>
-              <MenuItem value="">Selecciona una modalidad</MenuItem>
-              {initialModalidades.map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
-            </Select>
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  value={alumno.modalidad}
+                  onChange={handleChange('modalidad')}
+                  size="small"
+                  displayEmpty
+                >
+                  <MenuItem value="">Selecciona una modalidad</MenuItem>
+                  {initialModalidades.map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
+                </Select>
+              </Grid>
 
-            <label>Nivel</label>
-            <Select fullWidth value={alumno.nivel} onChange={handleChange('nivel')} sx={{ mt: 1, mb: 2 }}>
-              <MenuItem value="">Selecciona un nivel</MenuItem>
-              {nivelesDisponibles.map(n => <MenuItem key={n.id} value={n.nombre}>{n.nombre}</MenuItem>)}
-            </Select>
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  value={alumno.nivel}
+                  onChange={handleChange('nivel')}
+                  size="small"
+                  displayEmpty
+                >
+                  <MenuItem value="">Selecciona un nivel</MenuItem>
+                  {nivelesDisponibles.map(n => <MenuItem key={n.id} value={n.nombre}>{n.nombre}</MenuItem>)}
+                </Select>
+              </Grid>
 
-            <label>Carrera</label>
-            <Select fullWidth value={alumno.carrera} onChange={handleChange('carrera')} sx={{ mt: 1, mb: 2 }} required={alumno.ubicacion === 'Tecnologico'}>
-              <MenuItem value="">{alumno.ubicacion === 'Tecnologico' ? 'Selecciona una carrera *' : 'Selecciona carrera (si aplica)'}</MenuItem>
-              {carrerasOptions.map(c => <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>)}
-              {alumno.ubicacion === 'Centro de Idiomas' && <MenuItem value="No Aplica">No Aplica</MenuItem>}
-            </Select>
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  value={alumno.carrera}
+                  onChange={handleChange('carrera')}
+                  size="small"
+                  displayEmpty
+                  required={alumno.ubicacion === 'Tecnologico'}
+                >
+                  <MenuItem value="">{alumno.ubicacion === 'Tecnologico' ? 'Selecciona una carrera *' : 'Selecciona carrera (si aplica)'}</MenuItem>
+                  {carrerasOptions.map(c => <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>)}
+                  {alumno.ubicacion === 'Centro de Idiomas' && <MenuItem value="No Aplica">No Aplica</MenuItem>}
+                </Select>
+              </Grid>
+            </Grid>
           </Box>
         )}
 

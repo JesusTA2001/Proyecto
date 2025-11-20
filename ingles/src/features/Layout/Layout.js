@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import '../../styles/perfil-usuario.css';
 
 
-function Layout({children, titulo}) {
+function Layout({children}) {
   const navigate = useNavigate();
 
   const getCurrentUserName = () => {
@@ -137,9 +137,7 @@ function Layout({children, titulo}) {
           </ul>
         </section>
       </nav>
-      <div className="lista-estudiante">
-        <h1>{titulo}</h1>
-      </div>
+      {/* header title removed to let pages control their own headings */}
         <main>
             {children}
         </main>

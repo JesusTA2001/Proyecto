@@ -3,22 +3,39 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import '../../styles/listaEstudiante.css';
 
 export default function VerGrupoModal({ open, onClose, grupo, profesores, alumnos }) {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   if (!grupo) return null;
   const profesor = (profesores || []).find(p => p.numero_empleado === grupo.profesorId) || { nombre: 'No asignado' };
   const alumnoIds = Array.isArray(grupo.alumnoIds) ? grupo.alumnoIds : [];
   const alumnosInGroup = (alumnos || []).filter(a => alumnoIds.includes(a.numero_control));
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      fullScreen={fullScreen}
+      PaperProps={{
+        sx: {
+          // Limitar la altura del modal para evitar scroll de la página
+          maxHeight: fullScreen ? '100vh' : '80vh',
+        }
+      }}
+      aria-labelledby="ver-grupo-title"
+    >
+      <DialogTitle id="ver-grupo-title" sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
         Detalles del Grupo
         <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ overflowY: 'auto', px: 2, py: 2 }}>
         <div className="detail-container">
           <h3>{grupo.nombre}</h3>
           <p><strong>Nivel:</strong> {grupo.nivel}</p>
@@ -32,7 +49,8 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
             {alumnosInGroup.length === 0 ? (
               <p>No hay alumnos asignados a este grupo.</p>
             ) : (
-              <div style={{ maxHeight: 240, overflow: 'auto' }}>
+              // La tabla usa el scroll del DialogContent (scroll interno) para evitar que la página principal haga scroll
+              <div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>

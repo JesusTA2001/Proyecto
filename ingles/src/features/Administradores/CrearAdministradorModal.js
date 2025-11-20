@@ -8,16 +8,18 @@ import CrearAdministrador from './CrearAdmin';
 
 export default function CrearAdministradorModal({ open, onClose, agregarAdministrador }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { width: '95vw', maxWidth: 1000, maxHeight: '90vh' } }}>
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
         Nuevo Administrador
         <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
         {/* Pasamos agregarAdministrador y cerramos el modal desde el componente si es necesario */}
-        <CrearAdministrador agregarAdministrador={(a) => { agregarAdministrador(a); onClose(); }} />
+        <div style={{ width: '100%' }}>
+          <CrearAdministrador agregarAdministrador={(a) => { agregarAdministrador(a); onClose(); }} />
+        </div>
       </DialogContent>
     </Dialog>
   );

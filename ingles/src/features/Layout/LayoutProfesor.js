@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../../styles/perfil-usuario.css';
 
-function LayoutProfesor({ children, titulo }) {
+function LayoutProfesor({ children }) {
   const navigate = useNavigate();
 
   const getCurrentUserName = () => {
@@ -59,11 +59,7 @@ function LayoutProfesor({ children, titulo }) {
                   </Link>
                 </li>
                 
-                <li className="menu__inside">
-                  <Link to="/profesor/portal-calificaciones" className="menu__link menu__link--inside">
-                    Portal de Alumnos
-                  </Link>
-                </li>
+                {/* Portal de Alumnos eliminado del menú */}
                 
               </ul>
             </li>
@@ -85,9 +81,7 @@ function LayoutProfesor({ children, titulo }) {
         </section>
       </nav>
 
-      <div className="lista-estudiante">
-        <h1>{titulo}</h1>
-      </div>
+      {/* header title removed to simplify layout — pages provide headings when needed */}
       <main>{children}</main>
     </div>
   );

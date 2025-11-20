@@ -18,7 +18,7 @@ export const initialGrupos = [
     horaInicio: '09:00',
     horaFin: '11:00',
     // ---------------------------------
-    alumnoIds: ['T0901', 'T0902', 'T0903', 'T0904', 'T0905', 'T0906']
+    alumnoIds: ['T150', 'T0151', 'T0152', 'T0153', 'T0154', 'T0155', 'T0156', 'T0157']
   },
   {
     id: 'GRP-TEC-N2-VES-A',

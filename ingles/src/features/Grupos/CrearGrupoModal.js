@@ -8,14 +8,14 @@ import CrearGrupo from './CrearGrupo';
 
 export default function CrearGrupoModal({ open, onClose, agregarGrupo, niveles, modalidades, profesores, alumnos }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { width: '95vw', maxWidth: 1100, maxHeight: '90vh' } }}>
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
         Nuevo Grupo
         <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
         <CrearGrupo niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} agregarGrupo={(g) => { agregarGrupo(g); onClose(); }} />
       </DialogContent>
     </Dialog>
