@@ -12,6 +12,11 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
   const [searchTerm, setSearchTerm] = React.useState('');
   const apiRef = useGridApiRef();
 
+  const currentUser = React.useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (e) { return null; }
+  }, []);
+  const isDirectivo = currentUser && currentUser.role === 'directivo';
+
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
@@ -57,15 +62,16 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
     { field: 'alumnosCount', headerName: '# Alumnos', width: 120 },
     { field: 'acciones', headerName: 'Acciones', width: 200, sortable: false, renderCell: (params) => {
       const rowId = params && params.row ? params.row.id : null;
-      const handleSelect = () => {
-        const g = grupos.find(x => x.id === rowId);
-        setSelectedGrupo(g);
-      };
+      const handleSelect = () => { const g = grupos.find(x => x.id === rowId); setSelectedGrupo(g); };
       return (
         <div style={{ display: 'flex', gap: '0.4rem' }}>
           <button className='view-button icon-button' title='Ver' onClick={() => { handleSelect(); setOpenView(true); }}>👁️</button>
-          <button className='modifybutton icon-button' title='Modificar' onClick={() => { handleSelect(); setOpenEdit(true); }}>✏️</button>
-          <button className='deletebutton icon-button' title='Eliminar' onClick={() => { handleSelect(); setOpenDelete(true); }}>🗑️</button>
+          {!isDirectivo && (
+            <>
+              <button className='modifybutton icon-button' title='Modificar' onClick={() => { handleSelect(); setOpenEdit(true); }}>✏️</button>
+              <button className='deletebutton icon-button' title='Eliminar' onClick={() => { handleSelect(); setOpenDelete(true); }}>🗑️</button>
+            </>
+          )}
         </div>
       );
     } }
@@ -76,7 +82,9 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
       <div className="lista-header">
         <div className="header-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <input className="search-input" placeholder="🔍 Buscar por nombre o nivel..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
-          <button className='createbutton' onClick={()=>setOpenCreate(true)} style={{ marginLeft: 8 }}>Nuevo Grupo</button>
+          {!isDirectivo && (
+            <button className='createbutton' onClick={()=>setOpenCreate(true)} style={{ marginLeft: 8 }}>Nuevo Grupo</button>
+          )}
           <button className='createbutton' onClick={exportToCSV} style={{ marginLeft: 8 }}>Exportar a Excel</button>
         </div>
       </div>

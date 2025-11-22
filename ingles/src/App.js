@@ -19,6 +19,13 @@ import ListaHorarios from './features/Horario/ListaHorarioMUI';
 // Dashboard Profesor
 import DashboardProfesor from './features/Dashboard/DashboardProfesor';
 import LayoutProfesor from './features/Layout/LayoutProfesor';
+// Dashboards y Layouts adicionales
+import DashboardAlumnos from './features/Dashboard/DashboardAlumnos';
+import DashboardCoordinador from './features/Dashboard/DashboardCoordinador';
+import DashboardDirectivos from './features/Dashboard/DashboardDirectivos';
+import LayoutAlumnos from './features/Layout/LayoutAlumnos';
+import LayoutCoordinador from './features/Layout/LayoutCoordinador';
+import LayoutDirectivos from './features/Layout/LayoutDirectivos';
 import AsignarCalificaciones from './features/Profesores/AsignarCalificaciones';
 // --- 1. IMPORTAR NUEVO COMPONENTE DE ASISTENCIA ---
 import ControlAsistencia from './features/Profesores/ControlAsistencia';
@@ -228,7 +235,12 @@ function App() {
   const HomeOrRedirect = () => {
     const user = currentUser; 
     if (!user) return <Navigate to="/login" replace />;
+    // Redirigir según rol
     if (user.role === 'profesor') return <Navigate to="/dashboard-profesor" replace />;
+    if (user.role === 'alumno') return <Navigate to="/dashboard-alumnos" replace />;
+    if (user.role === 'coordinador') return <Navigate to="/dashboard-coordinador" replace />;
+    if (user.role === 'directivo') return <Navigate to="/dashboard-directivos" replace />;
+    // Administrador y roles no contemplados: mostrar dashboard general
     return (
       <Layout>
         <PerfilUsuario
@@ -254,74 +266,292 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           {/* Estudiantes */}
-          <Route path="/lista-estudiantes" element={<Layout><ListaEstudiante alumnos={alumnos} toggleEstado={toggleEstado} agregarAlumno={agregarAlumno} actualizarAlumno={actualizarAlumno} eliminarAlumno={eliminarAlumno} /></Layout>} />
-          <Route path="/crear-alumno" element={<Layout><CrearAlumno agregarAlumno={agregarAlumno} /></Layout>} />
+          <Route path="/lista-estudiantes" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaEstudiante alumnos={alumnos} toggleEstado={toggleEstado} agregarAlumno={agregarAlumno} actualizarAlumno={actualizarAlumno} eliminarAlumno={eliminarAlumno} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaEstudiante alumnos={alumnos} toggleEstado={toggleEstado} agregarAlumno={agregarAlumno} actualizarAlumno={actualizarAlumno} eliminarAlumno={eliminarAlumno} />
+                </Layout>
+              )
+          } />
+          <Route path="/crear-alumno" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <CrearAlumno agregarAlumno={agregarAlumno} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
 
           {/* Profesores */}
-          <Route path="/lista-profesores" element={<Layout><ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} /></Layout>} />
-          <Route path="/crear-profesor" element={<Layout><CrearProfesor agregarProfesor={agregarProfesor} /></Layout>} />
+          <Route path="/lista-profesores" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} />
+                </Layout>
+              )
+          } />
+          <Route path="/crear-profesor" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <CrearProfesor agregarProfesor={agregarProfesor} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
 
           {/* Administradores */}
-          <Route path="/lista-administradores" element={<Layout><ListaAdministrador administradores={administradores} toggleEstado={toggleEstado} agregarAdministrador={agregarAdministrador} actualizarAdministrador={actualizarAdministrador} eliminarAdministrador={eliminarAdministrador} /></Layout>} />
-          <Route path="/crear-administrador" element={<Layout><CrearAdministrador agregarAdministrador={agregarAdministrador} /></Layout>} />
+          <Route path="/lista-administradores" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaAdministrador administradores={administradores} toggleEstado={toggleEstado} agregarAdministrador={agregarAdministrador} actualizarAdministrador={actualizarAdministrador} eliminarAdministrador={eliminarAdministrador} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaAdministrador administradores={administradores} toggleEstado={toggleEstado} agregarAdministrador={agregarAdministrador} actualizarAdministrador={actualizarAdministrador} eliminarAdministrador={eliminarAdministrador} />
+                </Layout>
+              )
+          } />
+          <Route path="/crear-administrador" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <CrearAdministrador agregarAdministrador={agregarAdministrador} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
 
           {/* Niveles y Modalidades */}
-          <Route path="/lista-niveles" element={<Layout><ListaNiveles niveles={niveles} /></Layout>} />
-          <Route path="/crear-nivel" element={<Layout><CrearNivel agregarNivel={agregarNivel} /></Layout>} />
-          <Route path="/modificar-nivel/:id" element={<Layout><ModificarNivel niveles={niveles} actualizarNivel={actualizarNivel} /></Layout>} />
-          <Route path="/eliminar-nivel/:id" element={<Layout><EliminarNivel niveles={niveles} eliminarNivel={eliminarNivel} /></Layout>} />
-          <Route path="/lista-modalidad" element={<Layout><ListaModalidad modalidades={modalidades} /></Layout>} />
-          <Route path="/crear-modalidad" element={<Layout><CrearModalidad agregarModalidad={agregarModalidad} /></Layout>} />
-          <Route path="/modificar-modalidad/:id" element={<Layout><ModificarModalidad modalidades={modalidades} actualizarModalidad={actualizarModalidad} /></Layout>} />
-          <Route path="/eliminar-modalidad/:id" element={<Layout><EliminarModalidad modalidades={modalidades} eliminarModalidad={eliminarModalidad} /></Layout>} />
+          <Route path="/lista-niveles" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaNiveles niveles={niveles} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaNiveles niveles={niveles} />
+                </Layout>
+              )
+          } />
+          <Route path="/crear-nivel" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <CrearNivel agregarNivel={agregarNivel} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/modificar-nivel/:id" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <ModificarNivel niveles={niveles} actualizarNivel={actualizarNivel} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/eliminar-nivel/:id" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <EliminarNivel niveles={niveles} eliminarNivel={eliminarNivel} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/lista-modalidad" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaModalidad modalidades={modalidades} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaModalidad modalidades={modalidades} />
+                </Layout>
+              )
+          } />
+          <Route path="/crear-modalidad" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <CrearModalidad agregarModalidad={agregarModalidad} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/modificar-modalidad/:id" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <ModificarModalidad modalidades={modalidades} actualizarModalidad={actualizarModalidad} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/eliminar-modalidad/:id" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <EliminarModalidad modalidades={modalidades} eliminarModalidad={eliminarModalidad} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
 
           {/* Grupos */}
-          <Route path="/lista-grupos" element={<Layout><ListaGrupos grupos={grupos} profesores={profesores} alumnos={alumnos} niveles={niveles} modalidades={modalidades} agregarGrupo={agregarGrupo} actualizarGrupo={actualizarGrupo} eliminarGrupo={eliminarGrupo} /></Layout>} />
-          <Route path="/crear-grupo" element={<Layout><CrearGrupo agregarGrupo={agregarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} /></Layout>} />
-          <Route path="/modificar-grupo/:id" element={<Layout><ModificarGrupo grupos={grupos} actualizarGrupo={actualizarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} /></Layout>} />
-          <Route path="/eliminar-grupo/:id" element={<Layout><EliminarGrupo grupos={grupos} eliminarGrupo={eliminarGrupo} /></Layout>} />
+          <Route path="/lista-grupos" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaGrupos grupos={grupos} profesores={profesores} alumnos={alumnos} niveles={niveles} modalidades={modalidades} agregarGrupo={agregarGrupo} actualizarGrupo={actualizarGrupo} eliminarGrupo={eliminarGrupo} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaGrupos grupos={grupos} profesores={profesores} alumnos={alumnos} niveles={niveles} modalidades={modalidades} agregarGrupo={agregarGrupo} actualizarGrupo={actualizarGrupo} eliminarGrupo={eliminarGrupo} />
+                </Layout>
+              )
+          } />
+          <Route path="/crear-grupo" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <CrearGrupo agregarGrupo={agregarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/modificar-grupo/:id" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <ModificarGrupo grupos={grupos} actualizarGrupo={actualizarGrupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
+          <Route path="/eliminar-grupo/:id" element={
+            currentUser && currentUser.role === 'administrador'
+              ? (
+                <Layout>
+                  <EliminarGrupo grupos={grupos} eliminarGrupo={eliminarGrupo} />
+                </Layout>
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
           <Route path="/ver-grupo/:id" element={<Layout><VerGrupo grupos={grupos} profesores={profesores} alumnos={alumnos} /></Layout>} />
 
 
           {/* Horarios */}
-          <Route path="/lista-horarios" element={<Layout><ListaHorarios profesores={profesores} grupos={grupos} /></Layout>} />
+          <Route path="/lista-horarios" element={
+            currentUser && currentUser.role === 'directivo'
+              ? (
+                <LayoutDirectivos>
+                  <ListaHorarios profesores={profesores} grupos={grupos} />
+                </LayoutDirectivos>
+              ) : (
+                <Layout>
+                  <ListaHorarios profesores={profesores} grupos={grupos} />
+                </Layout>
+              )
+          } />
           <Route path="/ver-horario/:id" element={<Layout><VerHorario profesores={profesores} grupos={grupos} /></Layout>} />
 
 {/* --- 2. AÑADIR NUEVAS RUTAS DE REPORTE --- */}
           <Route 
             path="/reporte-profesores" 
             element={
-              <Layout>
-                <ReporteProfesores 
-                  profesores={profesores} 
-                  grupos={grupos}
-                  alumnos={alumnos}
-                />
-              </Layout>
+              currentUser && currentUser.role === 'directivo'
+                ? (
+                  <LayoutDirectivos>
+                    <ReporteProfesores 
+                      profesores={profesores} 
+                      grupos={grupos}
+                      alumnos={alumnos}
+                    />
+                  </LayoutDirectivos>
+                ) : (
+                  <Layout>
+                    <ReporteProfesores 
+                      profesores={profesores} 
+                      grupos={grupos}
+                      alumnos={alumnos}
+                    />
+                  </Layout>
+                )
             } 
           />
           <Route 
             path="/reporte-estudiantes" 
             element={
-              <Layout>
-                <ReporteEstudiantes 
-                  alumnos={alumnos}
-                  grupos={grupos}
-                  profesores={profesores}
-                />
-              </Layout>
+              currentUser && currentUser.role === 'directivo'
+                ? (
+                  <LayoutDirectivos>
+                    <ReporteEstudiantes 
+                      alumnos={alumnos}
+                      grupos={grupos}
+                      profesores={profesores}
+                    />
+                  </LayoutDirectivos>
+                ) : (
+                  <Layout>
+                    <ReporteEstudiantes 
+                      alumnos={alumnos}
+                      grupos={grupos}
+                      profesores={profesores}
+                    />
+                  </Layout>
+                )
             } 
           />
           <Route 
             path="/reporte-grupos" 
             element={
-              <Layout>
-                <ReporteGrupos 
-                  grupos={grupos}
-                  alumnos={alumnos}
-                  profesores={profesores}
-                />
-              </Layout>
+              currentUser && currentUser.role === 'directivo'
+                ? (
+                  <LayoutDirectivos>
+                    <ReporteGrupos 
+                      grupos={grupos}
+                      alumnos={alumnos}
+                      profesores={profesores}
+                    />
+                  </LayoutDirectivos>
+                ) : (
+                  <Layout>
+                    <ReporteGrupos 
+                      grupos={grupos}
+                      alumnos={alumnos}
+                      profesores={profesores}
+                    />
+                  </Layout>
+                )
             } 
           />
           
@@ -384,6 +614,55 @@ function App() {
           />
           {/* Redirección */}
           <Route path="*" element={<Navigate to="/" />} />
+          {/* Rutas para nuevos dashboards por rol */}
+          <Route
+            path="/dashboard-alumnos"
+            element={
+              currentUser && currentUser.role === 'alumno'
+                ? (
+                  <LayoutAlumnos>
+                    <DashboardAlumnos />
+                  </LayoutAlumnos>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+            }
+          />
+
+          <Route
+            path="/dashboard-coordinador"
+            element={
+              currentUser && currentUser.role === 'coordinador'
+                ? (
+                  <LayoutCoordinador>
+                    <DashboardCoordinador alumnos={alumnos} />
+                  </LayoutCoordinador>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+            }
+          />
+
+          <Route
+            path="/dashboard-directivos"
+            element={
+              currentUser && currentUser.role === 'directivo'
+                ? (
+                  <LayoutDirectivos>
+                    <DashboardDirectivos
+                      alumnos={alumnos}
+                      profesores={profesores}
+                      administradores={administradores}
+                      niveles={niveles}
+                      modalidades={modalidades}
+                      grupos={grupos}
+                    />
+                  </LayoutDirectivos>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+            }
+          />
         </Routes>
       </div>
     </Router>

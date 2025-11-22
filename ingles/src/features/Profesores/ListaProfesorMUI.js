@@ -14,6 +14,11 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
   // Se eliminaron selectedLocation y selectedStatus
   const apiRef = useGridApiRef();
 
+  const currentUser = React.useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (e) { return null; }
+  }, []);
+  const isDirectivo = currentUser && currentUser.role === 'directivo';
+
   // --- Estados de Modales ---
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
@@ -76,13 +81,20 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
     },
     {
       field: 'acciones', headerName: 'Acciones', width: 200, sortable: false,
-      renderCell: (params) => (
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
-          <button className='view-button icon-button' title='Ver' onClick={() => { const p = profesores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado); setSelectedProfesor(p); setOpenView(true); }}>👁️</button>
-          <button className='modifybutton icon-button' title='Modificar' onClick={() => { const p = profesores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado); setSelectedProfesor(p); setOpenEdit(true); }}>✏️</button>
-          <button className='deletebutton icon-button' title='Eliminar' onClick={() => { const p = profesores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado); setSelectedProfesor(p); setOpenDelete(true); }}>🗑️</button>
-        </div>
-      )
+      renderCell: (params) => {
+        const p = profesores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado);
+        return (
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedProfesor(p); setOpenView(true); }}>👁️</button>
+            {!isDirectivo && (
+              <>
+                <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedProfesor(p); setOpenEdit(true); }}>✏️</button>
+                <button className='deletebutton icon-button' title='Eliminar' onClick={() => { setSelectedProfesor(p); setOpenDelete(true); }}>🗑️</button>
+              </>
+            )}
+          </div>
+        );
+      }
     }
   ];
 
@@ -109,8 +121,9 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
           
           {/* 2. Contenedor de Botones (Derecha) */}
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            {/* Los <select> fueron eliminados de aquí */}
-            <button className='createbutton' onClick={() => setOpenCreate(true)}>Nuevo Profesor</button>
+            {!isDirectivo && (
+              <button className='createbutton' onClick={() => setOpenCreate(true)}>Nuevo Profesor</button>
+            )}
             <button className='createbutton' onClick={exportToCSV}>Exportar a Excel</button>
           </div>
 

@@ -14,6 +14,28 @@ const usuariosPrueba = {
     { usuario: 'prof2', contrasena: 'prof123', numero_empleado: 'EMP002' }, // María Rodriguez Lima
     { usuario: 'prof3', contrasena: 'prof123', numero_empleado: 'EMP003' }  // Ana Lopez Pérez
   ]
+  ,
+  alumno: [
+    { usuario: 'alumno1', contrasena: 'alum123', numero_control: '210001' },
+    { usuario: 'alumno2', contrasena: 'alum123', numero_control: '210002' },
+    { usuario: 'alumno3', contrasena: 'alum123', numero_control: '210003' }
+  ],
+  coordinador: [
+    { usuario: 'coord1', contrasena: 'coord123', numero_empleado: 'COORD01' },
+    { usuario: 'coord2', contrasena: 'coord123', numero_empleado: 'COORD02' },
+    { usuario: 'coord3', contrasena: 'coord123', numero_empleado: 'COORD03' },
+    { usuario: 'coord4', contrasena: 'coord123', numero_empleado: 'COORD04' },
+    { usuario: 'coord5', contrasena: 'coord123', numero_empleado: 'COORD05' },
+    { usuario: 'coord6', contrasena: 'coord123', numero_empleado: 'COORD06' },
+    { usuario: 'coord7', contrasena: 'coord123', numero_empleado: 'COORD07' },
+    { usuario: 'coord8', contrasena: 'coord123', numero_empleado: 'COORD08' },
+    { usuario: 'coord9', contrasena: 'coord123', numero_empleado: 'COORD09' }
+  ],
+  directivo: [
+    { usuario: 'dir1', contrasena: 'dir123', numero_empleado: 'DIR01' },
+    { usuario: 'dir2', contrasena: 'dir123', numero_empleado: 'DIR02' },
+    { usuario: 'dir3', contrasena: 'dir123', numero_empleado: 'DIR03' }
+  ]
 };
 
 function Login() {
@@ -48,6 +70,42 @@ function Login() {
         numero_empleado: profMatch.numero_empleado // <--- AÑADIDO
       }));
       window.location.href = '/dashboard-profesor';
+      return;
+    }
+
+    // Alumno
+    const alumnoMatch = usuariosPrueba.alumno.find(u => u.usuario === usuario && u.contrasena === contrasena);
+    if (alumnoMatch) {
+      localStorage.setItem('currentUser', JSON.stringify({
+        role: 'alumno',
+        usuario: alumnoMatch.usuario,
+        numero_control: alumnoMatch.numero_control
+      }));
+      window.location.href = '/dashboard-alumnos';
+      return;
+    }
+
+    // Coordinador
+    const coordMatch = usuariosPrueba.coordinador.find(u => u.usuario === usuario && u.contrasena === contrasena);
+    if (coordMatch) {
+      localStorage.setItem('currentUser', JSON.stringify({
+        role: 'coordinador',
+        usuario: coordMatch.usuario,
+        numero_empleado: coordMatch.numero_empleado
+      }));
+      window.location.href = '/dashboard-coordinador';
+      return;
+    }
+
+    // Directivo
+    const dirMatch = usuariosPrueba.directivo.find(u => u.usuario === usuario && u.contrasena === contrasena);
+    if (dirMatch) {
+      localStorage.setItem('currentUser', JSON.stringify({
+        role: 'directivo',
+        usuario: dirMatch.usuario,
+        numero_empleado: dirMatch.numero_empleado
+      }));
+      window.location.href = '/dashboard-directivos';
       return;
     }
 
@@ -100,6 +158,42 @@ function Login() {
             {usuariosPrueba.profesor.map((u) => (
               <li key={u.usuario} style={{ marginBottom: 8 }}>
                 <button type="button" onClick={() => rellenar(u, 'profesor')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
+                  <div style={{ fontWeight: 600 }}>{u.usuario}</div>
+                  <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <strong>Alumnos</strong>
+          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+            {usuariosPrueba.alumno.map((u) => (
+              <li key={u.usuario} style={{ marginBottom: 8 }}>
+                <button type="button" onClick={() => rellenar(u, 'alumno')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
+                  <div style={{ fontWeight: 600 }}>{u.usuario}</div>
+                  <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <strong>Coordinadores</strong>
+          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+            {usuariosPrueba.coordinador.map((u) => (
+              <li key={u.usuario} style={{ marginBottom: 8 }}>
+                <button type="button" onClick={() => rellenar(u, 'coordinador')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
+                  <div style={{ fontWeight: 600 }}>{u.usuario}</div>
+                  <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <strong>Directivos</strong>
+          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+            {usuariosPrueba.directivo.map((u) => (
+              <li key={u.usuario} style={{ marginBottom: 8 }}>
+                <button type="button" onClick={() => rellenar(u, 'directivo')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
                   <div style={{ fontWeight: 600 }}>{u.usuario}</div>
                   <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
                 </button>

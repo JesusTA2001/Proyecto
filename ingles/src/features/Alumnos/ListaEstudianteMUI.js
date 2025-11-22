@@ -19,6 +19,11 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   // --- Añadido: Referencia para el DataGrid ---
   const apiRef = useGridApiRef(); 
 
+  const currentUser = React.useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (e) { return null; }
+  }, []);
+  const isDirectivo = currentUser && currentUser.role === 'directivo';
+
   // --- Filtros personalizados ---
   const filteredAlumnos = (alumnos || []).filter(alumno => {
     const term = (searchTerm || '').toLowerCase();
@@ -112,31 +117,38 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
       headerName: 'Acciones',
       width: 230,
       sortable: false,
-      renderCell: (params) => (
-        <div>
-          <button
-            className="accion-link view-button"
-            title="Ver"
-            onClick={() => { const a = (alumnos || []).find(x => x.numero_control === params.row.numero_control); setSelectedAlumno(a); setOpenView(true); }}
-          >
-            👁️
-          </button>
-          <button
-            className="accion-link icon-button"
-            title="Modificar"
-            onClick={() => { const a = (alumnos || []).find(x => x.numero_control === params.row.numero_control); setSelectedAlumno(a); setOpenEdit(true); }}
-          >
-            ✏️
-          </button>
-          <button
-            className="accion-link icon-button"
-            title="Eliminar"
-            onClick={() => { const a = (alumnos || []).find(x => x.numero_control === params.row.numero_control); setSelectedAlumno(a); setOpenDelete(true); }}
-          >
-            🗑️
-          </button>
-        </div>
-      ),
+      renderCell: (params) => {
+        const alum = (alumnos || []).find(x => x.numero_control === params.row.numero_control);
+        return (
+          <div>
+            <button
+              className="accion-link view-button"
+              title="Ver"
+              onClick={() => { setSelectedAlumno(alum); setOpenView(true); }}
+            >
+              👁️
+            </button>
+            {!isDirectivo && (
+              <>
+                <button
+                  className="accion-link icon-button"
+                  title="Modificar"
+                  onClick={() => { setSelectedAlumno(alum); setOpenEdit(true); }}
+                >
+                  ✏️
+                </button>
+                <button
+                  className="accion-link icon-button"
+                  title="Eliminar"
+                  onClick={() => { setSelectedAlumno(alum); setOpenDelete(true); }}
+                >
+                  🗑️
+                </button>
+              </>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -168,8 +180,10 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
           />
 
           {/* 2. Contenedor para los botones */}
-          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}> 
-            <button className="createbutton" onClick={() => setOpenModal(true)}>Nuevo Alumno</button>
+          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+            {!isDirectivo && (
+              <button className="createbutton" onClick={() => setOpenModal(true)}>Nuevo Alumno</button>
+            )}
             <button className="createbutton" onClick={exportFilteredToCSV}>Exportar a Excel</button>
           </div>
         </div>

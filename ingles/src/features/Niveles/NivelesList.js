@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import '../../styles/listaEstudiante.css';
 
+// Detect current user
+const getCurrentUser = () => {
+  try { return JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (e) { return null; }
+};
+
 function ListaNiveles({ niveles }) {
   // Estado para el término de búsqueda
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,9 +34,15 @@ function ListaNiveles({ niveles }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Link to="/crear-nivel">
-            <button className='createbutton'>Nuevo Nivel</button>
-          </Link>
+          {(() => {
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.role === 'directivo') return null;
+            return (
+              <Link to="/crear-nivel">
+                <button className='createbutton'>Nuevo Nivel</button>
+              </Link>
+            );
+          })()}
         </div>
       </div>
 
@@ -53,12 +64,20 @@ function ListaNiveles({ niveles }) {
                 <td>{nivel.nombre}</td>
                 <td>{nivel.disponibilidad}</td>
                 <td className="acciones-cell">
-                  <Link to={`/modificar-nivel/${nivel.id}`} title="Modificar">
-                    <button className='modifybutton icon-button'>✏️</button>
-                  </Link>
-                  <Link to={`/eliminar-nivel/${nivel.id}`} title="Eliminar">
-                    <button className='deletebutton icon-button'>🗑️</button>
-                  </Link>
+                  {(() => {
+                    const currentUser = getCurrentUser();
+                    if (currentUser && currentUser.role === 'directivo') return null;
+                    return (
+                      <>
+                        <Link to={`/modificar-nivel/${nivel.id}`} title="Modificar">
+                          <button className='modifybutton icon-button'>✏️</button>
+                        </Link>
+                        <Link to={`/eliminar-nivel/${nivel.id}`} title="Eliminar">
+                          <button className='deletebutton icon-button'>🗑️</button>
+                        </Link>
+                      </>
+                    );
+                  })()}
                 </td>
               </tr>
             ))

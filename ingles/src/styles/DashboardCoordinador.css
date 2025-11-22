@@ -1,0 +1,316 @@
+/* src/styles/DashboardCoordinador.css */
+
+/* Contenedor principal */
+.coord-container {
+  padding: 2rem;
+  width: 100%;
+  background-color: #ffffff; /* Fondo blanco para que resalte sobre el gris de la app */
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.coord-header {
+  margin-bottom: 3rem;
+}
+
+.coord-header h1 {
+  margin: 0 0 0.75rem 0;
+  font-size: 2.5rem;
+  font-weight: 700; /* Ajustado para mejor legibilidad */
+  letter-spacing: -0.5px;
+  color: #1a1a1a;
+}
+
+.coord-header p {
+  margin: 0;
+  font-size: 1.125rem;
+  opacity: 0.6;
+  font-weight: 400;
+  color: #4b5563;
+}
+
+/* Grid de Estadísticas */
+.coord-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.coord-stat-card {
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.coord-stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--card-color, #9333ea);
+}
+
+.coord-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.coord-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.coord-stat-card h3 {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  color: #4b5563;
+}
+
+.coord-stat-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.25rem;
+  opacity: 0.9;
+}
+
+.coord-value {
+  font-size: 3rem;
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: -1px;
+  color: #111827;
+}
+
+/* Variantes de tarjetas */
+.card-purple { --card-color: #9333ea; }
+.card-purple .coord-stat-icon { background-color: rgba(147, 51, 234, 0.1); color: #9333ea; }
+
+.card-blue { --card-color: #3b82f6; }
+.card-blue .coord-stat-icon { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+.card-green { --card-color: #22c55e; }
+.card-green .coord-stat-icon { background-color: rgba(34, 197, 94, 0.1); color: #22c55e; }
+
+/* Secciones de Gráficos y Tablas */
+.coord-section {
+  margin-bottom: 3rem;
+  padding: 2.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: #fff;
+}
+
+.coord-section h2 {
+  margin: 0 0 2rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #374151;
+}
+
+.coord-chart-container {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
+
+/* Controles y Filtros */
+.coord-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.coord-search-box {
+  flex: 1;
+  min-width: 280px;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.coord-filter-select {
+  padding: 0.875rem 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.coord-add-button {
+  padding: 0.875rem 1.75rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #3b82f6;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.coord-add-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Tabla */
+.coord-table-wrapper {
+  overflow-x: auto;
+}
+
+.coord-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.coord-table th {
+  padding: 1.25rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.coord-table td {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9375rem;
+  color: #374151;
+}
+
+.coord-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Badge de Nivel */
+.nivel-badge {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* Barra de Progreso */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 10px;
+  background-color: #e5e7eb;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+/* Modal */
+.coord-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.coord-modal-content {
+  padding: 2.5rem;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 90%;
+  background-color: white;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.coord-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.coord-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.coord-form-group input,
+.coord-form-group select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+}
+
+.coord-modal-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 0.875rem;
+  border: 1px solid #d1d5db;
+  background-color: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-submit {
+  flex: 1;
+  padding: 0.875rem;
+  border: none;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Animaciones */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

@@ -13,6 +13,15 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
   const [selectedStatus, setSelectedStatus] = React.useState('');
   const apiRef = useGridApiRef();
 
+  const currentUser = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('currentUser') || 'null');
+    } catch (e) {
+      return null;
+    }
+  }, []);
+  const isDirectivo = currentUser && currentUser.role === 'directivo';
+
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
@@ -71,13 +80,20 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
     },
     {
       field: 'acciones', headerName: 'Acciones', width: 200, sortable: false,
-      renderCell: (params) => (
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className='view-button icon-button' title='Ver' onClick={() => { const a = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado); setSelectedAdmin(a); setOpenView(true); }}>👁️</button>
-          <button className='modifybutton icon-button' title='Modificar' onClick={() => { const a = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado); setSelectedAdmin(a); setOpenEdit(true); }}>✏️</button>
-          <button className='deletebutton icon-button' title='Eliminar' onClick={() => { const a = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado); setSelectedAdmin(a); setOpenDelete(true); }}>🗑️</button>
-        </div>
-      )
+      renderCell: (params) => {
+        const admin = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado);
+        return (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedAdmin(admin); setOpenView(true); }}>👁️</button>
+            {!isDirectivo && (
+              <>
+                <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedAdmin(admin); setOpenEdit(true); }}>✏️</button>
+                <button className='deletebutton icon-button' title='Eliminar' onClick={() => { setSelectedAdmin(admin); setOpenDelete(true); }}>🗑️</button>
+              </>
+            )}
+          </div>
+        );
+      }
     }
   ];
 
@@ -86,8 +102,12 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
       <div className="lista-header">
         <div className="header-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <input className="search-input" placeholder="🔍 Buscar por nombre o N° empleado..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-          <button className='createbutton' onClick={() => setOpenCreate(true)} style={{ marginLeft: 8 }}>Nuevo Administrador</button>
-          <button className='createbutton' onClick={exportToCSV} style={{ marginLeft: 8 }}>Exportar a Excel</button>
+          {!isDirectivo && (
+            <>
+              <button className='createbutton' onClick={() => setOpenCreate(true)} style={{ marginLeft: 8 }}>Nuevo Administrador</button>
+              <button className='createbutton' onClick={exportToCSV} style={{ marginLeft: 8 }}>Exportar a Excel</button>
+            </>
+          )}
         </div>
       </div>
 

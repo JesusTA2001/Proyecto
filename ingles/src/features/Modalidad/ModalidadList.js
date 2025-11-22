@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import '../../styles/listaEstudiante.css';
 
+// Detect current user
+const getCurrentUser = () => {
+  try { return JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (e) { return null; }
+};
+
 function ListaModalidad({ modalidades }) {
   // Estado para el término de búsqueda
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,9 +34,17 @@ function ListaModalidad({ modalidades }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Link to="/crear-modalidad">
-            <button className='createbutton'>Nueva Modalidad</button>
-          </Link>
+          {(() => {
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.role === 'directivo') {
+              return null;
+            }
+            return (
+              <Link to="/crear-modalidad">
+                <button className='createbutton'>Nueva Modalidad</button>
+              </Link>
+            );
+          })()}
         </div>
       </div>
       <table className="alumnos-table">
@@ -52,12 +65,22 @@ function ListaModalidad({ modalidades }) {
                 <td>{modalidad.nombre}</td>
                 <td>{modalidad.descripcion}</td>
                 <td className="acciones-cell">
-                  <Link to={`/modificar-modalidad/${modalidad.id}`} title="Modificar">
-                    <button className='modifybutton icon-button'>✏️</button>
-                  </Link>
-                  <Link to={`/eliminar-modalidad/${modalidad.id}`} title="Eliminar">
-                    <button className='deletebutton icon-button'>🗑️</button>
-                  </Link>
+                  {(() => {
+                    const currentUser = getCurrentUser();
+                    if (currentUser && currentUser.role === 'directivo') {
+                      return null;
+                    }
+                    return (
+                      <>
+                        <Link to={`/modificar-modalidad/${modalidad.id}`} title="Modificar">
+                          <button className='modifybutton icon-button'>✏️</button>
+                        </Link>
+                        <Link to={`/eliminar-modalidad/${modalidad.id}`} title="Eliminar">
+                          <button className='deletebutton icon-button'>🗑️</button>
+                        </Link>
+                      </>
+                    );
+                  })()}
                 </td>
               </tr>
             ))
