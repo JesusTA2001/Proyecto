@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
-import Chip from '@mui/material/Chip';
 import '../../styles/listaEstudiante.css';
 import CrearGrupoModal from './CrearGrupoModal';
 import VerGrupoModal from './VerGrupoModal';
