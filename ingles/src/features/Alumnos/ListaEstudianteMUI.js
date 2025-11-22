@@ -107,8 +107,9 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
         <Chip
           label={params.value}
           color={params.value === 'Activo' ? 'success' : 'error'}
-          onClick={() => toggleEstado(params.row.numero_control, 'alumno')}
-          sx={{ cursor: 'pointer' }}
+          onClick={!isDirectivo ? () => toggleEstado(params.row.numero_control, 'alumno') : undefined}
+          sx={{ cursor: isDirectivo ? 'default' : 'pointer' }}
+          disabled={isDirectivo}
         />
       ),
     },

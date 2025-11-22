@@ -73,8 +73,9 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
         <Chip
           label={params.value}
           color={params.value === 'Activo' ? 'success' : 'error'}
-          onClick={() => toggleEstado && toggleEstado(params.row.numero_empleado, 'administrador')}
-          sx={{ cursor: 'pointer' }}
+          onClick={!isDirectivo && toggleEstado ? () => toggleEstado(params.row.numero_empleado, 'administrador') : undefined}
+          sx={{ cursor: isDirectivo ? 'default' : 'pointer' }}
+          disabled={isDirectivo}
         />
       )
     },

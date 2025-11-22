@@ -76,7 +76,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
     {
       field: 'estado', headerName: 'Estado', width: 130,
       renderCell: (params) => (
-        <Chip label={params.value} color={params.value === 'Activo' ? 'success' : 'error'} onClick={() => toggleEstado && toggleEstado(params.row.numero_empleado, 'profesor')} sx={{ cursor: 'pointer' }} />
+        <Chip label={params.value} color={params.value === 'Activo' ? 'success' : 'error'} onClick={!isDirectivo && toggleEstado ? () => toggleEstado(params.row.numero_empleado, 'profesor') : undefined} sx={{ cursor: isDirectivo ? 'default' : 'pointer' }} disabled={isDirectivo} />
       )
     },
     {
