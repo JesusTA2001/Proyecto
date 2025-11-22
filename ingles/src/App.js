@@ -35,7 +35,7 @@ import MisGrupos from './features/Profesores/MisGrupos';
 import CrearAlumno from './features/Alumnos/CrearAlumnoStepper';
 
 // CRUD Profesores
-import CrearProfesor from './features/Profesores/crearProfesor';
+import CrearProfesor from './features/Profesores/CrearProfesor';
 
 // CRUD Administradores
 import CrearAdministrador from './features/Administradores/CrearAdmin';

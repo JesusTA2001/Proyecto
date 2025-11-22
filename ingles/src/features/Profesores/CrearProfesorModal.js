@@ -4,7 +4,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import '../../styles/listaEstudiante.css';
-import CrearProfesor from './crearProfesor';
+import CrearProfesor from './CrearProfesor';
 
 export default function CrearProfesorModal({ open, onClose, agregarProfesor }) {
   return (
