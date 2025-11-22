@@ -47,7 +47,7 @@ const getAvancePorNivel = (nivel) => {
 
 function DashboardCoordinador() {
   // Estados
-  const [alumnos, setAlumnos] = useState(initialAlumnos);
+  const [alumnos] = useState(initialAlumnos);
   const [searchTerm, setSearchTerm] = useState('');
   const [nivelFilter, setNivelFilter] = useState('');
 

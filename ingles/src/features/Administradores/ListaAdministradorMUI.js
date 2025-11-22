@@ -10,7 +10,7 @@ import EliminarAdministradorModal from './EliminarAdministradorModal';
 
 export default function ListaAdministradorMUI({ administradores = [], toggleEstado, agregarAdministrador, actualizarAdministrador, eliminarAdministrador }) {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedStatus, setSelectedStatus] = React.useState('');
+  const [selectedStatus] = React.useState('');
   const apiRef = useGridApiRef();
 
   const currentUser = React.useMemo(() => {

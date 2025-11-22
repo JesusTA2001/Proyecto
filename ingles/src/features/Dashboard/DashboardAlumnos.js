@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import '../../styles/DashboardAlumnos.css';
 import { initialAlumnos } from '../../data/alumnos';
 

@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid'; // Importar useGridApiRef
 import Chip from '@mui/material/Chip';
 import '../../styles/listaEstudiante.css';
-import { carrerasOptions } from '../../data/mapping';
 import CrearAlumnoModal from './CrearAlumnoModal';
 import VerAlumnoModal from './VerAlumnoModal';
 import ModificarAlumnoModal from './ModificarAlumnoModal';
@@ -12,9 +11,9 @@ import EliminarAlumnoModal from './EliminarAlumnoModal';
 export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumno, actualizarAlumno, eliminarAlumno }) {
   // --- Estados para filtros ---
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedStatus, setSelectedStatus] = React.useState('');
-  const [selectedCareer, setSelectedCareer] = React.useState('');
-  const [selectedLocation, setSelectedLocation] = React.useState('');
+  const [selectedStatus] = React.useState('');
+  const [selectedCareer] = React.useState('');
+  const [selectedLocation] = React.useState('');
   
   // --- Añadido: Referencia para el DataGrid ---
   const apiRef = useGridApiRef(); 

@@ -128,9 +128,9 @@ function LayoutDirectivos({children}) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                  <button type="button" className="menu__link menu__link--inside" onClick={handleLogout}>
                     Cerrar Sesión
-                  </a>
+                  </button>
                 </li>
               </ul>
             </li>
