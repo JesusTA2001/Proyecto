@@ -7,6 +7,18 @@ exports.login = async (req, res) => {
   try {
     const { usuario, contraseña } = req.body;
 
+    // Debug: verificar qué llega en el body
+    console.log('Login attempt - Usuario:', usuario);
+    console.log('Body recibido:', JSON.stringify(req.body));
+
+    // Validar campos requeridos
+    if (!usuario || !contraseña) {
+      return res.status(400).json({ 
+        message: 'Usuario y contraseña son requeridos',
+        received: { usuario: !!usuario, contraseña: !!contraseña }
+      });
+    }
+
     // Buscar usuario
     const [usuarios] = await pool.query(
       'SELECT * FROM Usuarios WHERE usuario = ?',
@@ -18,9 +30,21 @@ exports.login = async (req, res) => {
     }
 
     const user = usuarios[0];
+    console.log('Usuario encontrado:', user.usuario);
+    console.log('Rol:', user.rol);
+    console.log('Contraseña en BD existe:', !!user['contraseña']);
+    
+    // Verificar que la contraseña existe en la BD
+    const passwordFromDB = user['contraseña'] || user.contraseña;
+    if (!passwordFromDB) {
+      console.error('ERROR: La contraseña en la BD es NULL o undefined');
+      return res.status(500).json({ message: 'Error de configuración del usuario' });
+    }
+
+    console.log('Verificando contraseña...');
 
     // Verificar contraseña
-    const isMatch = await bcrypt.compare(contraseña, user.contraseña);
+    const isMatch = await bcrypt.compare(contraseña, passwordFromDB);
     if (!isMatch) {
       return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
     }

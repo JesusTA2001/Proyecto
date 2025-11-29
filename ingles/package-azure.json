@@ -1,0 +1,14 @@
+{
+  "name": "ingles-backend-azure",
+  "version": "1.0.0",
+  "description": "Backend del sistema de gestión escolar para Azure App Service",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "install-backend": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

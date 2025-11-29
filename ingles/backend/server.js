@@ -6,15 +6,29 @@ const { testConnection } = require('./config/db');
 const app = express();
 
 // Middleware CORS - Permitir Vercel y localhost
+const allowedOrigins = [
+  'https://proyecto-2971.vercel.app',
+  'http://localhost:3000',
+  'https://railway.com'
+];
+
 app.use(cors({
-  origin: [
-    'https://proyecto-2971.vercel.app',
-    'http://localhost:3000',
-    /\.vercel\.app$/  // Permite cualquier subdominio de vercel.app
-  ],
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (como mobile apps o curl)
+    if (!origin) return callback(null, true);
+    
+    // Permitir cualquier dominio de Vercel
+    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('No permitido por CORS'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id'],
+  maxAge: 86400 // 24 horas
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -69,10 +83,28 @@ app.use('/api/niveles', nivelesRoutes);
 app.use('/api/asistencias', asistenciasRoutes);
 app.use('/api/calificaciones', calificacionesRoutes);
 
+// Manejador de errores global
+app.use((err, req, res, next) => {
+  console.error('Error no manejado:', err);
+  res.status(500).json({ 
+    success: false, 
+    message: 'Error interno del servidor',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Manejador para rutas no encontradas
+app.use((req, res) => {
+  res.status(404).json({ 
+    success: false, 
+    message: 'Ruta no encontrada' 
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 // Iniciar servidor
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   console.log('='.repeat(50));
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log('='.repeat(50));
@@ -97,4 +129,30 @@ app.listen(PORT, async () => {
   console.log(`   GET    http://localhost:${PORT}/api/horarios`);
   console.log(`   POST   http://localhost:${PORT}/api/horarios`);
   console.log('='.repeat(50));
+});
+
+// Manejo de señales para cierre graceful
+process.on('SIGTERM', () => {
+  console.log('SIGTERM recibido, cerrando servidor...');
+  server.close(() => {
+    console.log('Servidor cerrado');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('\nSIGINT recibido, cerrando servidor...');
+  server.close(() => {
+    console.log('Servidor cerrado');
+    process.exit(0);
+  });
+});
+
+// Capturar errores no manejados
+process.on('uncaughtException', (error) => {
+  console.error('Error no capturado:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Promesa rechazada no manejada:', reason);
 });
