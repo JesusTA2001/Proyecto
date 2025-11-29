@@ -1,28 +1,16 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Configuración de SSL para Azure
-const sslConfig = process.env.DB_HOST && process.env.DB_HOST.includes('azure.com') 
-  ? { 
-      ssl: { 
-        rejectUnauthorized: false 
-      } 
-    } 
-  : {};
-
 // Crear pool de conexiones a MySQL
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'root',
+  database: process.env.DB_NAME || 'proyectoingles',
   port: process.env.DB_PORT || 3306,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-  ...sslConfig
+  queueLimit: 0
 });
 
 // Función para probar la conexión
@@ -30,8 +18,8 @@ const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
     console.log('✅ Conexión exitosa a MySQL');
-    console.log(`📊 Base de datos: ${process.env.DB_NAME}`);
-    console.log(`🔌 Host: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+    console.log(`📊 Base de datos: ${process.env.DB_NAME || 'proyectoingles'}`);
+    console.log(`🔌 Host: ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 3306}`);
     connection.release();
     return true;
   } catch (error) {

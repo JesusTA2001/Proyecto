@@ -203,42 +203,6 @@ function Login() {
         <p style={{ fontSize: 13, color: '#555' }}>Haz clic en cualquiera para autocompletar el formulario.</p>
 
         <div style={{ marginTop: 8 }}>
-          <strong>Administradores</strong>
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-            {usuariosPrueba.administrador.map((u) => (
-              <li key={u.usuario} style={{ marginBottom: 8 }}>
-                <button type="button" onClick={() => rellenar(u, 'administrador')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
-                  <div style={{ fontWeight: 600 }}>{u.usuario}</div>
-                  <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <strong>Profesores</strong>
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-            {usuariosPrueba.profesor.map((u) => (
-              <li key={u.usuario} style={{ marginBottom: 8 }}>
-                <button type="button" onClick={() => rellenar(u, 'profesor')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
-                  <div style={{ fontWeight: 600 }}>{u.usuario}</div>
-                  <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <strong>Alumnos</strong>
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-            {usuariosPrueba.alumno.map((u) => (
-              <li key={u.usuario} style={{ marginBottom: 8 }}>
-                <button type="button" onClick={() => rellenar(u, 'alumno')} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 6, border: '1px solid #eee', background: '#fafafa' }}>
-                  <div style={{ fontWeight: 600 }}>{u.usuario}</div>
-                  <div style={{ fontSize: 12, color: '#666' }}>{u.contrasena}</div>
-                </button>
-              </li>
-            ))}
-          </ul>
-
           <strong>Coordinadores</strong>
           <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
             {usuariosPrueba.coordinador.map((u) => (

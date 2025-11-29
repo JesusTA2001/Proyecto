@@ -6,29 +6,16 @@ const { testConnection } = require('./config/db');
 const app = express();
 
 // Middleware CORS - Permitir Vercel y localhost
-const allowedOrigins = [
-  'https://proyecto-2971.vercel.app',
-  'http://localhost:3000',
-  'https://railway.com'
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (como mobile apps o curl)
-    if (!origin) return callback(null, true);
-    
-    // Permitir cualquier dominio de Vercel
-    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    callback(new Error('No permitido por CORS'));
-  },
+  origin: [
+    'https://proyecto-2971.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    /\.vercel\.app$/  // Permite cualquier subdominio de vercel.app
+  ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Content-Length', 'X-Request-Id'],
-  maxAge: 86400 // 24 horas
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
