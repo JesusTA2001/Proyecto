@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import '../../styles/Login.css';
+import api from '../../api/axios';
 
-// Usuarios de prueba actualizados con 'numero_empleado'
+// Usuarios de prueba actualizados con 'numero_empleado' - TEMPORALES PARA TESTING
 const usuariosPrueba = {
   administrador: [
     { usuario: 'admin1', contrasena: 'admin123', numero_empleado: 'ADM01' },
@@ -42,74 +43,133 @@ function Login() {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setCargando(true);
 
-    // Buscar en administradores
-    const adminMatch = usuariosPrueba.administrador.find(u => u.usuario === usuario && u.contrasena === contrasena);
-    if (adminMatch) {
-      // MODIFICADO: Guardar sesión con rol, usuario y numero_empleado
-      localStorage.setItem('currentUser', JSON.stringify({ 
-        role: 'administrador', 
-        usuario: adminMatch.usuario,
-        numero_empleado: adminMatch.numero_empleado // <--- AÑADIDO
-      }));
-      // Recargar para garantizar que App.js lea el user y muestre el layout correcto
-      window.location.href = '/';
-      return;
+    try {
+      // Intentar autenticar con la API
+      const response = await api.post('/auth/login', {
+        usuario,
+        contraseña: contrasena
+      });
+
+      if (response.data.success) {
+        // Guardar token y datos del usuario
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('currentUser', JSON.stringify({
+          role: response.data.user.rol.toLowerCase(),
+          usuario: response.data.user.usuario,
+          numero_empleado: response.data.user.numero_empleado || response.data.user.id_Profesor || response.data.user.id_Administrador,
+          numero_control: response.data.user.nControl,
+          nombre: response.data.user.nombre,
+          apellidoPaterno: response.data.user.apellidoPaterno,
+          apellidoMaterno: response.data.user.apellidoMaterno,
+          email: response.data.user.email,
+          CURP: response.data.user.CURP,
+          telefono: response.data.user.telefono,
+          genero: response.data.user.genero,
+          direccion: response.data.user.direccion,
+          estado: response.data.user.estado,
+          ubicacion: response.data.user.ubicacion
+        }));
+
+        // Redirigir según el rol
+        const rol = response.data.user.rol.toLowerCase();
+        switch (rol) {
+          case 'administrador':
+            window.location.href = '/';
+            break;
+          case 'profesor':
+            window.location.href = '/dashboard-profesor';
+            break;
+          case 'estudiante':
+            window.location.href = '/dashboard-alumnos';
+            break;
+          case 'coordinador':
+            window.location.href = '/dashboard-coordinador';
+            break;
+          case 'directivo':
+            window.location.href = '/dashboard-directivos';
+            break;
+          default:
+            window.location.href = '/';
+        }
+        return;
+      }
+    } catch (error) {
+      console.error('Error de autenticación:', error);
+      
+      // Si falla la API, intentar con usuarios de prueba
+      setError('Usuario o contraseña incorrectos. Verifica tus credenciales.');
+      
+      // FALLBACK: Buscar en usuarios de prueba solo si la API falla
+      const adminMatch = usuariosPrueba.administrador.find(u => u.usuario === usuario && u.contrasena === contrasena);
+      if (adminMatch) {
+        localStorage.setItem('currentUser', JSON.stringify({ 
+          role: 'administrador', 
+          usuario: adminMatch.usuario,
+          numero_empleado: adminMatch.numero_empleado
+        }));
+        // Crear un token temporal para que funcione el sistema
+        localStorage.setItem('token', 'temp_token_' + Date.now());
+        window.location.href = '/';
+        return;
+      }
+
+      const profMatch = usuariosPrueba.profesor.find(u => u.usuario === usuario && u.contrasena === contrasena);
+      if (profMatch) {
+        localStorage.setItem('currentUser', JSON.stringify({ 
+          role: 'profesor', 
+          usuario: profMatch.usuario,
+          numero_empleado: profMatch.numero_empleado
+        }));
+        localStorage.setItem('token', 'temp_token_' + Date.now());
+        window.location.href = '/dashboard-profesor';
+        return;
+      }
+
+      const alumnoMatch = usuariosPrueba.alumno.find(u => u.usuario === usuario && u.contrasena === contrasena);
+      if (alumnoMatch) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          role: 'alumno',
+          usuario: alumnoMatch.usuario,
+          numero_control: alumnoMatch.numero_control
+        }));
+        localStorage.setItem('token', 'temp_token_' + Date.now());
+        window.location.href = '/dashboard-alumnos';
+        return;
+      }
+
+      const coordMatch = usuariosPrueba.coordinador.find(u => u.usuario === usuario && u.contrasena === contrasena);
+      if (coordMatch) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          role: 'coordinador',
+          usuario: coordMatch.usuario,
+          numero_empleado: coordMatch.numero_empleado
+        }));
+        localStorage.setItem('token', 'temp_token_' + Date.now());
+        window.location.href = '/dashboard-coordinador';
+        return;
+      }
+
+      const dirMatch = usuariosPrueba.directivo.find(u => u.usuario === usuario && u.contrasena === contrasena);
+      if (dirMatch) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          role: 'directivo',
+          usuario: dirMatch.usuario,
+          numero_empleado: dirMatch.numero_empleado
+        }));
+        localStorage.setItem('token', 'temp_token_' + Date.now());
+        window.location.href = '/dashboard-directivos';
+        return;
+      }
+    } finally {
+      setCargando(false);
     }
-
-    const profMatch = usuariosPrueba.profesor.find(u => u.usuario === usuario && u.contrasena === contrasena);
-    if (profMatch) {
-      // MODIFICADO: Guardar sesión con rol, usuario y numero_empleado
-      localStorage.setItem('currentUser', JSON.stringify({ 
-        role: 'profesor', 
-        usuario: profMatch.usuario,
-        numero_empleado: profMatch.numero_empleado // <--- AÑADIDO
-      }));
-      window.location.href = '/dashboard-profesor';
-      return;
-    }
-
-    // Alumno
-    const alumnoMatch = usuariosPrueba.alumno.find(u => u.usuario === usuario && u.contrasena === contrasena);
-    if (alumnoMatch) {
-      localStorage.setItem('currentUser', JSON.stringify({
-        role: 'alumno',
-        usuario: alumnoMatch.usuario,
-        numero_control: alumnoMatch.numero_control
-      }));
-      window.location.href = '/dashboard-alumnos';
-      return;
-    }
-
-    // Coordinador
-    const coordMatch = usuariosPrueba.coordinador.find(u => u.usuario === usuario && u.contrasena === contrasena);
-    if (coordMatch) {
-      localStorage.setItem('currentUser', JSON.stringify({
-        role: 'coordinador',
-        usuario: coordMatch.usuario,
-        numero_empleado: coordMatch.numero_empleado
-      }));
-      window.location.href = '/dashboard-coordinador';
-      return;
-    }
-
-    // Directivo
-    const dirMatch = usuariosPrueba.directivo.find(u => u.usuario === usuario && u.contrasena === contrasena);
-    if (dirMatch) {
-      localStorage.setItem('currentUser', JSON.stringify({
-        role: 'directivo',
-        usuario: dirMatch.usuario,
-        numero_empleado: dirMatch.numero_empleado
-      }));
-      window.location.href = '/dashboard-directivos';
-      return;
-    }
-
-    setError('Credenciales inválidas. Usa uno de los perfiles sugeridos o verifica tus datos.');
   };
 
   const rellenar = (u, role) => {
@@ -130,7 +190,9 @@ function Login() {
             <label htmlFor="contrasena">Contraseña</label>
             <input className='password' type="password" id="contrasena" name="contrasena" placeholder="Ingresa tu contraseña" value={contrasena} onChange={e => setContrasena(e.target.value)} />
             {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-            <button className='login-button' type="submit" style={{ marginTop: 12 }}>Iniciar Sesión</button>
+            <button className='login-button' type="submit" style={{ marginTop: 12 }} disabled={cargando}>
+              {cargando ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            </button>
           </form>
         </div>
       </div>

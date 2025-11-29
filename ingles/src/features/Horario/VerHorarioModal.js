@@ -18,24 +18,6 @@ export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
   const generarHoras = (start=7,end=21)=>{ const horas=[]; for(let i=start;i<=end;i++) horas.push(`${String(i).padStart(2,'0')}:00`); return horas; };
   const horas = generarHoras(7,21);
 
-  // Preprocesar grupos por día para determinar índice de inicio y span (en horas enteras)
-  const startHour = 7;
-  const gruposPorDia = {};
-  for (const dia of dias) {
-    const lista = gruposAsignados.filter(g => {
-      if (!g.dia) return false;
-      const diaMatch = g.dia.toLowerCase().includes(dia.toLowerCase().substring(0,3));
-      return diaMatch;
-    }).map(g => {
-      const inicioNum = horaANumero(g.horaInicio);
-      const finNum = horaANumero(g.horaFin);
-      const startIndex = Math.max(0, Math.floor(inicioNum) - startHour);
-      const span = Math.max(1, Math.ceil(finNum) - Math.floor(inicioNum));
-      return { grupo: g, startIndex, span, inicioNum, finNum };
-    });
-    gruposPorDia[dia] = lista;
-  }
-
   // función para obtener el grupo que ocupa una hora específica (si existe)
   const getGrupoEnHorario = (dia, hora) => {
     const horaNum = horaANumero(hora);
@@ -43,8 +25,22 @@ export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
       if (!grupo.dia) continue;
       const diaMatch = grupo.dia.toLowerCase().includes(dia.toLowerCase().substring(0,3));
       if (!diaMatch) continue;
-      const inicioNum = horaANumero(grupo.horaInicio);
-      const finNum = horaANumero(grupo.horaFin);
+      
+      // Parsear el rango de horas "08:00-10:00"
+      let inicioNum = 0;
+      let finNum = 0;
+      
+      if (grupo.hora && grupo.hora.includes('-')) {
+        // Formato nuevo: "08:00-10:00"
+        const [inicio, fin] = grupo.hora.split('-');
+        inicioNum = horaANumero(inicio.trim());
+        finNum = horaANumero(fin.trim());
+      } else {
+        // Fallback para formato antiguo
+        inicioNum = horaANumero(grupo.horaInicio);
+        finNum = horaANumero(grupo.horaFin);
+      }
+      
       if (horaNum >= inicioNum && horaNum < finNum) return grupo;
     }
     return null;

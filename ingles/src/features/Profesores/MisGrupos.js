@@ -193,7 +193,7 @@ function MisGrupos({ profesor, gruposAsignados = [], alumnos = [], profesores = 
               <div key={group.group_id} className="flex items-center justify-between p-4 group-card">
                 <div className="flex items-center space-x-4">
                   <div className="group-card-icon">
-                    <span>{group.group_id.substring(0, 4)}</span> {/* Acorta el ID si es largo */}
+                    <span>{String(group.group_id).substring(0, 4)}</span> {/* Acorta el ID si es largo */}
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-800">{group.group_name}</h4>

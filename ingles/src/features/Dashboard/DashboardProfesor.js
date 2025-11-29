@@ -87,11 +87,15 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
       width: 120,
       sortable: false,
       renderCell: (params) => (
-        <div>
+        <div style={{ display: 'flex', gap: 8 }}>
           <button
-            className="accion-link view-button"
-            title="Ver"
-            onClick={() => { const a = (data || []).find(x => x.numero_control === params.row.numero_control); setSelectedAlumno(a); setOpenViewAlumno(true); }}
+            className="view-button icon-button"
+            title="Ver Detalles"
+            onClick={() => { 
+              const a = (data || []).find(x => x.numero_control === params.row.numero_control); 
+              setSelectedAlumno(a); 
+              setOpenViewAlumno(true); 
+            }}
           >
             👁️
           </button>
@@ -176,11 +180,11 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
                   <div>
                     <p className="font-medium text-gray-800">{grupo.nombre}</p>
                     <p className="text-sm text-gray-600">
-                      {grupo.modalidad} - {grupo.dia} ({grupo.horaInicio} - {grupo.horaFin})
+                      {grupo.nivel} - {grupo.dia} {grupo.hora ? `(${grupo.hora})` : ''}
                     </p>
                   </div>
                   <span className="grade-badge" style={{ backgroundColor: '#f3e8ff', color: 'var(--color-primary)'}}>
-                    {grupo.alumnoIds.length} estudiantes
+                    {(grupo.alumnoIds || []).length} estudiantes
                   </span>
                 </div>
               ))
@@ -199,15 +203,16 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
                 gruposAsignados.map((grupo) => {
                   // Evitar división por cero si totalEstudiantes es 0
                   const maxStudents = Math.max(totalEstudiantes, 1);
+                  const cantidadAlumnos = (grupo.alumnoIds || []).length;
                   const porcentaje = Math.max(
                     1, 
-                    (grupo.alumnoIds.length / maxStudents) * 100
+                    (cantidadAlumnos / maxStudents) * 100
                   );
                   return (
                     <div key={grupo.id}>
                       <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
                         <span>{grupo.nombre}</span>
-                        <span>{grupo.alumnoIds.length}</span>
+                        <span>{cantidadAlumnos}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div

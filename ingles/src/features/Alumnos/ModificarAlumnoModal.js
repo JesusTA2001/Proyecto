@@ -39,7 +39,7 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
       value = String(value).replace(/\D/g, '').slice(0, 10);
       setErrors(prev => ({ ...prev, telefono: value && value.length !== 10 ? 'Debe tener 10 dígitos' : '' }));
     }
-    if (name === 'curp') {
+    if (name === 'CURP') {
       value = String(value).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18);
       setErrors(prev => ({ ...prev, curp: value && value.length !== 18 ? 'CURP debe tener 18 caracteres' : '' }));
     }
@@ -87,27 +87,34 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
             <Grid item xs={12} sm={6}>
               <TextField label="Número de control" name="numero_control" value={form.numero_control} fullWidth size="small" InputProps={{ readOnly: true }} disabled margin="dense" />
             </Grid>
-            <Grid item xs={12} sm={6} md={8}>
-              <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            
+            <Grid item xs={12} sm={6}>
+              <TextField label="Apellido Paterno" name="apellidoPaterno" value={form.apellidoPaterno || ''} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Apellido Materno" name="apellidoMaterno" value={form.apellidoMaterno || ''} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Nombre(s)" name="nombre" value={form.nombre} onChange={handleChange} fullWidth size="small" required margin="dense" />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField label="Correo" name="correo" type="email" value={form.correo} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            <Grid item xs={12} sm={6}>
+              <TextField label="Email" name="email" type="email" value={form.email || ''} onChange={handleChange} fullWidth size="small" required margin="dense" />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <Select name="genero" value={form.genero} onChange={handleChange} fullWidth size="small" displayEmpty>
+            <Grid item xs={12} sm={6}>
+              <Select name="genero" value={form.genero || ''} onChange={handleChange} fullWidth size="small" displayEmpty required>
                 <MenuItem value="">Selecciona un género</MenuItem>
                 {generoOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
               </Select>
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField label="CURP" name="curp" value={form.curp || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 18 }} helperText={errors.curp || '18 caracteres (alfanumérico)'} error={Boolean(errors.curp)} />
+            <Grid item xs={12} sm={6}>
+              <TextField label="CURP" name="CURP" value={form.CURP || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 18 }} helperText={errors.curp || '18 caracteres (alfanumérico)'} error={Boolean(errors.curp)} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField label="Teléfono" name="telefono" value={form.telefono || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 10 }} helperText={errors.telefono || '10 dígitos'} error={Boolean(errors.telefono)} />
+            <Grid item xs={12} sm={6}>
+              <TextField label="Número de Teléfono" name="telefono" value={form.telefono || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 10 }} helperText={errors.telefono || '10 dígitos'} error={Boolean(errors.telefono)} />
             </Grid>
 
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12}>
               <TextField label="Dirección" name="direccion" value={form.direccion || ''} onChange={handleChange} fullWidth size="small" margin="dense" />
             </Grid>
 
@@ -132,7 +139,7 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
               </Select>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={12}>
               <Select name="carrera" value={form.carrera || ''} onChange={handleChange} fullWidth size="small" displayEmpty required={form.ubicacion === 'Tecnologico'}>
                 <MenuItem value="">{form.ubicacion === 'Tecnologico' ? 'Selecciona una carrera *' : 'Selecciona carrera (si aplica)'}</MenuItem>
                 {carrerasOptions.map(c => <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>)}

@@ -83,16 +83,6 @@ function Layout({children}) {
                   </Link>
                   {/* --- FIN MODIFICADO --- */}
                 </li>
-                <li className="menu__inside">
-                  <Link to="/lista-niveles" className="menu__link menu__link--inside">
-                    Niveles
-                  </Link>
-                </li>
-                <li className="menu__inside">
-                  <Link to="/lista-modalidad" className="menu__link menu__link--inside">
-                  Modalidad
-                  </Link>
-                </li>
               </ul>
             </li>
 

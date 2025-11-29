@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import '../../styles/listaEstudiante.css';
 import CrearGrupo from './CrearGrupo';
 
-export default function CrearGrupoModal({ open, onClose, agregarGrupo, niveles, modalidades, profesores, alumnos }) {
+export default function CrearGrupoModal({ open, onClose, agregarGrupo, niveles, periodos, profesores, alumnos }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { width: '95vw', maxWidth: 1100, maxHeight: '90vh' } }}>
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
@@ -16,7 +16,7 @@ export default function CrearGrupoModal({ open, onClose, agregarGrupo, niveles, 
         </IconButton>
       </DialogTitle>
       <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
-        <CrearGrupo niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} agregarGrupo={(g) => { agregarGrupo(g); onClose(); }} />
+        <CrearGrupo niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} agregarGrupo={(g) => { agregarGrupo(g); onClose(); }} />
       </DialogContent>
     </Dialog>
   );

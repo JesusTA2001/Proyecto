@@ -8,33 +8,43 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import '../../styles/listaEstudiante.css';
-import { initialModalidades } from '../../data/modalidad';
-import { initialNiveles } from '../../data/niveles';
+import { generoOptions, gradoEstudioOptions } from '../../data/mapping';
 
 export default function ModificarProfesorModal({ open, onClose, profesor, actualizarProfesor }) {
   const [form, setForm] = useState(null);
-  const [nivelesDisponibles, setNivelesDisponibles] = useState([]);
+  const [errors, setErrors] = useState({ curp: '', telefono: '' });
 
   useEffect(() => {
     if (profesor) setForm({ ...profesor });
   }, [profesor]);
 
-  useEffect(() => {
-    if (!form) return;
-    const tecNivelIdsPattern = /^N[0-6]$/;
-    if (form.ubicacion === 'Tecnologico') setNivelesDisponibles(initialNiveles.filter(n => tecNivelIdsPattern.test(n.id)));
-    else setNivelesDisponibles(initialNiveles);
-  }, [form?.ubicacion]);
-
   if (!form) return null;
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    let value = e.target.value;
+    if (name === 'telefono') {
+      value = String(value).replace(/\D/g, '').slice(0, 10);
+      setErrors(prev => ({ ...prev, telefono: value && value.length !== 10 ? 'Debe tener 10 dígitos' : '' }));
+    }
+    if (name === 'curp') {
+      value = String(value).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18);
+      setErrors(prev => ({ ...prev, curp: value && value.length !== 18 ? 'CURP debe tener 18 caracteres' : '' }));
+    }
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Validaciones de formato
+    if (form.curp && form.curp.length !== 18) {
+      setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
+      return;
+    }
+    if (form.telefono && form.telefono.length !== 10) {
+      setErrors(prev => ({ ...prev, telefono: 'Teléfono debe tener 10 dígitos' }));
+      return;
+    }
     actualizarProfesor(form);
     onClose();
   };
@@ -50,45 +60,51 @@ export default function ModificarProfesorModal({ open, onClose, profesor, actual
       <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
         <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0, width: '100%' }}>
           <Grid container spacing={3} sx={{ width: '100%' }}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6}>
               <TextField label="Número empleado" name="numero_empleado" value={form.numero_empleado} fullWidth size="small" InputProps={{ readOnly: true }} disabled margin="dense" />
             </Grid>
-            <Grid item xs={12} sm={6} md={8}>
-              <TextField label="Nombre" name="nombre" value={form.nombre} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            
+            <Grid item xs={12} sm={6}>
+              <TextField label="Apellido Paterno" name="apellidoPaterno" value={form.apellidoPaterno || ''} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Apellido Materno" name="apellidoMaterno" value={form.apellidoMaterno || ''} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Nombre(s)" name="nombre" value={form.nombre} onChange={handleChange} fullWidth size="small" required margin="dense" />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField label="Correo" name="correo" type="email" value={form.correo} onChange={handleChange} fullWidth size="small" required margin="dense" />
+            <Grid item xs={12} sm={6}>
+              <TextField label="Email" name="correo" type="email" value={form.correo} onChange={handleChange} fullWidth size="small" required margin="dense" />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField label="CURP" name="curp" value={form.curp || ''} onChange={handleChange} fullWidth size="small" margin="dense" />
+            <Grid item xs={12} sm={6}>
+              <Select name="genero" value={form.genero || ''} onChange={handleChange} fullWidth size="small" displayEmpty required>
+                <MenuItem value="">Selecciona un género</MenuItem>
+                {generoOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+              </Select>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="CURP" name="curp" value={form.curp || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 18 }} helperText={errors.curp || '18 caracteres (alfanumérico)'} error={Boolean(errors.curp)} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Número de Teléfono" name="telefono" value={form.telefono || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 10 }} helperText={errors.telefono || '10 dígitos'} error={Boolean(errors.telefono)} />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField label="Teléfono" name="telefono" value={form.telefono || ''} onChange={handleChange} fullWidth size="small" margin="dense" />
-            </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid item xs={12}>
               <TextField label="Dirección" name="direccion" value={form.direccion || ''} onChange={handleChange} fullWidth size="small" margin="dense" />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6}>
               <Select name="ubicacion" value={form.ubicacion} onChange={handleChange} fullWidth size="small" displayEmpty>
                 <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
                 <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
               </Select>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
-              <Select name="modalidad" value={form.modalidad} onChange={handleChange} fullWidth size="small" displayEmpty>
-                <MenuItem value="">Selecciona una modalidad</MenuItem>
-                {initialModalidades.map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
-              </Select>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={4}>
-              <Select name="nivel" value={form.nivel} onChange={handleChange} fullWidth size="small" displayEmpty>
-                <MenuItem value="">Selecciona un nivel</MenuItem>
-                {nivelesDisponibles.map(n => <MenuItem key={n.id} value={n.nombre}>{n.nombre}</MenuItem>)}
+            <Grid item xs={12} sm={6}>
+              <Select name="gradoEstudio" value={form.gradoEstudio || ''} onChange={handleChange} fullWidth size="small" displayEmpty>
+                <MenuItem value="">Selecciona nivel de estudio</MenuItem>
+                {gradoEstudioOptions.map(g => <MenuItem key={g.value} value={g.value}>{g.label}</MenuItem>)}
               </Select>
             </Grid>
 

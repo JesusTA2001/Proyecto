@@ -47,7 +47,7 @@ function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
     );
 }
 
-function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, modalidades, profesores, alumnos, onClose }) {
+function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, periodos, profesores, alumnos, onClose }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const [grupo, setGrupo] = useState(null); // Estado para el grupo a editar
@@ -74,16 +74,19 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, mo
     useEffect(() => {
         // Si se recibe el grupo directamente (cuando se usa en modal), úsalo
         if (grupoProp) {
-            setGrupo({ dia: '', horaInicio: '', horaFin: '', ...grupoProp });
-            setAlumnosSeleccionados(new Set(grupoProp.alumnoIds || []));
+            setGrupo({ dia: '', horaInicio: '', horaFin: '', periodo: grupoProp.id_Periodo || '', ...grupoProp });
+            // Cargar alumnos usando alumnoIds del grupo
+            const alumnoIdsArray = Array.isArray(grupoProp.alumnoIds) ? grupoProp.alumnoIds : [];
+            setAlumnosSeleccionados(new Set(alumnoIdsArray));
             return;
         }
         // Si no, intenta buscar en el array 'grupos' usando el id de la ruta
         if (grupos && id) {
             const grupoAEditar = grupos.find(g => g.id === id);
             if (grupoAEditar) {
-                setGrupo({ dia: '', horaInicio: '', horaFin: '', ...grupoAEditar });
-                setAlumnosSeleccionados(new Set(grupoAEditar.alumnoIds || []));
+                setGrupo({ dia: '', horaInicio: '', horaFin: '', periodo: grupoAEditar.id_Periodo || '', ...grupoAEditar });
+                const alumnoIdsArray = Array.isArray(grupoAEditar.alumnoIds) ? grupoAEditar.alumnoIds : [];
+                setAlumnosSeleccionados(new Set(alumnoIdsArray));
                 return;
             }
         }
@@ -98,11 +101,12 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, mo
     // --- Filtrar Niveles por Ubicación ---
     useEffect(() => {
         if (!grupo) return; // Esperar a que cargue el grupo
-        const tecNivelIdsPattern = /^N[0-6]$/;
         let filtered = [];
         if (grupo.ubicacion === 'Tecnologico') {
-            filtered = niveles.filter(n => tecNivelIdsPattern.test(n.id));
+            // Niveles 0-6 para Tecnológico (Intro, Nivel1-6)
+            filtered = niveles.filter(n => n.id >= 0 && n.id <= 6);
         } else if (grupo.ubicacion === 'Centro de Idiomas') {
+            // Todos los niveles para Centro de Idiomas
             filtered = niveles;
         }
         setNivelesDisponibles(filtered);
@@ -167,7 +171,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, mo
     const handleSubmit = (e) => {
         e.preventDefault();
         // --- VALIDACIÓN AÑADIDA ---
-        if (!grupo.nombre || !grupo.nivel || !grupo.modalidad || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
+        if (!grupo.nombre || !grupo.nivel || !grupo.periodo || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
             alert("Por favor completa todos los campos del grupo, incluyendo día y horas.");
             return;
         }
@@ -213,9 +217,9 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, mo
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Select name="modalidad" value={grupo.modalidad} onChange={handleChange} fullWidth size="small" displayEmpty>
-                        <MenuItem value="">Selecciona una Modalidad</MenuItem>
-                        {(modalidades || []).map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
+                    <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty>
+                        <MenuItem value="">Selecciona un Periodo</MenuItem>
+                        {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
                     </Select>
                 </Grid>
 

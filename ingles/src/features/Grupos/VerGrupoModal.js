@@ -7,13 +7,16 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import '../../styles/listaEstudiante.css';
 
-export default function VerGrupoModal({ open, onClose, grupo, profesores, alumnos }) {
+export default function VerGrupoModal({ open, onClose, grupo, profesores, alumnos, periodos }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   if (!grupo) return null;
   const profesor = (profesores || []).find(p => p.numero_empleado === grupo.profesorId) || { nombre: 'No asignado' };
-  const alumnoIds = Array.isArray(grupo.alumnoIds) ? grupo.alumnoIds : [];
-  const alumnosInGroup = (alumnos || []).filter(a => alumnoIds.includes(a.numero_control));
+  const periodo = (periodos || []).find(p => p.id === grupo.id_Periodo) || { nombre: 'N/A' };
+  
+  // Usar directamente el array de alumnos del grupo que viene del backend
+  const alumnosDelGrupo = grupo.alumnos || [];
+  
   return (
     <Dialog
       open={open}
@@ -39,14 +42,14 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
         <div className="detail-container">
           <h3>{grupo.nombre}</h3>
           <p><strong>Nivel:</strong> {grupo.nivel}</p>
-          <p><strong>Modalidad:</strong> {grupo.modalidad}</p>
+          <p><strong>Periodo:</strong> {periodo.nombre}</p>
           <p><strong>Ubicación:</strong> {grupo.ubicacion}</p>
           <p><strong>Profesor:</strong> {profesor.nombre}</p>
-          <p><strong># Alumnos:</strong> {alumnoIds.length}</p>
+          <p><strong># Alumnos:</strong> {grupo.num_alumnos || 0}</p>
 
           <div style={{ marginTop: 12 }}>
             <h4 style={{ marginBottom: 8 }}>Alumnos del grupo</h4>
-            {alumnosInGroup.length === 0 ? (
+            {alumnosDelGrupo.length === 0 ? (
               <p>No hay alumnos asignados a este grupo.</p>
             ) : (
               // La tabla usa el scroll del DialogContent (scroll interno) para evitar que la página principal haga scroll
@@ -55,18 +58,18 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
                   <thead>
                     <tr>
                       <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #ddd' }}>#</th>
-                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #ddd' }}>Número</th>
-                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #ddd' }}>Nombre</th>
+                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #ddd' }}>Número de Control</th>
+                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #ddd' }}>Nombre Completo</th>
                       <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #ddd' }}>Correo</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {alumnosInGroup.map((al, idx) => (
-                      <tr key={al.numero_control || idx}>
+                    {alumnosDelGrupo.map((al, idx) => (
+                      <tr key={al.nControl || idx}>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{idx + 1}</td>
-                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{al.numero_control}</td>
-                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{al.nombre}</td>
-                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{al.correo}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{al.nControl}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{al.nombre_completo}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid #f0f0f0' }}>{al.email}</td>
                       </tr>
                     ))}
                   </tbody>

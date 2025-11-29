@@ -33,35 +33,11 @@ function LayoutAlumnos({ children }) {
 
           <ul className="menu__links">
             <li className="menu__item">
-              <Link to="/dashboard-profesor" className="menu__link">Inicio</Link>
+              <Link to="/dashboard-alumnos" className="menu__link">Inicio</Link>
             </li>
 
-            <li className="menu__item menu__item--show">
-              <span className="menu__link">Mis Clases</span>
-              <ul className="menu__nesting">
-                
-                {/* --- ENLACE NUEVO AÑADIDO AQUÍ --- */}
-                <li className="menu__inside">
-                  <Link to="/profesor/mis-grupos" className="menu__link menu__link--inside">
-                    Mis Grupos
-                  </Link>
-                </li>
-
-                <li className="menu__inside">
-                  <Link to="/profesor/asistencia" className="menu__link menu__link--inside">
-                    Asistencia
-                  </Link>
-                </li>
-                
-                <li className="menu__inside">
-                  <Link to="/profesor/calificaciones" className="menu__link menu__link--inside">
-                    Asignar Calificaciones
-                  </Link>
-                </li>
-                
-                {/* Portal de Alumnos eliminado del menú */}
-                
-              </ul>
+            <li className="menu__item">
+              <Link to="/alumno/calificaciones" className="menu__link">Calificaciones</Link>
             </li>
 
             {/* Cuenta / Cerrar sesión */}

@@ -5,15 +5,16 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
 
-// Recibe props: agregarGrupo, niveles, modalidades, profesores, alumnos
-function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos }) {
+// Recibe props: agregarGrupo, niveles, periodos, profesores, alumnos
+function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
     const navigate = useNavigate();
     const [grupo, setGrupo] = useState({
         nombre: '',
         nivel: '',
-        modalidad: '',
+        periodo: '',
         ubicacion: 'Tecnologico', // Valor inicial
         profesorId: '',
         alumnoIds: [],
@@ -44,12 +45,13 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
 
     // --- Filtrar Niveles por Ubicación ---
     useEffect(() => {
-        const tecNivelIdsPattern = /^N[0-6]$/;
         let filtered = [];
         if (grupo.ubicacion === 'Tecnologico') {
-            filtered = niveles.filter(n => tecNivelIdsPattern.test(n.id));
+            // Niveles 0-6 para Tecnológico (Intro, Nivel1-6)
+            filtered = niveles.filter(n => n.id >= 0 && n.id <= 6);
         } else if (grupo.ubicacion === 'Centro de Idiomas') {
-            filtered = niveles; // O filtra si es necesario
+            // Todos los niveles para Centro de Idiomas
+            filtered = niveles;
         }
         setNivelesDisponibles(filtered);
         // Resetear nivel si el actual no es válido
@@ -75,20 +77,68 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
 
     // --- Filtrar Alumnos por Ubicación y Nivel (¡Importante!) ---
     useEffect(() => {
+        console.log('🔍 Efecto de carga de alumnos disparado:', { 
+            ubicacion: grupo.ubicacion, 
+            nivel: grupo.nivel,
+            nivelesDisponibles: niveles.length
+        });
+
         if (!grupo.ubicacion || !grupo.nivel) {
+            console.log('⚠️ Falta ubicacion o nivel');
             setAlumnosDisponibles([]);
             return;
         }
-        // Encuentra alumnos activos, en la ubicación correcta, y CON EL NIVEL SELECCIONADO
-        const filtered = alumnos.filter(a =>
-            a.estado === 'Activo' &&
-            a.ubicacion === grupo.ubicacion &&
-            a.nivel === grupo.nivel
-        );
-        setAlumnosDisponibles(filtered);
-         setAlumnosSeleccionados(new Set()); // Limpia selección al cambiar filtro principal
+        
+        // Cargar alumnos disponibles desde el endpoint
+        const cargarAlumnosDisponibles = async () => {
+            try {
+                console.log('🔎 Buscando nivel:', grupo.nivel, 'en niveles:', niveles);
+                
+                // Buscar el id_Nivel correspondiente al nivel seleccionado
+                const nivelObj = niveles.find(n => n.nombre === grupo.nivel);
+                
+                console.log('✅ Nivel encontrado:', nivelObj);
+                
+                if (!nivelObj) {
+                    console.log('❌ No se encontró el nivel');
+                    setAlumnosDisponibles([]);
+                    return;
+                }
 
-    }, [grupo.ubicacion, grupo.nivel, alumnos]);
+                const params = {
+                    ubicacion: grupo.ubicacion,
+                    nivel: nivelObj.id
+                };
+
+                console.log('📡 Llamando API con params:', params);
+                const response = await api.get('/alumnos/disponibles/list', { params });
+                console.log('📥 Respuesta recibida:', response.data.length, 'alumnos');
+                
+                // Mapear la respuesta para que tenga el formato esperado
+                const alumnosMapeados = response.data.map(a => ({
+                    numero_control: a.nControl,
+                    nombre: a.nombre,
+                    apellidoPaterno: a.apellidoPaterno,
+                    apellidoMaterno: a.apellidoMaterno,
+                    email: a.email,
+                    ubicacion: a.ubicacion,
+                    nivel: a.nivel_nombre || `Nivel ${a.id_Nivel}`,
+                    estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
+                }));
+                
+                console.log('✅ Alumnos mapeados:', alumnosMapeados.length);
+                setAlumnosDisponibles(alumnosMapeados);
+                setAlumnosSeleccionados(new Set()); // Limpia selección al cambiar filtro principal
+            } catch (error) {
+                console.error('❌ Error al cargar alumnos disponibles:', error);
+                console.error('Detalles del error:', error.response?.data);
+                setAlumnosDisponibles([]);
+            }
+        };
+
+        cargarAlumnosDisponibles();
+
+    }, [grupo.ubicacion, grupo.nivel, niveles]);
 
 
     const handleChange = (e) => {
@@ -121,7 +171,7 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
     const handleSubmit = (e) => {
         e.preventDefault();
         // --- VALIDACIÓN ACTUALIZADA ---
-        if (!grupo.nombre || !grupo.nivel || !grupo.modalidad || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
+        if (!grupo.nombre || !grupo.nivel || !grupo.periodo || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
             alert("Por favor completa todos los campos del grupo, incluyendo día y horas.");
             return;
         }
@@ -158,9 +208,9 @@ function CrearGrupo({ agregarGrupo, niveles, modalidades, profesores, alumnos })
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Select name="modalidad" value={grupo.modalidad} onChange={handleChange} fullWidth size="small" displayEmpty>
-                        <MenuItem value="">Selecciona una Modalidad</MenuItem>
-                        {modalidades.map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
+                    <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty>
+                        <MenuItem value="">Selecciona un Periodo</MenuItem>
+                        {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={4}>

@@ -4,7 +4,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import '../../styles/listaEstudiante.css';
-import CrearProfesor from './CrearProfesor';
+import CrearProfesorStepper from './CrearProfesorStepper';
 
 export default function CrearProfesorModal({ open, onClose, agregarProfesor }) {
   return (
@@ -17,7 +17,7 @@ export default function CrearProfesorModal({ open, onClose, agregarProfesor }) {
       </DialogTitle>
       <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
         <div style={{ width: '100%' }}>
-          <CrearProfesor agregarProfesor={(p) => { agregarProfesor(p); onClose(); }} />
+          <CrearProfesorStepper agregarProfesor={(p) => { agregarProfesor(p); onClose(); }} />
         </div>
       </DialogContent>
     </Dialog>

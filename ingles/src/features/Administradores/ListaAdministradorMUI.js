@@ -30,7 +30,7 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
 
   const filtered = (administradores || []).filter(a => {
     const term = (searchTerm || '').toLowerCase();
-    const matchesSearch = !term || (a.nombre || '').toLowerCase().includes(term) || (a.numero_empleado || '').toLowerCase().includes(term);
+    const matchesSearch = !term || (a.nombre || '').toLowerCase().includes(term) || String(a.numero_empleado || '').toLowerCase().includes(term);
     const matchesStatus = !selectedStatus || a.estado === selectedStatus;
     return matchesSearch && matchesStatus;
   });

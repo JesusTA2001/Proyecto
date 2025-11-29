@@ -1,113 +1,73 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../styles/perfil-usuario.css';
-// Importamos los estilos del nuevo portal para reusar las clases de colores
 import '../../styles/PortalCalificaciones.css';
-// Material UI
 import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemText, Snackbar, Alert } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import api from '../../api/axios';
 
-// Función para cargar calificaciones desde localStorage
-const loadGrades = () => {
-  try {
-    const data = localStorage.getItem('allGrades');
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    return [];
-  }
-};
-
-// Función para cargar asistencias (faltas)
-const loadAsistencias = () => {
-  try {
-    const data = localStorage.getItem('allAsistencias');
-    return data ? JSON.parse(data) : {};
-  } catch (e) {
-    return {};
-  }
-};
-
-function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
+function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos = [], niveles = [] }) {
   const [group, setGroup] = useState('');
-  // tipo de evaluación y fecha eliminados: manejo por la tabla
   const [studentsInGroup, setStudentsInGroup] = useState([]);
-  
-  // MODIFICADO: Carga las calificaciones desde localStorage
-  const [grades, setGrades] = useState(loadGrades);
-  // Cargamos asistencias para calcular faltas
-  const [allAsistencias] = useState(() => loadAsistencias());
-
-  // Estado para parciales por alumno: { [studentId]: { p1: number, p2: number, p3: number } }
+  const [calificaciones, setCalificaciones] = useState([]); // Calificaciones desde BD
   const [partialGrades, setPartialGrades] = useState({});
-  // Toast simple
   const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
-
-  // MODIFICADO: Guarda en localStorage cada vez que las calificaciones cambian
-  useEffect(() => {
-    localStorage.setItem('allGrades', JSON.stringify(grades));
-  }, [grades]);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [faltasByStudent, setFaltasByStudent] = useState({});
 
   const groupOptions = React.useMemo(() => {
-    return grupos.map(g => ({ id: g.id, name: g.nombre }));
+    return grupos.map(g => ({ id: g.id, name: g.nombre, periodo: g.id_Periodo, nivel: g.id_Nivel }));
   }, [grupos]);
 
-  // La lista se actualiza inmediatamente cuando cambia la selección de grupo
+  // Cuando cambia el grupo seleccionado
   useEffect(() => {
     if (!group) {
       setStudentsInGroup([]);
+      setPartialGrades({});
       return;
     }
-    const g = grupos.find(x => x.nombre === group || x.id === group);
+    const g = grupos.find(x => x.nombre === group || x.id === parseInt(group));
     if (g && Array.isArray(g.alumnoIds)) {
       const list = g.alumnoIds.map(id => alumnos.find(a => a.numero_control === id)).filter(Boolean);
       setStudentsInGroup(list);
+      cargarCalificacionesGrupo(g.id);
     } else {
       setStudentsInGroup([]);
+      setPartialGrades({});
     }
   }, [group, grupos, alumnos]);
 
-  // Cuando se selecciona un grupo o cambian las calificaciones guardadas,
-  // pre-populamos los campos parciales con las últimas calificaciones existentes
-  useEffect(() => {
-    if (!group) {
+  // Cargar calificaciones del grupo desde la API
+  const cargarCalificacionesGrupo = async (id_Grupo) => {
+    try {
+      setIsLoading(true);
+      const response = await api.get(`/calificaciones/grupo/${id_Grupo}`);
+      
+      if (response.data.success) {
+        setCalificaciones(response.data.calificaciones);
+        
+        // Mapear calificaciones a partialGrades
+        const grades = {};
+        response.data.calificaciones.forEach(cal => {
+          grades[cal.nControl] = {
+            p1: cal.parcial1 !== null ? cal.parcial1 : '',
+            p2: cal.parcial2 !== null ? cal.parcial2 : '',
+            p3: cal.parcial3 !== null ? cal.parcial3 : ''
+          };
+        });
+        setPartialGrades(grades);
+      }
+    } catch (error) {
+      console.error('Error al cargar calificaciones:', error);
+      if (error.response?.status !== 404) {
+        showToast('Error al cargar calificaciones', 'error');
+      }
       setPartialGrades({});
-      return;
+    } finally {
+      setIsLoading(false);
     }
-    const g = grupos.find(x => x.nombre === group || x.id === group);
-    if (!g) {
-      setPartialGrades({});
-      return;
-    }
+  };
 
-    const next = {};
-    (g.alumnoIds || []).forEach(studentId => {
-      const student = alumnos.find(a => a.numero_control === studentId);
-      if (!student) return;
-
-      // Buscar la última entrada por parcial para este estudiante dentro del grupo
-      const p1Entry = grades.filter(gr => gr.student_id === studentId && (gr.group_name === g.nombre || gr.group_name === g.id) && String(gr.exam_type).toLowerCase() === 'parcial 1')
-        .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
-      const p2Entry = grades.filter(gr => gr.student_id === studentId && (gr.group_name === g.nombre || gr.group_name === g.id) && String(gr.exam_type).toLowerCase() === 'parcial 2')
-        .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
-      const p3Entry = grades.filter(gr => gr.student_id === studentId && (gr.group_name === g.nombre || gr.group_name === g.id) && String(gr.exam_type).toLowerCase() === 'parcial 3')
-        .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
-
-      next[studentId] = {
-        p1: p1Entry ? (Number(p1Entry.raw_grade_100) || 0) : '',
-        p2: p2Entry ? (Number(p2Entry.raw_grade_100) || 0) : '',
-        p3: p3Entry ? (Number(p3Entry.raw_grade_100) || 0) : ''
-      };
-    });
-
-    setPartialGrades(prev => ({ ...next }));
-  }, [group, grades, grupos, alumnos]);
-
-  // handleSelectStudent removed: la lista de estudiantes ya no es interactiva aquí
-
-  // Antes había un botón "Buscar Grupo" que aplicaba la selección;
-  // ahora la selección de grupo actualiza la tabla inmediatamente (onChange del select).
-
-  // Exportar a CSV (Excel puede abrir CSV)
+  // Exportar a CSV
   const exportToCSV = () => {
     if (!group) return alert('Primero selecciona un grupo para exportar');
     const rows = studentsInGroup.map((s, idx) => {
@@ -137,7 +97,7 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-  const g = grupos.find(x => x.nombre === group || x.id === group);
+    const g = grupos.find(x => x.nombre === group || x.id === parseInt(group));
     const groupName = g ? g.nombre.replace(/\s+/g, '_') : 'grupo';
     link.setAttribute('download', `calificaciones_${groupName}.csv`);
     document.body.appendChild(link);
@@ -146,112 +106,75 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
     URL.revokeObjectURL(url);
   };
 
-  // Guardar múltiples calificaciones desde partialGrades (escala 0-100)
-  const handleSaveAll = () => {
+  // Guardar todas las calificaciones
+  const handleSaveAll = async () => {
     if (!group) return showToast('Selecciona un grupo primero', 'error');
-    const g = grupos.find(x => x.nombre === group || x.id === group);
+    const g = grupos.find(x => x.nombre === group || x.id === parseInt(group));
     if (!g) return showToast('Grupo no encontrado', 'error');
 
     const entries = Object.entries(partialGrades);
-    if (entries.length === 0) return showToast('No hay parciales ingresados', 'error');
+    if (entries.length === 0) return showToast('No hay calificaciones para guardar', 'error');
 
-    // Creamos una entrada por cada parcial presente (Parcial 1, Parcial 2, Parcial 3)
-    const newGrades = [];
-    entries.forEach(([studentId, parts]) => {
-      const student = alumnos.find(a => a.numero_control === studentId) || { nombre: 'N/A' };
-      const parcialMap = [
-        { key: 'p1', label: 'Parcial 1' },
-        { key: 'p2', label: 'Parcial 2' },
-        { key: 'p3', label: 'Parcial 3' }
-      ];
+    try {
+      const calificacionesArray = entries.map(([nControl, parts]) => ({
+        nControl: parseInt(nControl),
+        parcial1: parts.p1 !== '' ? parseInt(parts.p1) : null,
+        parcial2: parts.p2 !== '' ? parseInt(parts.p2) : null,
+        parcial3: parts.p3 !== '' ? parseInt(parts.p3) : null,
+        id_nivel: g.id_Nivel,
+        id_Periodo: g.id_Periodo,
+        id_Grupo: g.id
+      }));
 
-      parcialMap.forEach((pInfo) => {
-        const raw = parts[pInfo.key];
-        if (raw === undefined || raw === '') return; // no guardar si no hay valor
-        const pval = Number(raw);
-        if (Number.isNaN(pval)) return;
-        if (pval < 0 || pval > 100) throw new Error('Las parciales deben estar entre 0 y 100');
-
-        const normalized = Number((pval / 10).toFixed(2)); // escala 0-10
-
-        newGrades.push({
-          __id: `g-${Date.now()}-${studentId}-${pInfo.key}`,
-          student_id: studentId,
-          student_name: student.nombre,
-          group_name: g.nombre,
-          exam_type: pInfo.label,
-          grade: normalized,
-          raw_grade_100: Number(pval.toFixed(1)),
-          date: new Date().toISOString().slice(0,10),
-          comments: '',
-          teacher_id: profesor?.numero_empleado || 'N/A',
-          teacher_name: profesor?.nombre || 'N/A'
-        });
+      const response = await api.post('/calificaciones/guardar', {
+        calificaciones: calificacionesArray
       });
-    });
 
-    // Append to existing grades
-    setGrades(s => [...newGrades, ...s]);
-    // Reset partials
-    setPartialGrades({});
-    showToast('Calificaciones guardadas correctamente', 'success');
+      if (response.data.success) {
+        showToast('Calificaciones guardadas correctamente', 'success');
+        cargarCalificacionesGrupo(g.id); // Recargar
+      }
+    } catch (error) {
+      console.error('Error al guardar calificaciones:', error);
+      showToast('Error al guardar calificaciones', 'error');
+    }
   };
 
-  // Guardar inmediatamente una parcial individual (no sobrescribe otras parciales)
-  const savePartialImmediate = ({ studentId, parcialKey, rawValue }) => {
-    if (!group) return showToast('Selecciona un grupo primero', 'error');
-    const g = grupos.find(x => x.nombre === group || x.id === group);
-    if (!g) return showToast('Grupo no encontrado', 'error');
-    if (rawValue === '' || rawValue === undefined) return; // nothing to save
+  // Guardar parcial individual inmediatamente
+  const savePartialImmediate = async ({ studentId, parcialKey, rawValue }) => {
+    if (!group) return;
+    const g = grupos.find(x => x.nombre === group || x.id === parseInt(group));
+    if (!g) return;
+    if (rawValue === '' || rawValue === undefined) return;
+    
     const pval = Number(rawValue);
     if (Number.isNaN(pval)) return;
-    if (pval < 0 || pval > 100) return showToast('Valor de parcial fuera de rango 0-100', 'error');
+    if (pval < 0 || pval > 100) return showToast('Valor fuera de rango 0-100', 'error');
 
-    const normalized = Number((pval / 10).toFixed(2)); // escala 0-10
-    const labelMap = { p1: 'Parcial 1', p2: 'Parcial 2', p3: 'Parcial 3' };
-    const entry = {
-      __id: `g-${Date.now()}-${studentId}-${parcialKey}`,
-      student_id: studentId,
-      student_name: (alumnos.find(a => a.numero_control === studentId)?.nombre) || 'N/A',
-      group_name: g.nombre,
-      exam_type: labelMap[parcialKey] || parcialKey,
-      grade: normalized,
-      raw_grade_100: Number(pval.toFixed(1)),
-      date: new Date().toISOString().slice(0,10),
-      comments: '',
-      teacher_id: profesor?.numero_empleado || 'N/A',
-      teacher_name: profesor?.nombre || 'N/A'
-    };
+    try {
+      const response = await api.post('/calificaciones/guardar-individual', {
+        nControl: parseInt(studentId),
+        parcial: parcialKey, // 'parcial1', 'parcial2', 'parcial3'
+        valor: parseInt(pval),
+        id_nivel: g.id_Nivel,
+        id_Periodo: g.id_Periodo,
+        id_Grupo: g.id
+      });
 
-    // Append — no se sobrescribe nada previo, solo agregamos un registro histórico
-    setGrades(s => [entry, ...s]);
-    showToast(`Parcial guardado: ${entry.exam_type} (${entry.student_id})`, 'success');
+      if (response.data.success) {
+        showToast(`${parcialKey} guardado`, 'success');
+      }
+    } catch (error) {
+      console.error('Error al guardar parcial:', error);
+      showToast('Error al guardar parcial', 'error');
+    }
   };
 
   const showToast = (message, type = 'success') => {
     setToast({ open: true, message, type });
   };
 
-  // Las utilidades de etiqueta/clase y eliminación se eliminaron porque no se usan aquí.
-
-  // Calcular faltas por alumno en el grupo seleccionado
-  const faltasByStudent = useMemo(() => {
-    if (!group) return {};
-    const g = grupos.find(x => x.nombre === group || x.id === group);
-    if (!g) return {};
-    const asistencias = allAsistencias[g.id] || {};
-    const res = {};
-    Object.keys(asistencias).forEach(date => {
-      const day = asistencias[date];
-      Object.keys(day).forEach(studentId => {
-        if (!res[studentId]) res[studentId] = 0;
-        if (day[studentId] === 'ausente') res[studentId] += 1;
-      });
-    });
-    return res;
-  }, [group, grupos, allAsistencias]);
-
-  // Validación por alumno: cada parcial debe ser >= 70
+  // Validación por alumno
   const validationByStudent = useMemo(() => {
     const map = {};
     studentsInGroup.forEach(s => {
@@ -269,41 +192,46 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
   const invalidStudents = studentsInGroup.filter(s => !validationByStudent[s.numero_control]?.valid);
 
   const [invalidModalOpen, setInvalidModalOpen] = useState(false);
-  // confirmForceOpen removed: no forced-save flow anymore
+
+  // Obtener datos del grupo seleccionado
+  const selectedGroupData = useMemo(() => {
+    if (!group) return null;
+    const g = grupos.find(x => x.nombre === group || x.id === parseInt(group));
+    if (!g) return null;
+    
+    const periodo = periodos.find(p => p.id === g.id_Periodo);
+    const nivel = niveles.find(n => n.id === g.id_Nivel);
+    
+    return {
+      nombre: g.nombre,
+      periodo: periodo?.nombre || 'N/A',
+      nivel: nivel?.nombre || g.nivel || 'N/A'
+    };
+  }, [group, grupos, periodos, niveles]);
 
   return (
-    <div className="portal-container"> {/* Usamos la clase base del nuevo CSS */}
-      {/* Header con datos del profesor, periodo (vacío), nivel, modalidad y grupo */}
+    <div className="portal-container">
+      {/* Header con datos del profesor, periodo, nivel y grupo */}
       <div className="card-white p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Seleccionar Grupo y Evaluación</h2>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 420px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <p className="text-sm text-gray-600">Periodo</p>
-                <p className="text-base font-semibold">&nbsp;</p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-600">Profesor</p>
                 <p className="text-base font-semibold">{profesor?.nombre || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Nivel</p>
-                <p className="text-base font-semibold">{(() => {
-                  const g = grupos.find(x => x.nombre === group || x.id === group);
-                  return g?.nivel || '';
-                })()}</p>
+                <p className="text-sm text-gray-600">Periodo</p>
+                <p className="text-base font-semibold">{selectedGroupData?.periodo || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Modalidad</p>
-                <p className="text-base font-semibold">{(() => {
-                  const g = grupos.find(x => x.nombre === group || x.id === group);
-                  return g?.modalidad || '';
-                })()}</p>
+                <p className="text-sm text-gray-600">Nivel</p>
+                <p className="text-base font-semibold">{selectedGroupData?.nivel || 'N/A'}</p>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div>
                 <p className="text-sm text-gray-600">Grupo</p>
-                <p className="text-base font-semibold">{group || 'Ninguno'}</p>
+                <p className="text-base font-semibold">{selectedGroupData?.nombre || 'Ninguno'}</p>
               </div>
             </div>
           </div>
@@ -405,14 +333,17 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
                           setPartialGrades(prev => ({ ...prev, [params.id]: { ...(prev[params.id] || {}), p1: '' } }));
                           return;
                         }
-                        // permitir solo números; limitar máximo a 100
                         let n = Number(val);
                         if (Number.isNaN(n)) n = '';
                         if (n !== '' && n > 100) n = 100;
                         if (n !== '') n = Math.round(n);
                         setPartialGrades(prev => ({ ...prev, [params.id]: { ...(prev[params.id] || {}), p1: n } }));
-                        // guardar inmediatamente esta parcial
-                        if (n !== '' && n !== undefined) savePartialImmediate({ studentId: params.id, parcialKey: 'p1', rawValue: n });
+                      }}
+                      onBlur={(e) => {
+                        const n = partialGrades[params.id]?.p1;
+                        if (n !== '' && n !== undefined) {
+                          savePartialImmediate({ studentId: params.id, parcialKey: 'parcial1', rawValue: n });
+                        }
                       }}
                     />
                   )
@@ -446,8 +377,12 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
                         if (n !== '' && n > 100) n = 100;
                         if (n !== '') n = Math.round(n);
                         setPartialGrades(prev => ({ ...prev, [params.id]: { ...(prev[params.id] || {}), p2: n } }));
-                        // guardar inmediatamente esta parcial
-                        if (n !== '' && n !== undefined) savePartialImmediate({ studentId: params.id, parcialKey: 'p2', rawValue: n });
+                      }}
+                      onBlur={(e) => {
+                        const n = partialGrades[params.id]?.p2;
+                        if (n !== '' && n !== undefined) {
+                          savePartialImmediate({ studentId: params.id, parcialKey: 'parcial2', rawValue: n });
+                        }
                       }}
                     />
                   )
@@ -481,8 +416,12 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [] }) {
                         if (n !== '' && n > 100) n = 100;
                         if (n !== '') n = Math.round(n);
                         setPartialGrades(prev => ({ ...prev, [params.id]: { ...(prev[params.id] || {}), p3: n } }));
-                        // guardar inmediatamente esta parcial
-                        if (n !== '' && n !== undefined) savePartialImmediate({ studentId: params.id, parcialKey: 'p3', rawValue: n });
+                      }}
+                      onBlur={(e) => {
+                        const n = partialGrades[params.id]?.p3;
+                        if (n !== '' && n !== undefined) {
+                          savePartialImmediate({ studentId: params.id, parcialKey: 'parcial3', rawValue: n });
+                        }
                       }}
                     />
                   )

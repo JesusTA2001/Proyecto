@@ -29,7 +29,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
   // --- Lógica de Filtrado (Simplificada) ---
   const filtered = (profesores || []).filter(p => {
     const term = (searchTerm || '').toLowerCase();
-    const textMatch = !term || (p.nombre || '').toLowerCase().includes(term) || (p.numero_empleado || '').toLowerCase().includes(term);
+    const textMatch = !term || (p.nombre || '').toLowerCase().includes(term) || String(p.numero_empleado || '').toLowerCase().includes(term);
     // Se eliminaron locationMatch y statusMatch
     return textMatch;
   });

@@ -1,0 +1,91 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+const { testConnection } = require('./config/db');
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Ruta de prueba
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'API del Sistema de Gestión Escolar',
+    status: 'Servidor funcionando correctamente',
+    version: '1.0.0'
+  });
+});
+
+// Ruta para probar la conexión a la base de datos
+app.get('/api/test-db', async (req, res) => {
+  const isConnected = await testConnection();
+  if (isConnected) {
+    res.json({ 
+      success: true, 
+      message: 'Conexión a MySQL exitosa',
+      database: process.env.DB_NAME
+    });
+  } else {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al conectar con MySQL'
+    });
+  }
+});
+
+// Importar rutas
+const authRoutes = require('./routes/auth');
+const alumnosRoutes = require('./routes/alumnos');
+const profesoresRoutes = require('./routes/profesores');
+const administradoresRoutes = require('./routes/administradores');
+const gruposRoutes = require('./routes/grupos');
+const horariosRoutes = require('./routes/horarios');
+const periodosRoutes = require('./routes/periodos');
+const nivelesRoutes = require('./routes/niveles');
+const asistenciasRoutes = require('./routes/asistencias');
+const calificacionesRoutes = require('./routes/calificaciones');
+
+// Registrar rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/alumnos', alumnosRoutes);
+app.use('/api/profesores', profesoresRoutes);
+app.use('/api/administradores', administradoresRoutes);
+app.use('/api/grupos', gruposRoutes);
+app.use('/api/horarios', horariosRoutes);
+app.use('/api/periodos', periodosRoutes);
+app.use('/api/niveles', nivelesRoutes);
+app.use('/api/asistencias', asistenciasRoutes);
+app.use('/api/calificaciones', calificacionesRoutes);
+
+const PORT = process.env.PORT || 5000;
+
+// Iniciar servidor
+app.listen(PORT, async () => {
+  console.log('='.repeat(50));
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log('='.repeat(50));
+  
+  // Probar conexión a la base de datos al iniciar
+  await testConnection();
+  
+  console.log('='.repeat(50));
+  console.log('💡 Rutas disponibles:');
+  console.log(`   GET    http://localhost:${PORT}/`);
+  console.log(`   GET    http://localhost:${PORT}/api/test-db`);
+  console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
+  console.log(`   GET    http://localhost:${PORT}/api/auth/verify`);
+  console.log(`   GET    http://localhost:${PORT}/api/alumnos`);
+  console.log(`   POST   http://localhost:${PORT}/api/alumnos`);
+  console.log(`   GET    http://localhost:${PORT}/api/profesores`);
+  console.log(`   POST   http://localhost:${PORT}/api/profesores`);
+  console.log(`   GET    http://localhost:${PORT}/api/administradores`);
+  console.log(`   POST   http://localhost:${PORT}/api/administradores`);
+  console.log(`   GET    http://localhost:${PORT}/api/grupos`);
+  console.log(`   POST   http://localhost:${PORT}/api/grupos`);
+  console.log(`   GET    http://localhost:${PORT}/api/horarios`);
+  console.log(`   POST   http://localhost:${PORT}/api/horarios`);
+  console.log('='.repeat(50));
+});

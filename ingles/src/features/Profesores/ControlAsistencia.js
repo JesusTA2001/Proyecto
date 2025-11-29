@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// Importamos los nuevos estilos
 import '../../styles/ControlAsistencia.css'; 
 import { Snackbar, Alert } from '@mui/material';
+import api from '../../api/axios';
 
 // Función para obtener iniciales
 function getInitials(name) {
@@ -10,51 +10,81 @@ function getInitials(name) {
   return parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0][0] + (parts[0][1] || '');
 }
 
-// Key para localStorage
-const ASISTENCIA_KEY = 'allAsistencias';
-
-// Función para cargar asistencias
-const loadAsistencias = () => {
-  try {
-    const data = localStorage.getItem(ASISTENCIA_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (e) {
-    return {};
-  }
-};
-
-// Usamos Snackbar + Alert de MUI para notificaciones (mejor accesibilidad)
-
 // --- Componente Principal ---
 function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
   const [selectedGrupoId, setSelectedGrupoId] = useState('');
-  // Guardamos las asistencias por [grupoId][fecha][alumnoId]
-  const [allAsistencias, setAllAsistencias] = useState(loadAsistencias);
+  // Guardamos las asistencias localmente como un Set de nControl (solo los presentes)
+  const [asistenciasPresentes, setAsistenciasPresentes] = useState(new Set());
   const [currentDate] = useState(new Date().toISOString().slice(0, 10)); // Formato AAAA-MM-DD
   
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filtra los alumnos que pertenecen al grupo seleccionado
   const alumnosEnGrupo = useMemo(() => {
     if (!selectedGrupoId) return [];
-    const grupo = grupos.find(g => g.id === selectedGrupoId);
-    if (!grupo || !grupo.alumnoIds) return [];
     
-    return grupo.alumnoIds
-      .map(id => alumnos.find(a => a.numero_control === id))
+    console.log('🔍 Buscando grupo:', selectedGrupoId, typeof selectedGrupoId);
+    console.log('📚 Grupos disponibles:', grupos.map(g => ({ id: g.id, tipo: typeof g.id, nombre: g.nombre })));
+    
+    const grupo = grupos.find(g => g.id === parseInt(selectedGrupoId));
+    console.log('✅ Grupo encontrado:', grupo);
+    
+    if (!grupo || !grupo.alumnoIds) {
+      console.log('⚠️ Grupo no tiene alumnoIds:', grupo);
+      return [];
+    }
+    
+    console.log('👥 AlumnoIds en grupo:', grupo.alumnoIds);
+    console.log('📋 Alumnos totales disponibles:', alumnos.length);
+    
+    const alumnosDelGrupo = grupo.alumnoIds
+      .map(id => {
+        const alumno = alumnos.find(a => a.numero_control === id);
+        console.log(`🔎 Buscando alumno ${id}:`, alumno ? 'Encontrado' : 'NO encontrado');
+        return alumno;
+      })
       .filter(Boolean); // Filtra por si algún alumno no se encontró
+    
+    console.log('✅ Alumnos del grupo:', alumnosDelGrupo.length);
+    return alumnosDelGrupo;
   }, [selectedGrupoId, grupos, alumnos]);
 
-  // Obtiene el estado de asistencia actual para la UI
-  const asistenciaHoy = useMemo(() => {
-    if (!selectedGrupoId || !allAsistencias[selectedGrupoId] || !allAsistencias[selectedGrupoId][currentDate]) {
-      return {};
+  // Cargar asistencias cuando cambia el grupo
+  useEffect(() => {
+    if (selectedGrupoId) {
+      cargarAsistencias();
+    } else {
+      setAsistenciasPresentes(new Set());
     }
-    return allAsistencias[selectedGrupoId][currentDate];
-  }, [allAsistencias, selectedGrupoId, currentDate]);
+  }, [selectedGrupoId, currentDate]);
 
-  // (estadísticas eliminadas del UI simplificado)
+  // Función para cargar asistencias desde la API
+  const cargarAsistencias = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/asistencias/grupo', {
+        params: {
+          id_Grupo: selectedGrupoId,
+          fecha: currentDate
+        }
+      });
+
+      if (response.data.success) {
+        // response.data.presentes es un array de nControl
+        setAsistenciasPresentes(new Set(response.data.presentes));
+      }
+    } catch (error) {
+      console.error('Error al cargar asistencias:', error);
+      if (error.response?.status !== 404) {
+        showToast('Error al cargar asistencias', 'error');
+      }
+      setAsistenciasPresentes(new Set());
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // --- Handlers ---
 
@@ -70,15 +100,14 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
   const handleMarkAttendance = (alumnoId, status) => {
     if (!selectedGrupoId) return;
 
-    setAllAsistencias(prev => {
-      const newAsistencias = { ...prev };
-      // Asegurarse que las estructuras de objeto existan
-      if (!newAsistencias[selectedGrupoId]) newAsistencias[selectedGrupoId] = {};
-      if (!newAsistencias[selectedGrupoId][currentDate]) newAsistencias[selectedGrupoId][currentDate] = {};
-
-      // Establecer el nuevo estado
-      newAsistencias[selectedGrupoId][currentDate][alumnoId] = status;
-      return newAsistencias;
+    setAsistenciasPresentes(prev => {
+      const newSet = new Set(prev);
+      if (status === 'presente') {
+        newSet.add(alumnoId);
+      } else {
+        newSet.delete(alumnoId);
+      }
+      return newSet;
     });
   };
 
@@ -86,41 +115,47 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
   const handleMarkAll = (status) => {
     if (!selectedGrupoId || alumnosEnGrupo.length === 0) return;
 
-    setAllAsistencias(prev => {
-      const newAsistencias = { ...prev };
-      if (!newAsistencias[selectedGrupoId]) newAsistencias[selectedGrupoId] = {};
-      if (!newAsistencias[selectedGrupoId][currentDate]) newAsistencias[selectedGrupoId][currentDate] = {};
-
-      // Aplicar a todos los alumnos del grupo seleccionado
-      alumnosEnGrupo.forEach(alumno => {
-        newAsistencias[selectedGrupoId][currentDate][alumno.numero_control] = status;
-      });
-
-      return newAsistencias;
-    });
+    if (status === 'presente') {
+      // Agregar todos los alumnos
+      const todosLosIds = alumnosEnGrupo.map(a => a.numero_control);
+      setAsistenciasPresentes(new Set(todosLosIds));
+    } else {
+      // Limpiar todos
+      setAsistenciasPresentes(new Set());
+    }
   };
 
-  // Limpiar selección de HOY
-  
-
-  // Guardar en localStorage
-  const handleSave = () => {
-    if (Object.keys(asistenciaHoy).length === 0) {
-      return showToast('No hay asistencias para guardar', 'error');
+  // Guardar en la base de datos
+  const handleSave = async () => {
+    if (!selectedGrupoId) {
+      return showToast('Selecciona un grupo primero', 'error');
     }
     
     setIsSaving(true);
     try {
-      localStorage.setItem(ASISTENCIA_KEY, JSON.stringify(allAsistencias));
-      
-      setTimeout(() => {
-        setIsSaving(false);
-        showToast('Asistencia guardada con éxito', 'success');
-      }, 500); // Simula un pequeño retraso
-      
-    } catch (e) {
+      // Preparar datos para enviar
+      const asistencias = alumnosEnGrupo.map(alumno => ({
+        nControl: alumno.numero_control,
+        presente: asistenciasPresentes.has(alumno.numero_control)
+      }));
+
+      const response = await api.post('/asistencias/guardar-masivas', {
+        id_Grupo: selectedGrupoId,
+        fecha: currentDate,
+        asistencias
+      });
+
+      if (response.data.success) {
+        showToast(
+          `Asistencia guardada: ${response.data.totalPresentes} presentes, ${response.data.totalAusentes} ausentes`, 
+          'success'
+        );
+      }
+    } catch (error) {
+      console.error('Error al guardar asistencia:', error);
+      showToast('Error al guardar la asistencia', 'error');
+    } finally {
       setIsSaving(false);
-      showToast('Error al guardar en localStorage', 'error');
     }
   };
 
@@ -153,7 +188,9 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
                   <option key={g.id} value={g.id}>{g.nombre}</option>
                 ))}
               </select>
-              <h3 className="text-lg font-semibold text-gray-800" style={{ margin: 0 }}>Lista de Estudiantes</h3>
+              <h3 className="text-lg font-semibold text-gray-800" style={{ margin: 0 }}>
+                Lista de Estudiantes - {currentDate}
+              </h3>
               <button 
                 id="save-attendance" 
                 className="action-btn save" 
@@ -172,7 +209,6 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
               <button className="action-btn red" onClick={() => handleMarkAll('ausente')}>
                 ✗ Marcar Todos Ausentes
               </button>
-              {/* Botón "Limpiar Todo" eliminado por petición del usuario */}
             </div>
           </div>
         
@@ -180,10 +216,15 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
           <div className="text-center text-gray-500 py-12">
             <p>Selecciona un grupo para ver la lista de estudiantes.</p>
           </div>
+        ) : isLoading ? (
+          <div className="text-center text-gray-500 py-12">
+            <span className="loading-spinner" style={{ display: 'inline-block' }}></span>
+            <p>Cargando asistencias...</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {alumnosEnGrupo.map(alumno => {
-              const status = asistenciaHoy[alumno.numero_control]; // 'presente', 'ausente', o undefined
+              const estaPresente = asistenciasPresentes.has(alumno.numero_control);
               return (
                 <div key={alumno.numero_control} className="student-card">
                   <div className="flex items-center justify-between mb-3">
@@ -199,13 +240,13 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
                   </div>
                   <div className="flex space-x-2">
                     <button 
-                      className={`attendance-btn present-btn ${status === 'presente' ? 'active-present' : ''}`}
+                      className={`attendance-btn present-btn ${estaPresente ? 'active-present' : ''}`}
                       onClick={() => handleMarkAttendance(alumno.numero_control, 'presente')}
                     >
                       ✓ Presente
                     </button>
                     <button 
-                      className={`attendance-btn absent-btn ${status === 'ausente' ? 'active-absent' : ''}`}
+                      className={`attendance-btn absent-btn ${!estaPresente ? 'active-absent' : ''}`}
                       onClick={() => handleMarkAttendance(alumno.numero_control, 'ausente')}
                     >
                       ✗ Ausente

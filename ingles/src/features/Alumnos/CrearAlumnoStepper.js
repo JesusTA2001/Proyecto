@@ -15,13 +15,15 @@ import { carrerasOptions } from '../../data/mapping';
 import { initialModalidades } from '../../data/modalidad';
 import { initialNiveles } from '../../data/niveles';
 
-const steps = ['Datos básicos', 'Academia', 'Revisar & Crear'];
+const steps = ['Datos Personales', 'Academia', 'Crear y Revisar'];
 
 export default function CrearAlumnoStepper({ agregarAlumno }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
 
   const [alumno, setAlumno] = useState({
+    apellidoPaterno: '',
+    apellidoMaterno: '',
     nombre: '',
     correo: '',
     genero: '',
@@ -68,8 +70,8 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
   const handleNext = () => {
     // Validaciones simples por paso
     if (activeStep === 0) {
-      if (!alumno.nombre || !alumno.correo) {
-        alert('Por favor completa el nombre y correo.');
+      if (!alumno.apellidoPaterno || !alumno.apellidoMaterno || !alumno.nombre || !alumno.correo) {
+        alert('Por favor completa los apellidos, nombre y correo.');
         return;
       }
       // Validaciones de formato
@@ -109,7 +111,7 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
 
   return (
     <div className="form-container">
-      <Stack spacing={2} sx={{ width: '100%' }}>
+      <Stack spacing={2} sx={{ width: '100%', maxWidth: '900px', mx: 'auto' }}>
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map(label => (
             <Step key={label}>
@@ -122,26 +124,34 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
           <Box>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Nombre completo" value={alumno.nombre} onChange={handleChange('nombre')} margin="dense" required />
+                <TextField fullWidth size="small" label="Apellido Paterno" value={alumno.apellidoPaterno} onChange={handleChange('apellidoPaterno')} margin="dense" required />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Correo" value={alumno.correo} onChange={handleChange('correo')} margin="dense" required />
+                <TextField fullWidth size="small" label="Apellido Materno" value={alumno.apellidoMaterno} onChange={handleChange('apellidoMaterno')} margin="dense" required />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Nombre(s)" value={alumno.nombre} onChange={handleChange('nombre')} margin="dense" required />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Email" type="email" value={alumno.correo} onChange={handleChange('correo')} margin="dense" required />
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <TextField
+                <Select
                   fullWidth
+                  value={alumno.genero}
+                  onChange={handleChange('genero')}
+                  displayEmpty
                   size="small"
-                  label="Teléfono"
-                  value={alumno.telefono}
-                  onChange={handleChange('telefono')}
-                  margin="dense"
-                  inputProps={{ maxLength: 10 }}
-                  helperText={errors.telefono || '10 dígitos'}
-                  error={Boolean(errors.telefono)}
-                />
+                  sx={{ mt: 0.5 }}
+                  required
+                >
+                  <MenuItem value="">Selecciona un género</MenuItem>
+                  <MenuItem value="Masculino">Masculino</MenuItem>
+                  <MenuItem value="Femenino">Femenino</MenuItem>
+                </Select>
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -156,24 +166,21 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
                 />
               </Grid>
 
-              <Grid item xs={12}>
-                <TextField fullWidth size="small" label="Dirección" value={alumno.direccion} onChange={handleChange('direccion')} margin="dense" />
-              </Grid>
-
               <Grid item xs={12} sm={6}>
-                <Select
+                <TextField
                   fullWidth
-                  value={alumno.genero}
-                  onChange={handleChange('genero')}
-                  displayEmpty
                   size="small"
-                  sx={{ mt: 0.5 }}
-                >
-                  <MenuItem value="">Selecciona un género</MenuItem>
-                  <MenuItem value="Masculino">Masculino</MenuItem>
-                  <MenuItem value="Femenino">Femenino</MenuItem>
-                  <MenuItem value="Otro">Otro</MenuItem>
-                </Select>
+                  label="Número de Teléfono"
+                  value={alumno.telefono}
+                  onChange={handleChange('telefono')}
+                  margin="dense"
+                  inputProps={{ maxLength: 10 }}
+                  helperText={errors.telefono || '10 dígitos'}
+                  error={Boolean(errors.telefono)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Dirección" value={alumno.direccion} onChange={handleChange('direccion')} margin="dense" />
               </Grid>
             </Grid>
           </Box>
@@ -241,14 +248,24 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
 
         {activeStep === 2 && (
           <Box>
-            <h3>Revisa los datos</h3>
-            <p><strong>Nombre:</strong> {alumno.nombre}</p>
-            <p><strong>Correo:</strong> {alumno.correo}</p>
-            <p><strong>Teléfono:</strong> {alumno.telefono}</p>
-            <p><strong>Ubicación:</strong> {alumno.ubicacion}</p>
-            <p><strong>Modalidad:</strong> {alumno.modalidad}</p>
-            <p><strong>Nivel:</strong> {alumno.nivel}</p>
-            <p><strong>Carrera:</strong> {alumno.carrera || 'No Aplica'}</p>
+            <h3>Revisa los datos antes de crear</h3>
+            <Box sx={{ backgroundColor: '#f5f5f5', p: 2, borderRadius: 1 }}>
+              <h4 style={{ marginTop: 0, marginBottom: 12 }}>Datos Personales</h4>
+              <p><strong>Apellido Paterno:</strong> {alumno.apellidoPaterno}</p>
+              <p><strong>Apellido Materno:</strong> {alumno.apellidoMaterno}</p>
+              <p><strong>Nombre(s):</strong> {alumno.nombre}</p>
+              <p><strong>Email:</strong> {alumno.correo}</p>
+              <p><strong>Género:</strong> {alumno.genero}</p>
+              <p><strong>CURP:</strong> {alumno.curp || 'No proporcionado'}</p>
+              <p><strong>Teléfono:</strong> {alumno.telefono || 'No proporcionado'}</p>
+              <p><strong>Dirección:</strong> {alumno.direccion || 'No proporcionado'}</p>
+              
+              <h4 style={{ marginBottom: 12 }}>Academia</h4>
+              <p><strong>Ubicación:</strong> {alumno.ubicacion}</p>
+              <p><strong>Modalidad:</strong> {alumno.modalidad}</p>
+              <p><strong>Nivel:</strong> {alumno.nivel}</p>
+              <p><strong>Carrera:</strong> {alumno.carrera || 'No Aplica'}</p>
+            </Box>
           </Box>
         )}
 

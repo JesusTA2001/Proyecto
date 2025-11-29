@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import '../../styles/listaEstudiante.css';
 import ModificarGrupo from './ModificarGrupo';
 
-export default function ModificarGrupoModal({ open, onClose, grupo, actualizarGrupo, niveles, modalidades, profesores, alumnos }) {
+export default function ModificarGrupoModal({ open, onClose, grupo, actualizarGrupo, niveles, periodos, profesores, alumnos }) {
   if (!grupo) return null;
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { width: '95vw', maxWidth: 1100, maxHeight: '90vh' } }}>
@@ -17,7 +17,7 @@ export default function ModificarGrupoModal({ open, onClose, grupo, actualizarGr
         </IconButton>
       </DialogTitle>
       <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
-        <ModificarGrupo grupo={grupo} niveles={niveles} modalidades={modalidades} profesores={profesores} alumnos={alumnos} actualizarGrupo={(g) => { actualizarGrupo(g); onClose(); }} onClose={onClose} />
+        <ModificarGrupo grupo={grupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} actualizarGrupo={(g) => { actualizarGrupo(g); onClose(); }} onClose={onClose} />
       </DialogContent>
     </Dialog>
   );

@@ -4,7 +4,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import '../../styles/listaEstudiante.css';
-import CrearAdministrador from './CrearAdmin';
+import CrearAdministradorStepper from './CrearAdministradorStepper';
 
 export default function CrearAdministradorModal({ open, onClose, agregarAdministrador }) {
   return (
@@ -16,9 +16,8 @@ export default function CrearAdministradorModal({ open, onClose, agregarAdminist
         </IconButton>
       </DialogTitle>
       <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
-        {/* Pasamos agregarAdministrador y cerramos el modal desde el componente si es necesario */}
         <div style={{ width: '100%' }}>
-          <CrearAdministrador agregarAdministrador={(a) => { agregarAdministrador(a); onClose(); }} />
+          <CrearAdministradorStepper agregarAdministrador={(a) => { agregarAdministrador(a); onClose(); }} />
         </div>
       </DialogContent>
     </Dialog>

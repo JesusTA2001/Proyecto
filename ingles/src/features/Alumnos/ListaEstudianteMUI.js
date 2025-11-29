@@ -29,7 +29,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     const matchesSearch =
       !term ||
       (alumno.nombre || '').toLowerCase().includes(term) ||
-      (alumno.numero_control || '').toLowerCase().includes(term);
+      String(alumno.numero_control || '').toLowerCase().includes(term);
     const matchesStatus = !selectedStatus || alumno.estado === selectedStatus;
     const matchesCareer = !selectedCareer || alumno.carrera === selectedCareer;
     const matchesLocation = !selectedLocation || alumno.ubicacion === selectedLocation;
