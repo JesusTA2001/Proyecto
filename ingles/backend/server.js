@@ -5,8 +5,17 @@ const { testConnection } = require('./config/db');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Middleware CORS - Permitir Vercel y localhost
+app.use(cors({
+  origin: [
+    'https://proyecto-2971.vercel.app',
+    'http://localhost:3000',
+    /\.vercel\.app$/  // Permite cualquier subdominio de vercel.app
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
