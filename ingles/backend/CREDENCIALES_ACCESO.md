@@ -1,17 +1,18 @@
 # 🔐 CREDENCIALES DE ACCESO AL SISTEMA
 
-**Fecha de creación:** 28 de noviembre de 2025  
-**Total de usuarios:** 326
+**Fecha de actualización:** 1 de diciembre de 2025  
+**Total de usuarios:** 326  
+**⚠️ IMPORTANTE:** Todas las contraseñas han sido simplificadas a `123456`
 
 ---
 
 ## 📊 RESUMEN POR ROL
 
-| Rol | Total de Usuarios | Patrón de Usuario | Patrón de Contraseña |
-|-----|-------------------|-------------------|----------------------|
-| 👨‍🎓 **ESTUDIANTES** | 300 | `nControl` | `primeras3letrasNombre + 2025` |
-| 👨‍🏫 **PROFESORES** | 20 | `prof[id]` | `primeras3letrasNombre + primeras3letrasApellido` |
-| 👨‍💼 **ADMINISTRADORES** | 6 | `admin[id]` | `primeras3letrasNombre + primeras3letrasApellido` |
+| Rol | Total de Usuarios | Patrón de Usuario | Contraseña |
+|-----|-------------------|-------------------|------------|
+| 👨‍🎓 **ESTUDIANTES** | 300 | `nControl` | `123456` |
+| 👨‍🏫 **PROFESORES** | 20 | `prof[id]` | `123456` |
+| 👨‍💼 **ADMINISTRADORES** | 6 | `admin[id]` | `123456` |
 
 ---
 
@@ -20,55 +21,56 @@
 Todos los estudiantes pueden acceder usando su **número de control** como usuario.
 
 ### Patrón:
-- **Usuario:** Su número de control (ej: `1002`, `2024050`)
-- **Contraseña:** Primeras 3 letras de su nombre + año 2025 (ej: `vic2025` para Victoria)
+- **Usuario:** Su número de control (ej: `1000`, `1002`, `2024050`)
+- **Contraseña:** `123456` (para todos)
 
 ### Ejemplos:
 | Usuario | Contraseña | Nombre Completo |
 |---------|------------|-----------------|
-| 1002 | vic2025 | Victoria Olmos |
-| 1022 | tom2025 | Tomás Farías |
-| 1042 | mar2025 | María Cristina Hinojosa |
-| 2024001 | ver2025 | Veronica Aguilar |
-| 2024050 | cla2025 | Claudia Castro |
-| 2024100 | edu2025 | Eduardo Martinez |
+| 1000 | 123456 | Silvia Farías |
+| 1002 | 123456 | Victoria Olmos |
+| 1022 | 123456 | Tomás Farías |
+| 1042 | 123456 | María Cristina Hinojosa |
+| 2024001 | 123456 | Veronica Aguilar |
+| 2024050 | 123456 | Claudia Castro |
+| 2024100 | 123456 | Eduardo Martinez |
 
 ### Todos los estudiantes (1000-1099):
 ```
-1000 / sil2025 - Silvia Farías
-1001 / mar2025 - Martín Gamez
-1002 / vic2025 - Victoria Olmos
-1003 / nat2025 - Natividad Ledesma
-1004 / dan2025 - Daniel Serna
-1005 / ade2025 - Adela Farías
-1006 / yol2025 - Yolanda Nieves
-1007 / nel2025 - Nelly Montaño
-1008 / vio2025 - Violeta Vélez
-1009 / jos2025 - José Salgado
-1010 / osw2025 - Oswaldo Arteaga
-1011 / ben2025 - Benjamín Domínguez
-1012 / jes2025 - Jesus Torres
-1013 / mag2025 - Magdalena Quesada
-1014 / jul2025 - Julia Valles
-1015 / ant2025 - Antonio Arguello
-1016 / ali2025 - Alicia Rojo
-1017 / mau2025 - Mauro Manzanares
-1018 / sus2025 - Susana Villagómez
-1019 / and2025 - Andrea Domínguez
-1020 / alb2025 - Alberto Berríos
-1021 / mod2025 - Modesto Olivares
-1022 / tom2025 - Tomás Farías
-1023 / elo2025 - Eloisa Gamez
-1024 / hel2025 - Helena Jaimes
-1025 / mar2025 - María José Rocha
+1000 / 123456 - Silvia Farías
+1001 / 123456 - Martín Gamez
+1002 / 123456 - Victoria Olmos
+1003 / 123456 - Natividad Ledesma
+1004 / 123456 - Daniel Serna
+1005 / 123456 - Adela Farías
+1006 / 123456 - Yolanda Nieves
+1007 / 123456 - Nelly Montaño
+1008 / 123456 - Violeta Vélez
+1009 / 123456 - José Salgado
+1010 / 123456 - Oswaldo Arteaga
+1011 / 123456 - Benjamín Domínguez
+1012 / 123456 - Jesus Torres
+1013 / 123456 - Magdalena Quesada
+1014 / 123456 - Julia Valles
+1015 / 123456 - Antonio Arguello
+1016 / 123456 - Alicia Rojo
+1017 / 123456 - Mauro Manzanares
+1018 / 123456 - Susana Villagómez
+1019 / 123456 - Andrea Domínguez
+1020 / 123456 - Alberto Berríos
+1021 / 123456 - Modesto Olivares
+1022 / 123456 - Tomás Farías
+1023 / 123456 - Eloisa Gamez
+1024 / 123456 - Helena Jaimes
+1025 / 123456 - María José Rocha
 ... (continúa hasta 1099)
 ```
 
 ### Todos los estudiantes (2024001-2024200):
 ```
-2024001 / ver2025 - Veronica Aguilar
-2024002 / jor2025 - Jorge Lopez
-2024003 / jav2025 - Javier Ortiz
+2024001 / 123456 - Veronica Aguilar
+2024002 / 123456 - Jorge Lopez
+2024003 / 123456 - Javier Ortiz
 ... (continúa hasta 2024200)
 ```
 
@@ -80,26 +82,26 @@ Todos los estudiantes pueden acceder usando su **número de control** como usuar
 
 | Usuario | Contraseña | Nombre Completo | ID Profesor |
 |---------|------------|-----------------|-------------|
-| prof1 | hummen | Humberto Menchaca | 1 |
-| prof2 | liloli | Lilia Olivares | 2 |
-| prof3 | siltej | Silvia Tejeda | 3 |
-| prof4 | yolrey | Yolanda Reyes | 4 |
-| prof5 | jaisai | Jaime Saiz | 5 |
-| prof6 | aidmez | Aida Meza | 6 |
-| prof7 | araben | Araceli Benítez | 7 |
-| prof8 | abesan | Abel Sanches | 8 |
-| prof9 | ivozúñ | Ivonne Zúñiga | 9 |
-| prof10 | amabét | Amador Bétancourt | 10 |
-| prof11 | rodde  | Rodolfo de la Crúz | 11 |
-| prof12 | elogue | Eloisa Guerrero | 12 |
-| prof13 | luznáj | Luz Nájera | 13 |
-| prof14 | elvmar | Elvia Martínez | 14 |
-| prof15 | micbot | Micaela Botello | 15 |
-| prof16 | eugtir | Eugenia Tirado | 16 |
-| prof17 | marmal | Margarita Malave | 17 |
-| prof18 | nelhen | Nelly Henríquez | 18 |
-| prof19 | pabher | Pablo Hernádez | 19 |
-| prof20 | fedceb | Federico Ceballos | 20 |
+| prof1 | 123456 | Humberto Menchaca | 1 |
+| prof2 | 123456 | Lilia Olivares | 2 |
+| prof3 | 123456 | Silvia Tejeda | 3 |
+| prof4 | 123456 | Yolanda Reyes | 4 |
+| prof5 | 123456 | Jaime Saiz | 5 |
+| prof6 | 123456 | Aida Meza | 6 |
+| prof7 | 123456 | Araceli Benítez | 7 |
+| prof8 | 123456 | Abel Sanches | 8 |
+| prof9 | 123456 | Ivonne Zúñiga | 9 |
+| prof10 | 123456 | Amador Bétancourt | 10 |
+| prof11 | 123456 | Rodolfo de la Crúz | 11 |
+| prof12 | 123456 | Eloisa Guerrero | 12 |
+| prof13 | 123456 | Luz Nájera | 13 |
+| prof14 | 123456 | Elvia Martínez | 14 |
+| prof15 | 123456 | Micaela Botello | 15 |
+| prof16 | 123456 | Eugenia Tirado | 16 |
+| prof17 | 123456 | Margarita Malave | 17 |
+| prof18 | 123456 | Nelly Henríquez | 18 |
+| prof19 | 123456 | Pablo Hernádez | 19 |
+| prof20 | 123456 | Federico Ceballos | 20 |
 
 ---
 
@@ -109,12 +111,12 @@ Todos los estudiantes pueden acceder usando su **número de control** como usuar
 
 | Usuario | Contraseña | Nombre Completo | ID Admin |
 |---------|------------|-----------------|----------|
-| admin1 | anapar | Ana Parra | 1 |
-| admin2 | enrsan | Enrique Sanches | 2 |
-| admin3 | ólimej | Óliver Mejía | 3 |
-| admin4 | joaiba | Joaquín Ibarra | 4 |
-| admin5 | juacal | Juan Caldera | 5 |
-| admin6 | jacvan | Jacobo Vanegas | 6 |
+| admin1 | 123456 | Ana Parra | 1 |
+| admin2 | 123456 | Enrique Sanches | 2 |
+| admin3 | 123456 | Óliver Mejía | 3 |
+| admin4 | 123456 | Joaquín Ibarra | 4 |
+| admin5 | 123456 | Juan Caldera | 5 |
+| admin6 | 123456 | Jacobo Vanegas | 6 |
 
 ---
 
@@ -122,8 +124,8 @@ Todos los estudiantes pueden acceder usando su **número de control** como usuar
 
 ⚠️ **Nota:** Actualmente no hay coordinadores ni directivos registrados en la base de datos.  
 Si se agregan en el futuro, el patrón será:
-- **Coordinadores:** `coord[id]` / `primeras3letrasNombre + primeras3letrasApellido`
-- **Directivos:** `dir[id]` / `primeras3letrasNombre + primeras3letrasApellido`
+- **Coordinadores:** `coord[id]` / `123456`
+- **Directivos:** `dir[id]` / `123456`
 
 ---
 
@@ -131,16 +133,19 @@ Si se agregan en el futuro, el patrón será:
 
 ### ✅ Ventajas del nuevo sistema:
 1. **Sin limitantes:** Todos los estudiantes, profesores y administradores pueden acceder
-2. **Patrón simple:** Fácil de recordar y comunicar
+2. **Contraseña universal:** Una sola contraseña (`123456`) para todos los usuarios
 3. **Cobertura completa:** 326 usuarios pueden acceder inmediatamente
-4. **Seguridad básica:** Contraseñas hasheadas con bcrypt
-5. **Escalable:** El script puede ejecutarse nuevamente si hay cambios
+4. **Fácil de comunicar:** Sólo necesitas recordar tu usuario y `123456`
+5. **Simplificado:** Sin contraseñas hasheadas, comparación directa
 
 ### 🔒 Recomendaciones de Seguridad:
-1. Los usuarios deberían cambiar su contraseña al primer inicio de sesión
-2. Considerar implementar una política de cambio de contraseña periódico
-3. Agregar validación de contraseña segura (mayúsculas, números, símbolos)
-4. Implementar recuperación de contraseña por email
+⚠️ **IMPORTANTE:** Este sistema usa contraseñas planas y una contraseña universal (`123456`).  
+**NO es seguro para producción.** Recomendaciones:
+1. Implementar bcrypt para hashear contraseñas antes de producción
+2. Forzar cambio de contraseña al primer inicio de sesión
+3. Implementar política de contraseñas seguras (mayúsculas, números, símbolos)
+4. Agregar recuperación de contraseña por email
+5. **Este sistema es SOLO para desarrollo y pruebas**
 
 ### 🛠️ Para agregar más usuarios:
 Ejecutar el script: `node backend/scripts/crear_usuarios_completo.js`
@@ -157,20 +162,29 @@ Este script:
 
 ### Para Estudiantes:
 1. Ir a la página de login
-2. Usuario: Tu número de control (ej: `1042`)
-3. Contraseña: Primeras 3 letras de tu nombre + 2025 (ej: `mar2025`)
+2. Usuario: Tu número de control (ej: `1000`, `1042`, `2024001`)
+3. Contraseña: `123456`
 
 ### Para Profesores:
 1. Ir a la página de login
-2. Usuario: `prof` + tu ID (ej: `prof3` para Silvia Tejeda)
-3. Contraseña: Primeras 3 letras de tu nombre + primeras 3 de tu apellido (ej: `siltej`)
+2. Usuario: `prof` + tu ID (ej: `prof1`, `prof3`, `prof10`)
+3. Contraseña: `123456`
 
 ### Para Administradores:
 1. Ir a la página de login
-2. Usuario: `admin` + tu ID (ej: `admin1`)
-3. Contraseña: Primeras 3 letras de tu nombre + primeras 3 de tu apellido (ej: `anapar`)
+2. Usuario: `admin` + tu ID (ej: `admin1`, `admin2`)
+3. Contraseña: `123456`
+
+### ✅ Ejemplos de acceso:
+```
+Estudiante: 1000 / 123456
+Estudiante: 2024001 / 123456
+Profesor:   prof1 / 123456
+Profesor:   prof10 / 123456
+Admin:      admin1 / 123456
+```
 
 ---
 
-**Última actualización:** 28/11/2025  
-**Script:** `backend/scripts/crear_usuarios_completo.js`
+**Última actualización:** 1/12/2025  
+**Sistema:** Contraseñas planas (sin bcrypt) - SOLO para desarrollo

@@ -43,9 +43,11 @@ exports.login = async (req, res) => {
 
     console.log('Verificando contraseña...');
 
-    // Verificar contraseña
-    const isMatch = await bcrypt.compare(contraseña, passwordFromDB);
+    // Verificar contraseña - Comparación directa (sin bcrypt)
+    // Todas las contraseñas en la BD son: 123456
+    const isMatch = contraseña === passwordFromDB;
     if (!isMatch) {
+      console.log('Contraseña incorrecta. Esperada:', passwordFromDB, 'Recibida:', contraseña);
       return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
     }
 
