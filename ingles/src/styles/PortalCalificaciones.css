@@ -191,3 +191,129 @@
 .icon-wrapper.bg-green { background-color: #dcfce7; /* bg-green-100 */ }
 .icon-wrapper.bg-red { background-color: #fee2e2; /* bg-red-100 */ }
 .icon-wrapper.bg-blue { background-color: #dbeafe; /* bg-blue-100 */ }
+
+/* ========================================
+   ESTILOS RESPONSIVOS - PORTAL CALIFICACIONES
+======================================== */
+
+/* Tablet (1024px y menos) */
+@media (max-width: 1024px) {
+  .portal-container {
+    padding: 1.25rem;
+  }
+  
+  .p-6 { padding: 1.25rem; }
+  .gap-6 { gap: 1.25rem; }
+  
+  .text-3xl { font-size: 1.625rem; }
+  .text-2xl { font-size: 1.375rem; }
+  
+  /* Grid adapta a 2 columnas */
+  @media (min-width: 768px) {
+    .md\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+}
+
+/* Mobile (768px y menos) */
+@media (max-width: 768px) {
+  .portal-container {
+    padding: 1rem;
+  }
+  
+  .p-6 { padding: 1rem; }
+  .p-4 { padding: 0.875rem; }
+  .gap-6 { gap: 1rem; }
+  .gap-4 { gap: 0.875rem; }
+  
+  .text-3xl { font-size: 1.5rem; }
+  .text-2xl { font-size: 1.25rem; }
+  .text-xl { font-size: 1.125rem; }
+  .text-lg { font-size: 1rem; }
+  
+  /* Grid fuerza 1 columna en mobile */
+  .md\:grid-cols-2,
+  .md\:grid-cols-3,
+  .md\:grid-cols-4,
+  .lg\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Iconos más pequeños */
+  .w-10 { width: 2rem; }
+  .h-10 { height: 2rem; }
+  .w-12 { width: 2.5rem; }
+  .h-12 { height: 2.5rem; }
+  .w-16 { width: 3rem; }
+  .h-16 { height: 3rem; }
+  
+  /* Espaciado horizontal a vertical */
+  .space-x-3 > :not([hidden]) ~ :not([hidden]),
+  .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0;
+    margin-top: 0.75rem;
+  }
+  
+  .flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  /* Mantener flex-row para casos específicos */
+  .flex.items-center.justify-between {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  /* Scroll horizontal para tablas */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Small Mobile (480px y menos) */
+@media (max-width: 480px) {
+  .portal-container {
+    padding: 0.75rem;
+  }
+  
+  .p-6 { padding: 0.875rem; }
+  .p-4 { padding: 0.75rem; }
+  .p-3 { padding: 0.625rem; }
+  
+  .text-3xl { font-size: 1.375rem; }
+  .text-2xl { font-size: 1.125rem; }
+  .text-xl { font-size: 1rem; }
+  .text-lg { font-size: 0.9375rem; }
+  .text-sm { font-size: 0.8125rem; }
+  .text-xs { font-size: 0.6875rem; }
+  
+  .w-8 { width: 1.75rem; }
+  .h-8 { height: 1.75rem; }
+  .w-10 { width: 1.875rem; }
+  .h-10 { height: 1.875rem; }
+  
+  .rounded-lg { border-radius: 0.375rem; }
+  
+  /* Padding reducido en botones */
+  .py-3 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+  .px-4 { padding-left: 0.875rem; padding-right: 0.875rem; }
+}
+
+/* Tiny Mobile (360px y menos) */
+@media (max-width: 360px) {
+  .portal-container {
+    padding: 0.5rem;
+  }
+  
+  .p-6 { padding: 0.75rem; }
+  .p-4 { padding: 0.625rem; }
+  
+  .text-3xl { font-size: 1.25rem; }
+  .text-2xl { font-size: 1rem; }
+  .text-xl { font-size: 0.9375rem; }
+  
+  .w-6 { width: 1.25rem; }
+  .h-6 { height: 1.25rem; }
+  .w-8 { width: 1.5rem; }
+  .h-8 { height: 1.5rem; }
+}

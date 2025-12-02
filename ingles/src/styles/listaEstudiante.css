@@ -732,3 +732,375 @@ body {
   background: none;
   box-shadow: none;
 }
+
+/* ========================================
+   RESPONSIVE DESIGN - MEDIA QUERIES
+   ======================================== */
+
+/* Tablets y pantallas medianas (1024px o menos) */
+@media (max-width: 1024px) {
+  .lista-container {
+    padding: 15px;
+    max-width: 98%;
+  }
+
+  .lista-titulo {
+    font-size: 1.75em;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .createbutton {
+    width: 100%;
+  }
+
+  .alumnos-table {
+    font-size: 0.9rem;
+  }
+
+  .alumnos-table th,
+  .alumnos-table td {
+    padding: 12px 8px;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .button-group {
+    width: 100%;
+  }
+
+  .filter-button {
+    flex: 1;
+  }
+
+  .filter-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+}
+
+/* Móviles (768px o menos) */
+@media (max-width: 768px) {
+  .lista-container {
+    padding: 10px;
+    margin: 10px auto;
+    border-radius: 8px;
+  }
+
+  .lista-header {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  .lista-titulo {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+
+  .header-actions {
+    gap: 12px;
+  }
+
+  .search-input {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .createbutton {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+
+  /* Hacer la tabla scrolleable horizontalmente en móviles */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .alumnos-table {
+    font-size: 0.85rem;
+    min-width: 600px; /* Ancho mínimo para scroll horizontal */
+  }
+
+  .alumnos-table th,
+  .alumnos-table td {
+    padding: 10px 6px;
+  }
+
+  .alumnos-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .acciones-cell {
+    white-space: nowrap;
+    min-width: 120px;
+  }
+
+  .accion-link {
+    font-size: 1.1rem;
+    margin: 0 5px;
+    padding: 10px;
+  }
+
+  .icon-button {
+    font-size: 1.1rem;
+    padding: 6px 10px;
+  }
+
+  .estado-button {
+    padding: 4px 10px;
+    min-width: 80px;
+    font-size: 0.85rem;
+  }
+
+  .button-list {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .button-list button {
+    width: 100%;
+  }
+
+  /* Responsive filters */
+  .filter-group label {
+    font-size: 0.85rem;
+  }
+
+  .filter-button {
+    padding: 7px 12px;
+    font-size: 0.85rem;
+  }
+
+  .filter-select {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    min-width: 100%;
+  }
+
+  /* Pagination */
+  .pagination-controls {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .pagination-button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .pagination-controls span {
+    order: -1; /* Mueve el texto arriba */
+  }
+
+  /* Detail container */
+  .detail-container {
+    padding: 20px 15px;
+    margin: 10px;
+  }
+
+  .detail-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .detail-grid p {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .back-button-link {
+    position: static;
+    display: block;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .back-button-link .createbutton {
+    width: 100%;
+  }
+
+  .detail-section-title {
+    font-size: 1.1rem;
+    margin-top: 20px;
+  }
+
+  .levels-path-list {
+    justify-content: center;
+  }
+
+  .levels-path-list li {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+}
+
+/* Móviles pequeños (480px o menos) */
+@media (max-width: 480px) {
+  .lista-container {
+    padding: 8px;
+    margin: 5px auto;
+  }
+
+  .lista-titulo {
+    font-size: 1.25em;
+  }
+
+  .search-input {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .createbutton {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+
+  .alumnos-table {
+    font-size: 0.8rem;
+    min-width: 500px;
+  }
+
+  .alumnos-table th,
+  .alumnos-table td {
+    padding: 8px 4px;
+  }
+
+  .acciones-cell {
+    min-width: 100px;
+  }
+
+  .accion-link {
+    font-size: 1rem;
+    margin: 0 3px;
+    padding: 8px;
+  }
+
+  .icon-button {
+    font-size: 1rem;
+    padding: 5px 8px;
+  }
+
+  .estado-button {
+    padding: 3px 8px;
+    min-width: 70px;
+    font-size: 0.8rem;
+  }
+
+  .filter-button {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .filter-select {
+    padding: 7px 8px;
+    font-size: 0.85rem;
+  }
+
+  .detail-container {
+    padding: 15px 10px;
+  }
+
+  .detail-container h2 {
+    font-size: 1.25rem;
+  }
+
+  .detail-grid p {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  .detail-section-title {
+    font-size: 1rem;
+  }
+
+  .form-container {
+    padding: 15px;
+    gap: 12px;
+  }
+}
+
+/* Mejoras para DataGrid de MUI en móviles */
+@media (max-width: 768px) {
+  .MuiDataGrid-root {
+    font-size: 0.85rem;
+  }
+
+  .MuiDataGrid-columnHeaders {
+    font-size: 0.9rem;
+  }
+
+  .MuiDataGrid-cell {
+    padding: 8px 4px;
+  }
+
+  .MuiDataGrid-toolbarContainer {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .MuiButton-root {
+    font-size: 0.85rem;
+  }
+}
+
+/* Overlay para menú móvil cuando está abierto */
+@media (max-width: 1024px) {
+  .menu__links.active::before {
+    content: '';
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+}
+
+/* Asegurar que los modales se vean bien en móviles */
+@media (max-width: 768px) {
+  .MuiDialog-paper {
+    margin: 10px !important;
+    max-width: calc(100% - 20px) !important;
+    width: 100% !important;
+  }
+
+  .MuiDialogTitle-root {
+    padding: 12px 16px !important;
+    font-size: 1.25rem !important;
+  }
+
+  .MuiDialogContent-root {
+    padding: 12px 16px !important;
+  }
+
+  .MuiDialogActions-root {
+    padding: 8px 16px !important;
+  }
+}
+

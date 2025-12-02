@@ -1,4 +1,4 @@
-/* Estilos mínimos para DashboardProfesor, creado automáticamente para evitar error de importación */
+/* Estilos base para DashboardProfesor */
 .min-h-screen { min-height: 100vh; }
 .bg-gray-50 { background-color: #f9fafb; }
 .bg-white { background-color: #ffffff; }
@@ -32,3 +32,62 @@
 .p-4 { padding: 1rem; }
 .text-2xl { font-size: 1.5rem; }
 .text-3xl { font-size: 1.875rem; }
+
+/* ========================================
+   ESTILOS RESPONSIVOS - DASHBOARD PROFESOR
+======================================== */
+
+/* Tablet (1024px y menos) */
+@media (max-width: 1024px) {
+  .p-6 { padding: 1rem; }
+  .gap-6 { gap: 1rem; }
+  
+  /* Grid de estadísticas a 2 columnas */
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .text-3xl { font-size: 1.5rem; }
+  .text-2xl { font-size: 1.25rem; }
+}
+
+/* Mobile (768px y menos) */
+@media (max-width: 768px) {
+  .p-6 { padding: 0.75rem; }
+  .p-4 { padding: 0.75rem; }
+  
+  /* Grid de estadísticas a 1 columna */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .text-3xl { font-size: 1.25rem; }
+  .text-2xl { font-size: 1.125rem; }
+  .text-lg { font-size: 1rem; }
+  .text-sm { font-size: 0.8125rem; }
+  
+  /* Stat cards más compactos */
+  .flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .w-10 { width: 2rem; }
+  .h-10 { height: 2rem; }
+}
+
+/* Small Mobile (480px y menos) */
+@media (max-width: 480px) {
+  .rounded-lg { border-radius: 0.375rem; }
+  
+  .text-3xl { font-size: 1.125rem; }
+  .text-2xl { font-size: 1rem; }
+  .text-lg { font-size: 0.9375rem; }
+  
+  /* Contenedor principal más estrecho */
+  .min-h-screen {
+    padding: 0.5rem;
+  }
+}

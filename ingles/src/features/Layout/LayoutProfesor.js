@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../../styles/perfil-usuario.css';
 
 function LayoutProfesor({ children }) {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const getCurrentUserName = () => {
     try {
@@ -20,6 +21,14 @@ function LayoutProfesor({ children }) {
     try { localStorage.removeItem('currentUser'); } catch (e) {}
     navigate('/login');
   };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
   return (
     <div className="perfil-usuario">
       <nav className="menu">
@@ -31,9 +40,23 @@ function LayoutProfesor({ children }) {
           />
           <h1 className="menu__logo">Profesor</h1>
 
-          <ul className="menu__links">
+          {/* Hamburger Menu Icon */}
+          <div 
+            className={`menu__hamburger ${menuOpen ? 'active' : ''}`} 
+            onClick={toggleMenu}
+            role="button"
+            aria-label="Toggle menu"
+            tabIndex={0}
+            onKeyPress={(e) => e.key === 'Enter' && toggleMenu()}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <ul className={`menu__links ${menuOpen ? 'active' : ''}`}>
             <li className="menu__item">
-              <Link to="/dashboard-profesor" className="menu__link">Inicio</Link>
+              <Link to="/dashboard-profesor" className="menu__link" onClick={closeMenu}>Inicio</Link>
             </li>
 
             <li className="menu__item menu__item--show">
@@ -42,19 +65,19 @@ function LayoutProfesor({ children }) {
                 
                 {/* --- ENLACE NUEVO AÑADIDO AQUÍ --- */}
                 <li className="menu__inside">
-                  <Link to="/profesor/mis-grupos" className="menu__link menu__link--inside">
+                  <Link to="/profesor/mis-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Mis Grupos
                   </Link>
                 </li>
 
                 <li className="menu__inside">
-                  <Link to="/profesor/asistencia" className="menu__link menu__link--inside">
+                  <Link to="/profesor/asistencia" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Asistencia
                   </Link>
                 </li>
                 
                 <li className="menu__inside">
-                  <Link to="/profesor/calificaciones" className="menu__link menu__link--inside">
+                  <Link to="/profesor/calificaciones" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Asignar Calificaciones
                   </Link>
                 </li>
@@ -71,7 +94,7 @@ function LayoutProfesor({ children }) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
                   </a>
                 </li>

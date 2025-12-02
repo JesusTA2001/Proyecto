@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../../styles/perfil-usuario.css';
 
 function LayoutCoordinador({ children }) {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const getCurrentUserName = () => {
     try {
@@ -45,6 +46,14 @@ function LayoutCoordinador({ children }) {
     try { localStorage.removeItem('currentUser'); } catch (e) {}
     navigate('/login');
   };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
   return (
     <div className="perfil-usuario">
       <nav className="menu">
@@ -56,26 +65,40 @@ function LayoutCoordinador({ children }) {
           />
           <h1 className="menu__logo">Coordinador{carreraAsignada ? ` — ${carreraAsignada.label}` : ''}</h1>
 
-          <ul className="menu__links">
+          {/* Hamburger Menu Icon */}
+          <div 
+            className={`menu__hamburger ${menuOpen ? 'active' : ''}`} 
+            onClick={toggleMenu}
+            role="button"
+            aria-label="Toggle menu"
+            tabIndex={0}
+            onKeyPress={(e) => e.key === 'Enter' && toggleMenu()}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <ul className={`menu__links ${menuOpen ? 'active' : ''}`}>
             <li className="menu__item">
-              <Link to="/dashboard-coordinador" className="menu__link">Inicio</Link>
+              <Link to="/dashboard-coordinador" className="menu__link" onClick={closeMenu}>Inicio</Link>
             </li>
 
             <li className="menu__item menu__item--show">
               <span className="menu__link">Accesos</span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <Link to="/lista-estudiantes" className="menu__link menu__link--inside">
+                  <Link to="/lista-estudiantes" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Estudiantes
                   </Link>
                 </li>
                 <li className="menu__inside">
-                  <Link to="/lista-grupos" className="menu__link menu__link--inside">
+                  <Link to="/lista-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Grupos
                   </Link>
                 </li>
                 <li className="menu__inside">
-                  <Link to="/lista-horarios" className="menu__link menu__link--inside">
+                  <Link to="/lista-horarios" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Horarios
                   </Link>
                 </li>
@@ -89,7 +112,7 @@ function LayoutCoordinador({ children }) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <button type="button" className="menu__link menu__link--inside" onClick={handleLogout}>
+                  <button type="button" className="menu__link menu__link--inside" onClick={() => { handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
                   </button>
                 </li>

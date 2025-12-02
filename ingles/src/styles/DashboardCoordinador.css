@@ -314,3 +314,219 @@
 /* Animaciones */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========================================
+   ESTILOS RESPONSIVOS - DASHBOARD COORDINADOR
+======================================== */
+
+/* Tablet (1024px y menos) */
+@media (max-width: 1024px) {
+  .coord-container {
+    padding: 1.5rem;
+  }
+  
+  .coord-header h1 {
+    font-size: 2rem;
+  }
+  
+  .coord-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .coord-stat-card {
+    padding: 1.5rem;
+  }
+  
+  .coord-value {
+    font-size: 2.5rem;
+  }
+  
+  .coord-section {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .coord-chart-container {
+    height: 280px;
+  }
+}
+
+/* Mobile (768px y menos) */
+@media (max-width: 768px) {
+  .coord-container {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .coord-header {
+    margin-bottom: 2rem;
+  }
+  
+  .coord-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .coord-header p {
+    font-size: 1rem;
+  }
+  
+  .coord-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .coord-stat-card {
+    padding: 1.25rem;
+  }
+  
+  .coord-value {
+    font-size: 2rem;
+  }
+  
+  .coord-section {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .coord-section h2 {
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .coord-chart-container {
+    height: 240px;
+  }
+  
+  /* Controles apilados verticalmente */
+  .coord-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .coord-search-box {
+    min-width: 100%;
+    width: 100%;
+  }
+  
+  .coord-filter-select,
+  .coord-add-button {
+    width: 100%;
+  }
+  
+  /* Tabla con scroll horizontal */
+  .coord-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .coord-table {
+    min-width: 600px;
+  }
+  
+  .coord-table th,
+  .coord-table td {
+    padding: 1rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Modal más pequeño */
+  .coord-modal-content {
+    padding: 2rem;
+    width: 95%;
+    max-width: 100%;
+  }
+  
+  /* Botones apilados */
+  .coord-modal-buttons {
+    flex-direction: column;
+  }
+  
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
+}
+
+/* Small Mobile (480px y menos) */
+@media (max-width: 480px) {
+  .coord-container {
+    padding: 0.75rem;
+  }
+  
+  .coord-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .coord-header p {
+    font-size: 0.9375rem;
+  }
+  
+  .coord-stat-card {
+    padding: 1rem;
+  }
+  
+  .coord-stat-card h3 {
+    font-size: 0.75rem;
+  }
+  
+  .coord-value {
+    font-size: 1.75rem;
+  }
+  
+  .coord-stat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .coord-section {
+    padding: 1rem;
+  }
+  
+  .coord-section h2 {
+    font-size: 1rem;
+  }
+  
+  .coord-chart-container {
+    height: 200px;
+  }
+  
+  .coord-search-box,
+  .coord-filter-select,
+  .coord-add-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .coord-modal-content {
+    padding: 1.5rem;
+  }
+  
+  .coord-form-group input,
+  .coord-form-group select {
+    padding: 0.75rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Tiny Mobile (360px y menos) */
+@media (max-width: 360px) {
+  .coord-container {
+    padding: 0.5rem;
+  }
+  
+  .coord-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .coord-value {
+    font-size: 1.5rem;
+  }
+  
+  .coord-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+}

@@ -79,3 +79,50 @@
 .group-card-button:hover {
     background-color: #e9d5ff; /* hover:bg-purple-200 */
 }
+
+/* ========================================
+   ESTILOS RESPONSIVOS - MIS GRUPOS
+======================================== */
+
+/* Mobile (768px y menos) */
+@media (max-width: 768px) {
+  .group-card {
+    padding: 0.875rem;
+  }
+  
+  .group-card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .group-card-button {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+  }
+  
+  .chart-container {
+    height: 180px;
+  }
+  
+  .progress-bar {
+    height: 5px;
+  }
+}
+
+/* Small Mobile (480px y menos) */
+@media (max-width: 480px) {
+  .group-card {
+    padding: 0.75rem;
+  }
+  
+  .group-card-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.8125rem;
+  }
+  
+  .chart-container {
+    height: 160px;
+  }
+}

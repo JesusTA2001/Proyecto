@@ -102,3 +102,109 @@
 .status-good { background-color: #dbeafe; color: #1d4ed8; }
 .status-regular { background-color: #fef3c7; color: #92400e; }
 .status-poor { background-color: #fee2e2; color: #dc2626; }
+
+/* ========================================
+   ESTILOS RESPONSIVOS - REPORTES
+======================================== */
+
+/* Tablet (1024px y menos) */
+@media (max-width: 1024px) {
+  .report-container {
+    padding: 1.25rem;
+  }
+  
+  .card-shadow {
+    padding: 1.25rem;
+  }
+  
+  .report-header-title {
+    font-size: 1.375rem;
+  }
+}
+
+/* Mobile (768px y menos) */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 1rem;
+  }
+  
+  .card-shadow {
+    padding: 1rem;
+  }
+  
+  .report-header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .report-header-title {
+    font-size: 1.25rem;
+  }
+  
+  .report-header-subtitle {
+    font-size: 0.875rem;
+  }
+  
+  /* Filtros apilados verticalmente */
+  .report-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.875rem;
+  }
+  
+  .report-filters-left {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  
+  .report-search,
+  .report-select,
+  .report-export-button {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Small Mobile (480px y menos) */
+@media (max-width: 480px) {
+  .report-container {
+    padding: 0.75rem;
+  }
+  
+  .card-shadow {
+    padding: 0.875rem;
+    border-radius: 0.375rem;
+  }
+  
+  .report-header-title {
+    font-size: 1.125rem;
+  }
+  
+  .report-header-subtitle {
+    font-size: 0.8125rem;
+  }
+  
+  .report-search,
+  .report-select,
+  .report-export-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  .status-badge {
+    padding: 2px 6px;
+    font-size: 0.6875rem;
+  }
+}
+
+/* Tiny Mobile (360px y menos) */
+@media (max-width: 360px) {
+  .report-container {
+    padding: 0.5rem;
+  }
+  
+  .report-header-title {
+    font-size: 1rem;
+  }
+}

@@ -164,9 +164,9 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
       <div className="lista-header">
         <div className="header-actions" style={{ 
             display: 'flex', 
-            justifyContent: 'space-between', // Cambiado de 'flex-end'
-            alignItems: 'center',      // Añadido para alinear verticalmente
-            width: '100%'               // Asegura que ocupe todo el ancho
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            width: '100%'           
         }}>
           
           {/* 1. Barra de búsqueda añadida */}
@@ -176,7 +176,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
             className="search-input" // Usa la misma clase que en otros listados
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ flexGrow: 1, marginRight: '16px' }} // Permite que crezca y añade espacio
+            style={{ flexGrow: 1, marginRight: '16px' }} 
           />
 
           {/* 2. Contenedor para los botones */}

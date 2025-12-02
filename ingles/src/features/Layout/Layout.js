@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../../styles/perfil-usuario.css';
 
 
 function Layout({children}) {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const getCurrentUserName = () => {
     try {
@@ -21,6 +22,15 @@ function Layout({children}) {
     try { localStorage.removeItem('currentUser'); } catch (e) {}
     navigate('/login');
   };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
   return (
     <div className="perfil-usuario">
       <nav className="menu">
@@ -32,10 +42,24 @@ function Layout({children}) {
           />
           <h1 className="menu__logo">Administrador</h1>
 
-          <ul className="menu__links">
+          {/* Hamburger Menu Icon */}
+          <div 
+            className={`menu__hamburger ${menuOpen ? 'active' : ''}`} 
+            onClick={toggleMenu}
+            role="button"
+            aria-label="Toggle menu"
+            tabIndex={0}
+            onKeyPress={(e) => e.key === 'Enter' && toggleMenu()}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <ul className={`menu__links ${menuOpen ? 'active' : ''}`}>
             {/* ... (otros enlaces del menú: Inicio, Administrador, Profesor) ... */}
             <li className="menu__item">
-              <Link to="/" className="menu__link">Inicio</Link>
+              <Link to="/" className="menu__link" onClick={closeMenu}>Inicio</Link>
             </li>
 
             {/* Administrador */}
@@ -43,7 +67,7 @@ function Layout({children}) {
               <span className="menu__link">Administrador</span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <Link to="/lista-administradores" className="menu__link menu__link--inside">
+                  <Link to="/lista-administradores" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Lista Administradores
                   </Link>
                 </li>
@@ -55,12 +79,12 @@ function Layout({children}) {
               <span className="menu__link">Profesor</span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <Link to="/lista-profesores" className="menu__link menu__link--inside">
+                  <Link to="/lista-profesores" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Lista De Profesores
                   </Link>
                 </li>
                 <li className="menu__inside">
-                  <Link to="/lista-horarios" className="menu__link menu__link--inside">
+                  <Link to="/lista-horarios" className="menu__link menu__link--inside" onClick={closeMenu}>
                   Horarios
                   </Link>
                 </li>
@@ -72,13 +96,13 @@ function Layout({children}) {
               <span className="menu__link">Estudiantes</span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <Link to="/lista-estudiantes" className="menu__link menu__link--inside">
+                  <Link to="/lista-estudiantes" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Lista De Estudiantes
                   </Link>
                 </li>
                 <li className="menu__inside">
                   {/* --- MODIFICADO --- */}
-                  <Link to="/lista-grupos" className="menu__link menu__link--inside">
+                  <Link to="/lista-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Grupos De Estudiantes
                   </Link>
                   {/* --- FIN MODIFICADO --- */}
@@ -92,19 +116,19 @@ function Layout({children}) {
               <ul className="menu__nesting">
                 <li className="menu__inside">
                   {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
-                  <Link to="/reporte-profesores" className="menu__link menu__link--inside">
+                  <Link to="/reporte-profesores" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Reporte Profesores
                   </Link>
                 </li>
                 <li className="menu__inside">
                   {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
-                  <Link to="/reporte-estudiantes" className="menu__link menu__link--inside">
+                  <Link to="/reporte-estudiantes" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Reporte Estudiantes
                   </Link>
                 </li>
                 <li className="menu__inside">
                   {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
-                  <Link to="/reporte-grupos" className="menu__link menu__link--inside">
+                  <Link to="/reporte-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Reporte Grupos
                   </Link>
                 </li>
@@ -118,7 +142,7 @@ function Layout({children}) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
                   </a>
                 </li>

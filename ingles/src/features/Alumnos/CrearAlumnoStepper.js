@@ -42,7 +42,7 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
   const [nivelesDisponibles, setNivelesDisponibles] = useState([]);
 
   useEffect(() => {
-    // Filtrar niveles según ubicación (mismo comportamiento que el form original)
+    // Filtrar niveles según ubicación 
     const tecNivelIdsPattern = /^N[0-6]$/;
     if (alumno.ubicacion === 'Tecnologico') {
       setNivelesDisponibles(initialNiveles.filter(n => tecNivelIdsPattern.test(n.id)));
@@ -53,7 +53,7 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
 
   const handleChange = (field) => (e) => {
     let value = e.target.value;
-    // Sanitizaciones específicas
+    
     if (field === 'telefono') {
       // solo dígitos y máximo 10
       value = String(value).replace(/\D/g, '').slice(0, 10);
