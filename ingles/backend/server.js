@@ -5,13 +5,15 @@ const { testConnection } = require('./config/db');
 
 const app = express();
 
-// Middleware CORS - Permitir Vercel y localhost
+// Middleware CORS - Permitir Azure Static Web Apps, Vercel y localhost
 app.use(cors({
   origin: [
+    'https://gray-beach-0cdc4478f.3.azurestaticapps.net',  // Azure Static Web App
     'https://proyecto-2971.vercel.app',
     'http://localhost:3000',
     'http://localhost:3001',
-    /\.vercel\.app$/  // Permite cualquier subdominio de vercel.app
+    /\.vercel\.app$/,  // Permite cualquier subdominio de vercel.app
+    /\.azurestaticapps\.net$/  // Permite cualquier subdominio de Azure Static Web Apps
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
