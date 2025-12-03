@@ -32,12 +32,6 @@ jobs:
         cd backend
         npm ci
         npm prune --production
-    
-    - name: Crear archivo .deployment
-      run: |
-        echo "[config]" > .deployment
-        echo "SCM_DO_BUILD_DURING_DEPLOYMENT = true" >> .deployment
-        echo "PROJECT = backend" >> .deployment
 
     # OPCIÓN 1: Con Publish Profile (ACTIVA)
     - name: Deploy a Azure Web App
