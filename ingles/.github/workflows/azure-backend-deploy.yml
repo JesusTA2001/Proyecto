@@ -31,6 +31,11 @@ jobs:
       run: |
         cd backend
         npm ci
+        
+    - name: Crear paquete ZIP del backend
+      run: |
+        cd backend
+        zip -r ../backend-deploy.zip .
 
     # OPCIÓN 1: Con Publish Profile (ACTIVA)
     - name: Deploy a Azure Web App
@@ -38,7 +43,7 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        package: backend-deploy.zip
 
     # OPCIÓN 2: Con Azure CLI (comentada - usar solo si falla la Opción 1)
     # - name: Login a Azure
