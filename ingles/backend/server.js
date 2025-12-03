@@ -7,17 +7,35 @@ const app = express();
 
 // Middleware CORS - Permitir Azure Static Web Apps, Vercel y localhost
 app.use(cors({
-  origin: [
-    'https://gray-beach-0cdc4478f.3.azurestaticapps.net',  // Azure Static Web App
-    'https://proyecto-2971.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    /\.vercel\.app$/,  // Permite cualquier subdominio de vercel.app
-    /\.azurestaticapps\.net$/  // Permite cualquier subdominio de Azure Static Web Apps
-  ],
+  origin: function(origin, callback) {
+    // Permitir peticiones sin origin (como Postman o apps móviles)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://gray-beach-0cdc4478f.3.azurestaticapps.net',
+      'https://gray-beach-0cdc4470f.3.azurestaticapps.net',
+      'https://proyecto-2971.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ];
+    
+    // Verificar si el origin está en la lista o coincide con los patrones
+    const isAllowed = allowedOrigins.includes(origin) || 
+                      /\.vercel\.app$/.test(origin) ||
+                      /\.azurestaticapps\.net$/.test(origin);
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('🚫 Origen bloqueado por CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600 // Cache preflight por 10 minutos
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
