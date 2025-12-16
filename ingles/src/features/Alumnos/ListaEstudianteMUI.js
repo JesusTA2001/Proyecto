@@ -26,9 +26,13 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   // --- Filtros personalizados ---
   const filteredAlumnos = (alumnos || []).filter(alumno => {
     const term = (searchTerm || '').toLowerCase();
+    const nombreCompleto = alumno.nombreCompleto || `${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''} ${alumno.nombre || ''}`.trim();
     const matchesSearch =
       !term ||
+      nombreCompleto.toLowerCase().includes(term) ||
       (alumno.nombre || '').toLowerCase().includes(term) ||
+      (alumno.apellidoPaterno || '').toLowerCase().includes(term) ||
+      (alumno.apellidoMaterno || '').toLowerCase().includes(term) ||
       String(alumno.numero_control || '').toLowerCase().includes(term);
     const matchesStatus = !selectedStatus || alumno.estado === selectedStatus;
     const matchesCareer = !selectedCareer || alumno.carrera === selectedCareer;
@@ -40,7 +44,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   const rows = filteredAlumnos.map((alumno) => ({
     id: alumno.numero_control,
     numero_control: alumno.numero_control,
-    nombre: alumno.nombre,
+    nombre: alumno.nombreCompleto || `${alumno.nombre || ''} ${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''}`.trim(),
     carrera: alumno.carrera === '' ? 'No Aplica' : alumno.carrera,
     ubicacion: alumno.ubicacion,
     estado: alumno.estado,

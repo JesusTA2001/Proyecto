@@ -5,10 +5,10 @@ const { testConnection } = require('./config/db');
 
 const app = express();
 
-// Middleware CORS - Configuración específica para Azure Static Web Apps
+// Middleware CORS - Configuración para desarrollo local y Azure
 app.use(cors({
-  origin: "https://gray-beach-0cdc4470f.3.azurestaticapps.net",
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  origin: ["https://gray-beach-0cdc4470f.3.azurestaticapps.net", "http://localhost:3000"],
+  methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
   allowedHeaders: "Content-Type, Authorization",
   credentials: true
 }));
@@ -52,6 +52,7 @@ const periodosRoutes = require('./routes/periodos');
 const nivelesRoutes = require('./routes/niveles');
 const asistenciasRoutes = require('./routes/asistencias');
 const calificacionesRoutes = require('./routes/calificaciones');
+const estadoGrupoRoutes = require('./routes/estadoGrupo');
 
 // Registrar rutas
 app.use('/api/auth', authRoutes);
@@ -64,6 +65,7 @@ app.use('/api/periodos', periodosRoutes);
 app.use('/api/niveles', nivelesRoutes);
 app.use('/api/asistencias', asistenciasRoutes);
 app.use('/api/calificaciones', calificacionesRoutes);
+app.use('/api/estado-grupo', estadoGrupoRoutes);
 
 // Manejador de errores global
 app.use((err, req, res, next) => {

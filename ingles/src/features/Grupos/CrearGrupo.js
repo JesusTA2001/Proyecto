@@ -5,12 +5,17 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
+import Tooltip from '@mui/material/Tooltip';
 import api from '../../api/axios';
+import CrearPeriodo from '../Periodos/CrearPeriodo';
 import '../../styles/listaEstudiante.css';
 
 // Recibe props: agregarGrupo, niveles, periodos, profesores, alumnos
 function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
     const navigate = useNavigate();
+    const [openCrearPeriodo, setOpenCrearPeriodo] = useState(false);
     const [grupo, setGrupo] = useState({
         nombre: '',
         nivel: '',
@@ -28,6 +33,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
     const [profesoresDisponibles, setProfesoresDisponibles] = useState([]);
     const [alumnosDisponibles, setAlumnosDisponibles] = useState([]); // Alumnos que cumplen requisitos
     const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(new Set()); // IDs seleccionados
+    const [filtroAlumno, setFiltroAlumno] = useState(''); // Filtro de búsqueda
 
     // Opciones para el select de días
     const diasSemana = [
@@ -143,6 +149,41 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        // Validar y ajustar minutos a :00 o :30 para campos de hora
+        if ((name === 'horaInicio' || name === 'horaFin') && value) {
+            const [horas, minutos] = value.split(':');
+            const horaNum = parseInt(horas);
+            
+            // Validar rango de horas: 7am (07:00) a 11pm (23:00)
+            if (horaNum < 7 || horaNum > 23) {
+                alert('El horario debe estar entre 7:00 AM y 11:00 PM');
+                return;
+            }
+            
+            let minutosAjustados = minutos;
+            
+            // Redondear minutos a :00 o :30
+            const min = parseInt(minutos);
+            if (min < 15) {
+                minutosAjustados = '00';
+            } else if (min < 45) {
+                minutosAjustados = '30';
+            } else {
+                // Si es :45 o más, avanzar a la siguiente hora con :00
+                const nuevaHora = (horaNum + 1) % 24;
+                if (nuevaHora < 7 || nuevaHora > 23) {
+                    alert('El horario debe estar entre 7:00 AM y 11:00 PM');
+                    return;
+                }
+                setGrupo(prev => ({ ...prev, [name]: `${nuevaHora.toString().padStart(2, '0')}:00` }));
+                return;
+            }
+            
+            setGrupo(prev => ({ ...prev, [name]: `${horas}:${minutosAjustados}` }));
+            return;
+        }
+        
         setGrupo(prev => ({ ...prev, [name]: value }));
     };
 
@@ -168,13 +209,32 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
         setAlumnosSeleccionados(seleccion);
     };
 
+    const handlePeriodoCreado = (nuevoPeriodo) => {
+        // Recargar la página o actualizar el estado de periodos
+        window.location.reload();
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         // --- VALIDACIÓN ACTUALIZADA ---
-        if (!grupo.nombre || !grupo.nivel || !grupo.periodo || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
+        if (!grupo.nombre || !grupo.nivel || !grupo.periodo || !grupo.ubicacion || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
             alert("Por favor completa todos los campos del grupo, incluyendo día y horas.");
             return;
         }
+        
+        // Validar que la hora de fin sea mayor que la hora de inicio
+        if (grupo.horaInicio && grupo.horaFin) {
+            const [horaInicioH, horaInicioM] = grupo.horaInicio.split(':').map(Number);
+            const [horaFinH, horaFinM] = grupo.horaFin.split(':').map(Number);
+            const minutosInicio = horaInicioH * 60 + horaInicioM;
+            const minutosFin = horaFinH * 60 + horaFinM;
+            
+            if (minutosFin <= minutosInicio) {
+                alert("La hora de fin debe ser mayor que la hora de inicio.");
+                return;
+            }
+        }
+        
          if (alumnosSeleccionados.size === 0) {
              if (!window.confirm("¿Estás seguro de crear un grupo sin alumnos?")) {
                  return;
@@ -189,6 +249,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
     };
 
     return (
+        <>
         <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0 }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
@@ -208,10 +269,27 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty>
-                        <MenuItem value="">Selecciona un Periodo</MenuItem>
-                        {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
-                    </Select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty style={{ flex: 1 }}>
+                            <MenuItem value="">Selecciona un Periodo</MenuItem>
+                            {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
+                        </Select>
+                        <Tooltip title="Crear nuevo periodo" arrow>
+                            <IconButton 
+                                onClick={() => setOpenCrearPeriodo(true)}
+                                size="small"
+                                sx={{ 
+                                    backgroundColor: '#3b82f6',
+                                    color: 'white',
+                                    '&:hover': { backgroundColor: '#2563eb' },
+                                    width: '36px',
+                                    height: '36px'
+                                }}
+                            >
+                                <AddIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </div>
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <Select name="profesorId" value={grupo.profesorId} onChange={handleChange} fullWidth size="small" displayEmpty>
@@ -229,17 +307,67 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                     </Select>
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <TextField type="time" label="Hora Inicio" name="horaInicio" value={grupo.horaInicio} onChange={handleChange} fullWidth size="small" InputLabelProps={{ shrink: true }} />
+                    <TextField 
+                        type="time" 
+                        label="Hora Inicio" 
+                        name="horaInicio" 
+                        value={grupo.horaInicio} 
+                        onChange={handleChange} 
+                        fullWidth 
+                        size="small" 
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                            min: "07:00",
+                            max: "23:00",
+                            step: 1800 // 30 minutos en segundos
+                        }}
+                    />
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <TextField type="time" label="Hora Fin" name="horaFin" value={grupo.horaFin} onChange={handleChange} fullWidth size="small" InputLabelProps={{ shrink: true }} />
+                    <TextField 
+                        type="time" 
+                        label="Hora Fin" 
+                        name="horaFin" 
+                        value={grupo.horaFin} 
+                        onChange={handleChange} 
+                        fullWidth 
+                        size="small" 
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                            min: "07:00",
+                            max: "23:00",
+                            step: 1800 // 30 minutos en segundos
+                        }}
+                    />
                 </Grid>
 
                 <Grid item xs={12} md={8}>
                     <fieldset style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px', maxHeight: '48vh', overflowY: 'auto' }}>
                         <legend>Alumnos para el Grupo (Nivel: {grupo.nivel || 'N/A'}, Ubic: {grupo.ubicacion})</legend>
-                        {alumnosDisponibles.length > 0 ? (
-                            alumnosDisponibles.map(alumno => (
+                        <input
+                            type="text"
+                            placeholder="Buscar alumno por nombre o N° Control..."
+                            className="usuario"
+                            style={{ width: '100%', marginBottom: '10px' }}
+                            value={filtroAlumno}
+                            onChange={(e) => setFiltroAlumno(e.target.value)}
+                        />
+                        {alumnosDisponibles.filter(a => {
+                            if (!filtroAlumno) return true; // Si no hay filtro, mostrar todos
+                            
+                            const filtroLower = filtroAlumno.toLowerCase();
+                            const nombre = String(a.nombre || '').toLowerCase();
+                            const numeroControl = String(a.numero_control || '').toLowerCase();
+                            return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
+                        }).length > 0 ? (
+                            alumnosDisponibles.filter(a => {
+                                if (!filtroAlumno) return true; // Si no hay filtro, mostrar todos
+                                
+                                const filtroLower = filtroAlumno.toLowerCase();
+                                const nombre = String(a.nombre || '').toLowerCase();
+                                const numeroControl = String(a.numero_control || '').toLowerCase();
+                                return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
+                            }).map(alumno => (
                                 <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
                                     <input
                                         type="checkbox"
@@ -253,7 +381,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                                 </div>
                             ))
                         ) : (
-                            <p>No hay alumnos disponibles para este nivel y ubicación, o selecciona nivel/ubicación primero.</p>
+                            <p>No hay alumnos disponibles para este nivel y ubicación, o que coincidan con la búsqueda.</p>
                         )}
                     </fieldset>
                     <p style={{ marginTop: 8 }}>Alumnos seleccionados: {alumnosSeleccionados.size}</p>
@@ -276,6 +404,14 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                 </Grid>
             </Grid>
         </form>
+
+        {/* Modal para crear periodo */}
+        <CrearPeriodo
+            open={openCrearPeriodo}
+            onClose={() => setOpenCrearPeriodo(false)}
+            onPeriodoCreado={handlePeriodoCreado}
+        />
+    </>
     );
 }
 export default CrearGrupo;

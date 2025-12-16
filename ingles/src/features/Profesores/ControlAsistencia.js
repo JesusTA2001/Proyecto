@@ -20,6 +20,7 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [asistenciaYaGuardada, setAsistenciaYaGuardada] = useState(false);
 
   // Filtra los alumnos que pertenecen al grupo seleccionado
   const alumnosEnGrupo = useMemo(() => {
@@ -72,8 +73,17 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
       });
 
       if (response.data.success) {
-        // response.data.presentes es un array de nControl
-        setAsistenciasPresentes(new Set(response.data.presentes));
+        const presentes = response.data.presentes || [];
+        setAsistenciasPresentes(new Set(presentes));
+        
+        // Si hay al menos un registro de asistencia (presente o ausente), ya fue guardada
+        // Como solo guardamos presentes, si hay registros significa que ya se tomó asistencia
+        const yaHayRegistros = presentes.length > 0;
+        setAsistenciaYaGuardada(yaHayRegistros);
+        
+        if (yaHayRegistros) {
+          showToast('La asistencia para esta fecha ya fue registrada anteriormente', 'info');
+        }
       }
     } catch (error) {
       console.error('Error al cargar asistencias:', error);
@@ -81,6 +91,7 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
         showToast('Error al cargar asistencias', 'error');
       }
       setAsistenciasPresentes(new Set());
+      setAsistenciaYaGuardada(false);
     } finally {
       setIsLoading(false);
     }
@@ -131,6 +142,10 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
       return showToast('Selecciona un grupo primero', 'error');
     }
     
+    if (asistenciaYaGuardada) {
+      return showToast('La asistencia para esta fecha ya fue registrada', 'error');
+    }
+    
     setIsSaving(true);
     try {
       // Preparar datos para enviar
@@ -150,10 +165,19 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
           `Asistencia guardada: ${response.data.totalPresentes} presentes, ${response.data.totalAusentes} ausentes`, 
           'success'
         );
+        // Marcar como ya guardada después de guardar exitosamente
+        setAsistenciaYaGuardada(true);
       }
     } catch (error) {
       console.error('Error al guardar asistencia:', error);
-      showToast('Error al guardar la asistencia', 'error');
+      
+      // Si el backend indica que ya fue registrada
+      if (error.response?.data?.yaRegistrada) {
+        showToast(error.response.data.message || 'La asistencia ya fue registrada', 'error');
+        setAsistenciaYaGuardada(true);
+      } else {
+        showToast('Error al guardar la asistencia', 'error');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -195,12 +219,18 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
                 id="save-attendance" 
                 className="action-btn save" 
                 onClick={handleSave} 
-                disabled={isSaving || !selectedGrupoId}
-                style={{ marginLeft: 8 }}
+                disabled={isSaving || !selectedGrupoId || asistenciaYaGuardada}
+                style={{ marginLeft: 8, opacity: asistenciaYaGuardada ? 0.5 : 1 }}
+                title={asistenciaYaGuardada ? 'La asistencia ya fue registrada para esta fecha' : 'Guardar asistencia'}
               >
                 {isSaving ? <span className="loading-spinner"></span> : null}
-                {isSaving ? 'Guardando...' : 'Guardar Asistencia'}
+                {isSaving ? 'Guardando...' : asistenciaYaGuardada ? 'Ya Registrado' : 'Guardar Asistencia'}
               </button>
+              {asistenciaYaGuardada && (
+                <span style={{ color: '#f59e0b', fontSize: '0.875rem', fontWeight: '500' }}>
+                  ⚠️ Asistencia ya registrada
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-4">
               <button className="action-btn green" onClick={() => handleMarkAll('presente')}>

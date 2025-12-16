@@ -32,28 +32,46 @@ function DashboardAlumnos({ alumno }) {
   const [grupoActual, setGrupoActual] = useState(null);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [modalEditarDatos, setModalEditarDatos] = useState(false);
+  const [datosEditables, setDatosEditables] = useState({ email: '', telefono: '', direccion: '' });
 
   // Cargar datos desde la base de datos
   useEffect(() => {
     const cargarDatos = async () => {
-      if (!alumnoLogueado.numero_control) return;
+      const nControl = alumnoLogueado.nControl || alumnoLogueado.numero_control;
+      if (!nControl) return;
       
       try {
         setIsLoading(true);
         
-        // Cargar datos del estudiante desde la API (si tienes endpoint)
-        // Por ahora usamos los datos del localStorage que vienen del login
-        setDatosPersonales(alumnoLogueado);
+        // Cargar datos del estudiante desde la API
+        try {
+          const estudianteResponse = await api.get(`/alumnos/${nControl}`);
+          setDatosPersonales(estudianteResponse.data);
+          setDatosEditables({
+            email: estudianteResponse.data.email || '',
+            telefono: estudianteResponse.data.telefono || '',
+            direccion: estudianteResponse.data.direccion || ''
+          });
+        } catch (error) {
+          console.error('Error al cargar datos del estudiante:', error);
+          // Fallback a localStorage si falla la API
+          setDatosPersonales(alumnoLogueado);
+        }
         
         // Cargar grupo actual del estudiante
         // TODO: Crear endpoint para obtener grupo actual del estudiante
-        // const grupoResponse = await api.get(`/estudiantes/${alumnoLogueado.numero_control}/grupo-actual`);
+        // const grupoResponse = await api.get(`/estudiantes/${nControl}/grupo-actual`);
         // setGrupoActual(grupoResponse.data);
         
         // Cargar asistencias del estudiante
         try {
-          const asistenciasResponse = await api.get(`/asistencias/historial/${alumnoLogueado.numero_control}`);
-          setAttendanceRecords(asistenciasResponse.data || []);
+          const asistenciasResponse = await api.get(`/asistencias/historial/${nControl}`);
+          if (asistenciasResponse.data.success) {
+            setAttendanceRecords(asistenciasResponse.data.historial || []);
+          } else {
+            setAttendanceRecords([]);
+          }
         } catch (error) {
           console.error('Error al cargar asistencias:', error);
           setAttendanceRecords([]);
@@ -67,12 +85,75 @@ function DashboardAlumnos({ alumno }) {
     };
     
     cargarDatos();
-  }, [alumnoLogueado.numero_control]);
+  }, []);
 
   // Estados de los Modales (solo para ver datos, ya no editar)
   const [modals, setModals] = useState({
     personal: false
   });
+
+  // Manejadores para editar datos personales
+  const handleEditarDatos = () => {
+    setModalEditarDatos(true);
+  };
+
+  const handleCerrarModalEditar = () => {
+    setModalEditarDatos(false);
+    // Restaurar valores originales si se cancela
+    setDatosEditables({
+      email: datosPersonales?.email || '',
+      telefono: datosPersonales?.telefono || '',
+      direccion: datosPersonales?.direccion || ''
+    });
+  };
+
+  const handleGuardarDatos = async () => {
+    try {
+      // Usar nControl o numero_control según lo que esté disponible
+      const nControl = alumnoLogueado.nControl || alumnoLogueado.numero_control;
+      
+      console.log('Enviando datos:', datosEditables);
+      console.log('nControl del alumno:', nControl);
+      console.log('URL:', `/alumnos/${nControl}/datos-personales`);
+      
+      const response = await api.patch(`/alumnos/${nControl}/datos-personales`, datosEditables);
+      
+      console.log('Respuesta del servidor:', response.data);
+      
+      if (response.data.success) {
+        // Actualizar datos personales en el estado
+        setDatosPersonales(prev => ({
+          ...prev,
+          ...datosEditables
+        }));
+        
+        // Actualizar localStorage también
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        localStorage.setItem('currentUser', JSON.stringify({
+          ...currentUser,
+          ...datosEditables
+        }));
+        
+        alert('Datos actualizados exitosamente');
+        setModalEditarDatos(false);
+      }
+    } catch (error) {
+      console.error('Error completo:', error);
+      console.error('Respuesta del error:', error.response?.data);
+      console.error('Status del error:', error.response?.status);
+      
+      const mensajeError = error.response?.data?.message || 'Error al actualizar los datos. Por favor, intenta nuevamente.';
+      alert(mensajeError);
+    }
+  };
+
+  const handleCambioInput = (e) => {
+    const { name, value } = e.target;
+    setDatosEditables(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   // --- Cálculos de Estadísticas ---
   const stats = useMemo(() => {
@@ -83,9 +164,10 @@ function DashboardAlumnos({ alumno }) {
     const total = attendanceRecords.length;
     if (total === 0) return { asistencias: 0, faltas: 0, retardos: 0, porcentaje: 0 };
 
-    const asistencias = attendanceRecords.filter(r => r.presente || r.tipo === 'Asistencia').length;
-    const faltas = total - asistencias; // Los que no están en la lista son faltas
-    const porcentaje = Math.round((asistencias / total) * 100);
+    // Contar asistencias y faltas basado en el campo 'presente' o 'tipo'
+    const asistencias = attendanceRecords.filter(r => r.presente === true || r.tipo === 'Asistencia').length;
+    const faltas = attendanceRecords.filter(r => r.presente === false || r.tipo === 'Falta').length;
+    const porcentaje = total > 0 ? Math.round((asistencias / total) * 100) : 0;
 
     return { asistencias, faltas, retardos: 0, porcentaje };
   }, [attendanceRecords]);
@@ -118,16 +200,23 @@ function DashboardAlumnos({ alumno }) {
 
       {/* Sección: Datos Personales */}
       <section className="da-section section-purple">
-        <div className="da-section-header">
+        <div className="da-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>
             <div className="da-section-icon icon-bg-purple">👤</div>
             Datos Personales
           </h2>
+          <button 
+            className="createbutton" 
+            onClick={handleEditarDatos}
+            style={{ fontSize: '0.9rem', padding: '8px 16px' }}
+          >
+            ✏️ Editar Datos
+          </button>
         </div>
         <div className="da-info-grid">
           <div className="da-info-item">
             <span className="da-info-label">Número de Control</span>
-            <span className="da-info-value">{datosPersonales?.numero_control || 'N/A'}</span>
+            <span className="da-info-value">{datosPersonales?.nControl || alumnoLogueado?.nControl || alumnoLogueado?.numero_control || 'N/A'}</span>
           </div>
           <div className="da-info-item">
             <span className="da-info-label">Nombre Completo</span>
@@ -148,6 +237,10 @@ function DashboardAlumnos({ alumno }) {
           <div className="da-info-item">
             <span className="da-info-label">Género</span>
             <span className="da-info-value">{datosPersonales?.genero || 'N/A'}</span>
+          </div>
+          <div className="da-info-item">
+            <span className="da-info-label">Dirección</span>
+            <span className="da-info-value">{datosPersonales?.direccion || 'N/A'}</span>
           </div>
         </div>
       </section>
@@ -230,8 +323,8 @@ function DashboardAlumnos({ alumno }) {
                       <td>{record.grupo_nombre || 'N/A'}</td>
                       <td>{record.nivel_nombre || 'N/A'}</td>
                       <td>
-                        <span className={`da-attendance-badge badge-asistencia`}>
-                          Asistencia
+                        <span className={`da-attendance-badge ${record.presente || record.tipo === 'Asistencia' ? 'badge-asistencia' : 'badge-falta'}`}>
+                          {record.presente || record.tipo === 'Asistencia' ? 'Asistencia' : 'Falta'}
                         </span>
                       </td>
                     </tr>
@@ -242,6 +335,69 @@ function DashboardAlumnos({ alumno }) {
           </>
         )}
       </section>
+
+      {/* Modal para Editar Datos Personales */}
+      {modalEditarDatos && (
+        <div className="modal-overlay" onClick={handleCerrarModalEditar}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h2>✏️ Editar Datos Personales</h2>
+              <button className="modal-close" onClick={handleCerrarModalEditar}>×</button>
+            </div>
+            <div className="modal-body" style={{ padding: '20px' }}>
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333' }}>
+                  Correo Electrónico *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={datosEditables.email}
+                  onChange={handleCambioInput}
+                  className="form-input"
+                  style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333' }}>
+                  Teléfono *
+                </label>
+                <input
+                  type="tel"
+                  name="telefono"
+                  value={datosEditables.telefono}
+                  onChange={handleCambioInput}
+                  className="form-input"
+                  style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333' }}>
+                  Dirección
+                </label>
+                <textarea
+                  name="direccion"
+                  value={datosEditables.direccion}
+                  onChange={handleCambioInput}
+                  className="form-input"
+                  style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', minHeight: '80px', resize: 'vertical' }}
+                  placeholder="Calle, número, colonia, ciudad..."
+                />
+              </div>
+            </div>
+            <div className="modal-footer" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', padding: '15px 20px', borderTop: '1px solid #eee' }}>
+              <button className="deletebutton" onClick={handleCerrarModalEditar}>
+                Cancelar
+              </button>
+              <button className="createbutton" onClick={handleGuardarDatos}>
+                Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

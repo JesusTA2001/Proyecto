@@ -7,7 +7,9 @@ exports.getPeriodos = async (req, res) => {
       SELECT 
         id_Periodo,
         descripcion,
-        año
+        año,
+        fecha_inicio,
+        fecha_fin
       FROM Periodo
       ORDER BY año DESC, id_Periodo DESC
     `);
@@ -40,6 +42,107 @@ exports.getPeriodoById = async (req, res) => {
     console.error('Error al obtener periodo:', error);
     res.status(500).json({ 
       message: 'Error al obtener periodo', 
+      error: error.message 
+    });
+  }
+};
+
+// Crear un nuevo periodo
+exports.createPeriodo = async (req, res) => {
+  try {
+    const { descripcion, año, fecha_inicio, fecha_fin } = req.body;
+
+    // Validaciones
+    if (!descripcion || !año || !fecha_inicio || !fecha_fin) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Todos los campos son obligatorios (descripcion, año, fecha_inicio, fecha_fin)' 
+      });
+    }
+
+    // Verificar que el periodo no exista ya
+    const [existente] = await pool.query(
+      'SELECT id_Periodo FROM Periodo WHERE descripcion = ?',
+      [descripcion]
+    );
+
+    if (existente.length > 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Ya existe un periodo con esa descripción' 
+      });
+    }
+
+    // Insertar el periodo
+    const [result] = await pool.query(
+      'INSERT INTO Periodo (descripcion, año, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?)',
+      [descripcion, parseInt(año), fecha_inicio, fecha_fin]
+    );
+
+    // Obtener el periodo creado
+    const [nuevoPeriodo] = await pool.query(
+      'SELECT id_Periodo, descripcion, año, fecha_inicio, fecha_fin FROM Periodo WHERE id_Periodo = ?',
+      [result.insertId]
+    );
+
+    res.status(201).json({ 
+      success: true,
+      message: 'Periodo creado correctamente',
+      periodo: nuevoPeriodo[0]
+    });
+  } catch (error) {
+    console.error('Error al crear periodo:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al crear periodo', 
+      error: error.message 
+    });
+  }
+};
+
+// Eliminar un periodo
+exports.deletePeriodo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar que el periodo exista
+    const [periodo] = await pool.query(
+      'SELECT id_Periodo FROM Periodo WHERE id_Periodo = ?',
+      [id]
+    );
+
+    if (periodo.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Periodo no encontrado' 
+      });
+    }
+
+    // Verificar si hay grupos asociados
+    const [grupos] = await pool.query(
+      'SELECT COUNT(*) as total FROM Grupo WHERE id_Periodo = ?',
+      [id]
+    );
+
+    if (grupos[0].total > 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: `No se puede eliminar el periodo porque tiene ${grupos[0].total} grupo(s) asociado(s)` 
+      });
+    }
+
+    // Eliminar el periodo
+    await pool.query('DELETE FROM Periodo WHERE id_Periodo = ?', [id]);
+
+    res.json({ 
+      success: true,
+      message: 'Periodo eliminado correctamente' 
+    });
+  } catch (error) {
+    console.error('Error al eliminar periodo:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al eliminar periodo', 
       error: error.message 
     });
   }

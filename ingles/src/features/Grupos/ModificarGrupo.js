@@ -5,29 +5,16 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
 
 // Componente de multi-selección (puedes moverlo a un archivo separado e importarlo)
 function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
-    const [filtro, setFiltro] = useState('');
-    const alumnosFiltrados = (alumnos || []).filter(a =>
-        a.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-        a.numero_control.toLowerCase().includes(filtro.toLowerCase())
-    );
-
     return (
         <fieldset style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px', maxHeight: '300px', overflowY: 'auto' }}>
             <legend>Alumnos Disponibles ({seleccionados.size} seleccionados)</legend>
-            <input
-                type="text"
-                placeholder="Buscar alumno por nombre o N° Control..."
-                className="usuario"
-                style={{ width: '100%', marginBottom: '10px' }}
-                value={filtro}
-                onChange={(e) => setFiltro(e.target.value)}
-            />
-            {alumnosFiltrados.length > 0 ? (
-                alumnosFiltrados.map(alumno => (
+            {(alumnos || []).length > 0 ? (
+                (alumnos || []).map(alumno => (
                     <div key={alumno.numero_control} style={{ marginBottom: '5px' }}>
                         <input
                             type="checkbox"
@@ -41,7 +28,7 @@ function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
                     </div>
                 ))
             ) : (
-                <p>No hay alumnos disponibles para este nivel y ubicación, o que coincidan con la búsqueda.</p>
+                <p>No hay alumnos disponibles para este nivel y ubicación.</p>
             )}
         </fieldset>
     );
@@ -74,7 +61,13 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     useEffect(() => {
         // Si se recibe el grupo directamente (cuando se usa en modal), úsalo
         if (grupoProp) {
-            setGrupo({ dia: '', horaInicio: '', horaFin: '', periodo: grupoProp.id_Periodo || '', ...grupoProp });
+            setGrupo({ 
+                periodo: grupoProp.id_Periodo || '', 
+                dia: grupoProp.dia || '', 
+                horaInicio: grupoProp.horaInicio || '', 
+                horaFin: grupoProp.horaFin || '', 
+                ...grupoProp 
+            });
             // Cargar alumnos usando alumnoIds del grupo
             const alumnoIdsArray = Array.isArray(grupoProp.alumnoIds) ? grupoProp.alumnoIds : [];
             setAlumnosSeleccionados(new Set(alumnoIdsArray));
@@ -84,7 +77,13 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
         if (grupos && id) {
             const grupoAEditar = grupos.find(g => g.id === id);
             if (grupoAEditar) {
-                setGrupo({ dia: '', horaInicio: '', horaFin: '', periodo: grupoAEditar.id_Periodo || '', ...grupoAEditar });
+                setGrupo({ 
+                    periodo: grupoAEditar.id_Periodo || '', 
+                    dia: grupoAEditar.dia || '', 
+                    horaInicio: grupoAEditar.horaInicio || '', 
+                    horaFin: grupoAEditar.horaFin || '', 
+                    ...grupoAEditar 
+                });
                 const alumnoIdsArray = Array.isArray(grupoAEditar.alumnoIds) ? grupoAEditar.alumnoIds : [];
                 setAlumnosSeleccionados(new Set(alumnoIdsArray));
                 return;
@@ -122,21 +121,98 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
 
     // --- Filtrar Alumnos Disponibles ---
     useEffect(() => {
-        if (!grupo) return;
-        const filtered = (alumnos || []).filter(a =>
-            (a.estado === 'Activo' &&
-             a.ubicacion === grupo.ubicacion &&
-             a.nivel === grupo.nivel) ||
-            alumnosSeleccionados.has(a.numero_control) 
-        );
-         const uniqueAlumnos = Array.from(new Map(filtered.map(a => [a.numero_control, a])).values());
-        setAlumnosDisponibles(uniqueAlumnos);
+        if (!grupo || !grupo.ubicacion || !grupo.nivel) {
+            setAlumnosDisponibles([]);
+            return;
+        }
         
-    }, [grupo?.ubicacion, grupo?.nivel, alumnos, alumnosSeleccionados]);
+        const cargarAlumnosDisponibles = async () => {
+            try {
+                // Buscar el id_Nivel correspondiente al nivel seleccionado
+                const nivelObj = niveles.find(n => n.nombre === grupo.nivel);
+                
+                if (!nivelObj) {
+                    setAlumnosDisponibles([]);
+                    return;
+                }
+
+                const params = {
+                    ubicacion: grupo.ubicacion,
+                    nivel: nivelObj.id
+                };
+
+                const response = await api.get('/alumnos/disponibles/list', { params });
+                
+                // Mapear la respuesta para que tenga el formato esperado
+                const alumnosMapeados = response.data.map(a => ({
+                    numero_control: a.nControl,
+                    nombre: `${a.apellidoPaterno} ${a.apellidoMaterno} ${a.nombre}`.trim(),
+                    apellidoPaterno: a.apellidoPaterno,
+                    apellidoMaterno: a.apellidoMaterno,
+                    email: a.email,
+                    ubicacion: a.ubicacion,
+                    nivel: a.nivel_nombre || `Nivel ${a.id_Nivel}`,
+                    estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
+                }));
+                
+                // Agregar alumnos que ya están seleccionados en el grupo (para que no desaparezcan)
+                const alumnosYaSeleccionados = (alumnos || []).filter(a => 
+                    alumnosSeleccionados.has(a.numero_control)
+                );
+                
+                // Combinar y eliminar duplicados
+                const todosLosAlumnos = [...alumnosMapeados, ...alumnosYaSeleccionados];
+                const uniqueAlumnos = Array.from(new Map(todosLosAlumnos.map(a => [a.numero_control, a])).values());
+                
+                setAlumnosDisponibles(uniqueAlumnos);
+            } catch (error) {
+                console.error('❌ Error al cargar alumnos disponibles:', error);
+                setAlumnosDisponibles([]);
+            }
+        };
+
+        cargarAlumnosDisponibles();
+        
+    }, [grupo?.ubicacion, grupo?.nivel, niveles, alumnosSeleccionados]);
 
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        // Validar y ajustar minutos a :00 o :30 para campos de hora
+        if ((name === 'horaInicio' || name === 'horaFin') && value) {
+            const [horas, minutos] = value.split(':');
+            const horaNum = parseInt(horas);
+            
+            // Validar rango de horas: 7am (07:00) a 11pm (23:00)
+            if (horaNum < 7 || horaNum > 23) {
+                alert('El horario debe estar entre 7:00 AM y 11:00 PM');
+                return;
+            }
+            
+            let minutosAjustados = minutos;
+            
+            // Redondear minutos a :00 o :30
+            const min = parseInt(minutos);
+            if (min < 15) {
+                minutosAjustados = '00';
+            } else if (min < 45) {
+                minutosAjustados = '30';
+            } else {
+                // Si es :45 o más, avanzar a la siguiente hora con :00
+                const nuevaHora = (horaNum + 1) % 24;
+                if (nuevaHora < 7 || nuevaHora > 23) {
+                    alert('El horario debe estar entre 7:00 AM y 11:00 PM');
+                    return;
+                }
+                setGrupo(prev => ({ ...prev, [name]: `${nuevaHora.toString().padStart(2, '0')}:00` }));
+                return;
+            }
+            
+            setGrupo(prev => ({ ...prev, [name]: `${horas}:${minutosAjustados}` }));
+            return;
+        }
+        
         setGrupo(prev => {
             const newState = { ...prev, [name]: value };
              if (name === 'ubicacion' || name === 'nivel') {
@@ -171,9 +247,22 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     const handleSubmit = (e) => {
         e.preventDefault();
         // --- VALIDACIÓN AÑADIDA ---
-        if (!grupo.nombre || !grupo.nivel || !grupo.periodo || !grupo.ubicacion || !grupo.profesorId || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
+        if (!grupo.nombre || !grupo.nivel || !grupo.periodo || !grupo.ubicacion || !grupo.dia || !grupo.horaInicio || !grupo.horaFin) {
             alert("Por favor completa todos los campos del grupo, incluyendo día y horas.");
             return;
+        }
+        
+        // Validar que la hora de fin sea mayor que la hora de inicio
+        if (grupo.horaInicio && grupo.horaFin) {
+            const [horaInicioH, horaInicioM] = grupo.horaInicio.split(':').map(Number);
+            const [horaFinH, horaFinM] = grupo.horaFin.split(':').map(Number);
+            const minutosInicio = horaInicioH * 60 + horaInicioM;
+            const minutosFin = horaFinH * 60 + horaFinM;
+            
+            if (minutosFin <= minutosInicio) {
+                alert("La hora de fin debe ser mayor que la hora de inicio.");
+                return;
+            }
         }
         // -------------------------
 
@@ -197,10 +286,9 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     return (
         <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0 }}>
             <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                    <TextField label="ID del Grupo" name="id" value={grupo.id} fullWidth InputProps={{ readOnly: true }} size="small" margin="dense" />
-                </Grid>
-                <Grid item xs={12} md={8}>
+                {/* Campo oculto para mantener el ID sin mostrarlo al usuario */}
+                <input type="hidden" name="id" value={grupo.id} />
+                <Grid item xs={12}>
                     <TextField label="Nombre del Grupo" name="nombre" value={grupo.nombre} onChange={handleChange} fullWidth required size="small" margin="dense" />
                 </Grid>
 
@@ -240,22 +328,43 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                     </Select>
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <TextField type="time" label="Hora Inicio" name="horaInicio" value={grupo.horaInicio} onChange={handleChange} fullWidth size="small" InputLabelProps={{ shrink: true }} />
+                    <TextField 
+                        type="time" 
+                        label="Hora Inicio" 
+                        name="horaInicio" 
+                        value={grupo.horaInicio} 
+                        onChange={handleChange} 
+                        fullWidth 
+                        size="small" 
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                            min: "07:00",
+                            max: "23:00",
+                            step: 1800
+                        }}
+                    />
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <TextField type="time" label="Hora Fin" name="horaFin" value={grupo.horaFin} onChange={handleChange} fullWidth size="small" InputLabelProps={{ shrink: true }} />
+                    <TextField 
+                        type="time" 
+                        label="Hora Fin" 
+                        name="horaFin" 
+                        value={grupo.horaFin} 
+                        onChange={handleChange} 
+                        fullWidth 
+                        size="small" 
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                            min: "07:00",
+                            max: "23:00",
+                            step: 1800
+                        }}
+                    />
                 </Grid>
 
                 <Grid item xs={12} md={8}>
                     <fieldset style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px', maxHeight: '48vh', overflowY: 'auto' }}>
                         <legend>Alumnos Disponibles ({alumnosSeleccionados.size} seleccionados)</legend>
-                        <input
-                            type="text"
-                            placeholder="Buscar alumno por nombre o N° Control..."
-                            className="usuario"
-                            style={{ width: '100%', marginBottom: '10px' }}
-                            onChange={(e) => { const val = e.target.value; /* simple filter handled by alumnosDisponibles in useEffect */ const filtered = (alumnos || []).filter(a => (a.nombre.toLowerCase().includes(val.toLowerCase()) || a.numero_control.toLowerCase().includes(val.toLowerCase())) && (a.estado === 'Activo' && a.ubicacion === grupo.ubicacion && a.nivel === grupo.nivel || alumnosSeleccionados.has(a.numero_control))); setAlumnosDisponibles(filtered); }}
-                        />
                         {alumnosDisponibles.length > 0 ? (
                             alumnosDisponibles.map(alumno => (
                                 <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
@@ -271,7 +380,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                                 </div>
                             ))
                         ) : (
-                            <p>No hay alumnos disponibles para este nivel y ubicación, o que coincidan con la búsqueda.</p>
+                            <p>No hay alumnos disponibles para este nivel y ubicación.</p>
                         )}
                     </fieldset>
                 </Grid>

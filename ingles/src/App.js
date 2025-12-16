@@ -28,6 +28,8 @@ import LayoutDirectivos from './features/Layout/LayoutDirectivos';
 import AsignarCalificaciones from './features/Profesores/AsignarCalificaciones';
 // --- 1. IMPORTAR NUEVO COMPONENTE DE ASISTENCIA ---
 import ControlAsistencia from './features/Profesores/ControlAsistencia';
+// Administrar Periodos
+import AdministrarPeriodos from './features/Periodos/AdministrarPeriodos';
 import MisGrupos from './features/Profesores/MisGrupos';
 
 // CRUD Alumnos
@@ -132,10 +134,10 @@ function App() {
         // Mapear los datos de la BD al formato del frontend
         const alumnosMapeados = (alumnosRes.data || []).map(a => ({
           numero_control: a.nControl,
-          nombre: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${a.nombre || ''}`.trim(),
+          nombre: a.nombre, // Solo el nombre, no concatenar apellidos
+          nombreCompleto: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim(), // Nombre Apellido Paterno Apellido Materno
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
-          nombreCompleto: a.nombre,
           email: a.email,
           genero: a.genero,
           CURP: a.CURP,
@@ -179,22 +181,37 @@ function App() {
           estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
         }));
 
-        const gruposMapeados = (gruposRes.data || []).map(g => ({
-          id: g.id_Grupo,
-          nombre: g.grupo,
-          nivel: g.nivel_nombre || `Nivel ${g.id_Nivel}`,
-          ubicacion: g.ubicacion,
-          profesorId: g.id_Profesor,
-          profesor_nombre: g.profesor_nombre,
-          dia: g.diaSemana,
-          hora: g.hora,
-          id_cHorario: g.id_cHorario,
-          id_Periodo: g.id_Periodo,
-          id_Nivel: g.id_Nivel,
-          num_alumnos: g.num_alumnos || 0,
-          alumnoIds: g.alumnoIds || [],
-          alumnos: g.alumnos || []
-        }));
+        const gruposMapeados = (gruposRes.data || []).map(g => {
+          // Separar la hora en horaInicio y horaFin
+          let horaInicio = '';
+          let horaFin = '';
+          if (g.hora) {
+            const partes = g.hora.split('-');
+            if (partes.length === 2) {
+              horaInicio = partes[0].trim();
+              horaFin = partes[1].trim();
+            }
+          }
+          
+          return {
+            id: g.id_Grupo,
+            nombre: g.grupo,
+            nivel: g.nivel_nombre || `Nivel ${g.id_Nivel}`,
+            ubicacion: g.ubicacion,
+            profesorId: g.id_Profesor,
+            profesor_nombre: g.profesor_nombre,
+            dia: g.diaSemana,
+            hora: g.hora,
+            horaInicio,
+            horaFin,
+            id_cHorario: g.id_cHorario,
+            id_Periodo: g.id_Periodo,
+            id_Nivel: g.id_Nivel,
+            num_alumnos: g.num_alumnos || 0,
+            alumnoIds: g.alumnoIds || [],
+            alumnos: g.alumnos || []
+          };
+        });
 
         const horariosMapeados = (horariosRes.data || []).map(h => ({
           id: h.id_cHorario,
@@ -592,22 +609,37 @@ function App() {
 
       // Recargar grupos después de crear
       const gruposRes = await api.get('/grupos');
-      const gruposMapeados = gruposRes.data.map(g => ({
-        id: g.id_Grupo,
-        nombre: g.grupo,
-        nivel: g.nivel_nombre || `Nivel ${g.id_Nivel}`,
-        ubicacion: g.ubicacion,
-        profesorId: g.id_Profesor,
-        profesor_nombre: g.profesor_nombre,
-        dia: g.diaSemana,
-        hora: g.hora,
-        id_cHorario: g.id_cHorario,
-        id_Periodo: g.id_Periodo,
-        id_Nivel: g.id_Nivel,
-        num_alumnos: g.num_alumnos || 0,
-        alumnoIds: g.alumnoIds || [],
-        alumnos: g.alumnos || []
-      }));
+      const gruposMapeados = gruposRes.data.map(g => {
+        // Separar la hora en horaInicio y horaFin
+        let horaInicio = '';
+        let horaFin = '';
+        if (g.hora) {
+          const partes = g.hora.split('-');
+          if (partes.length === 2) {
+            horaInicio = partes[0].trim();
+            horaFin = partes[1].trim();
+          }
+        }
+        
+        return {
+          id: g.id_Grupo,
+          nombre: g.grupo,
+          nivel: g.nivel_nombre || `Nivel ${g.id_Nivel}`,
+          ubicacion: g.ubicacion,
+          profesorId: g.id_Profesor,
+          profesor_nombre: g.profesor_nombre,
+          dia: g.diaSemana,
+          hora: g.hora,
+          horaInicio,
+          horaFin,
+          id_cHorario: g.id_cHorario,
+          id_Periodo: g.id_Periodo,
+          id_Nivel: g.id_Nivel,
+          num_alumnos: g.num_alumnos || 0,
+          alumnoIds: g.alumnoIds || [],
+          alumnos: g.alumnos || []
+        };
+      });
       setGrupos(gruposMapeados);
       
       return response.data;
@@ -655,22 +687,37 @@ function App() {
 
       // Recargar grupos después de actualizar
       const gruposRes = await api.get('/grupos');
-      const gruposMapeados = gruposRes.data.map(g => ({
-        id: g.id_Grupo,
-        nombre: g.grupo,
-        nivel: g.nivel_nombre || `Nivel ${g.id_Nivel}`,
-        ubicacion: g.ubicacion,
-        profesorId: g.id_Profesor,
-        profesor_nombre: g.profesor_nombre,
-        dia: g.diaSemana,
-        hora: g.hora,
-        id_cHorario: g.id_cHorario,
-        id_Periodo: g.id_Periodo,
-        id_Nivel: g.id_Nivel,
-        num_alumnos: g.num_alumnos || 0,
-        alumnoIds: g.alumnoIds || [],
-        alumnos: g.alumnos || []
-      }));
+      const gruposMapeados = gruposRes.data.map(g => {
+        // Separar la hora en horaInicio y horaFin
+        let horaInicio = '';
+        let horaFin = '';
+        if (g.hora) {
+          const partes = g.hora.split('-');
+          if (partes.length === 2) {
+            horaInicio = partes[0].trim();
+            horaFin = partes[1].trim();
+          }
+        }
+        
+        return {
+          id: g.id_Grupo,
+          nombre: g.grupo,
+          nivel: g.nivel_nombre || `Nivel ${g.id_Nivel}`,
+          ubicacion: g.ubicacion,
+          profesorId: g.id_Profesor,
+          profesor_nombre: g.profesor_nombre,
+          dia: g.diaSemana,
+          hora: g.hora,
+          horaInicio,
+          horaFin,
+          id_cHorario: g.id_cHorario,
+          id_Periodo: g.id_Periodo,
+          id_Nivel: g.id_Nivel,
+          num_alumnos: g.num_alumnos || 0,
+          alumnoIds: g.alumnoIds || [],
+          alumnos: g.alumnos || []
+        };
+      });
       setGrupos(gruposMapeados);
     } catch (error) {
       console.error('Error al actualizar grupo:', error);
@@ -873,6 +920,22 @@ function App() {
               )
           } />
           <Route path="/ver-grupo/:id" element={<Layout><VerGrupo grupos={grupos} profesores={profesores} alumnos={alumnos} /></Layout>} />
+
+          {/* Periodos */}
+          <Route path="/administrar-periodos" element={
+            currentUser && (currentUser.role === 'administrador' || currentUser.role === 'directivo' || currentUser.role === 'coordinador')
+              ? (
+                currentUser.role === 'directivo' ? (
+                  <LayoutDirectivos><AdministrarPeriodos /></LayoutDirectivos>
+                ) : currentUser.role === 'coordinador' ? (
+                  <LayoutCoordinador><AdministrarPeriodos /></LayoutCoordinador>
+                ) : (
+                  <Layout><AdministrarPeriodos /></Layout>
+                )
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
 
 
           {/* Horarios */}

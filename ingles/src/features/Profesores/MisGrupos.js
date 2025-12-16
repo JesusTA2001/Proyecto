@@ -59,7 +59,7 @@ function MisGrupos({ profesor, gruposAsignados = [], alumnos = [], profesores = 
       group_id: grupo.id,
       group_name: grupo.nombre,
       student_count: grupo.alumnoIds?.length || 0,
-      schedule: `${grupo.dia} ${grupo.horaInicio}-${grupo.horaFin}`,
+      schedule: `${grupo.dia || 'Sin día'} ${grupo.horaInicio && grupo.horaFin ? `${grupo.horaInicio}-${grupo.horaFin}` : grupo.hora || 'Sin horario'}`,
       classroom: grupo.ubicacion, // Usamos ubicación como aula
       
       // Datos simulados (como en el HTML de Canva)
@@ -192,15 +192,29 @@ function MisGrupos({ profesor, gruposAsignados = [], alumnos = [], profesores = 
             sortedGrupos.map(group => (
               <div key={group.group_id} className="flex items-center justify-between p-4 group-card">
                 <div className="flex items-center space-x-4">
-                  <div className="group-card-icon">
-                    <span>{String(group.group_id).substring(0, 4)}</span> {/* Acorta el ID si es largo */}
-                  </div>
                   <div>
                     <h4 className="font-semibold text-gray-800">{group.group_name}</h4>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>📍 {group.classroom}</span>
                       <span>🕒 {group.schedule}</span>
                       <span>👥 {group.student_count} estudiantes</span>
+                      <button 
+                        className="accion-link view-button"
+                        onClick={() => handleViewDetails(group.group_id)}
+                        title="Ver detalles del grupo"
+                        style={{ 
+                          fontSize: '1.5rem',
+                          padding: '0 12px',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          verticalAlign: 'middle'
+                        }}
+                      >
+                        👁️
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -219,12 +233,6 @@ function MisGrupos({ profesor, gruposAsignados = [], alumnos = [], profesores = 
                         <span className="text-sm font-medium text-gray-700">{group.attendance_rate}%</span>
                       </div>
                     </div>
-                    <button 
-                      className="group-card-button" 
-                      onClick={() => handleViewDetails(group.group_id)}
-                    >
-                      Ver Detalles
-                    </button>
                   </div>
                 </div>
               </div>

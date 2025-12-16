@@ -84,7 +84,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
       renderCell: (params) => {
         const p = profesores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado);
         return (
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
+          <div className='acciones-cell' style={{ display: 'flex', gap: '0.4rem' }}>
             <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedProfesor(p); setOpenView(true); }}>👁️</button>
             {!isDirectivo && (
               <>

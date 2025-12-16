@@ -9,5 +9,7 @@ router.use(authMiddleware);
 // Rutas para periodos
 router.get('/', periodoController.getPeriodos);
 router.get('/:id', periodoController.getPeriodoById);
+router.post('/', periodoController.createPeriodo);
+router.delete('/:id', periodoController.deletePeriodo);
 
 module.exports = router;

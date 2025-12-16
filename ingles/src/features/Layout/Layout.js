@@ -107,6 +107,11 @@ function Layout({children}) {
                   </Link>
                   {/* --- FIN MODIFICADO --- */}
                 </li>
+                <li className="menu__inside">
+                  <Link to="/administrar-periodos" className="menu__link menu__link--inside" onClick={closeMenu}>
+                    Administrar Periodos
+                  </Link>
+                </li>
               </ul>
             </li>
 

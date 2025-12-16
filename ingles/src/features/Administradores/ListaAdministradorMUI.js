@@ -84,7 +84,7 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
       renderCell: (params) => {
         const admin = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado);
         return (
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className='acciones-cell' style={{ display: 'flex', gap: '0.5rem' }}>
             <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedAdmin(admin); setOpenView(true); }}>👁️</button>
             {!isDirectivo && (
               <>

@@ -307,3 +307,65 @@ exports.toggleEstadoAlumno = async (req, res) => {
     res.status(500).json({ message: 'Error al cambiar estado', error: error.message });
   }
 };
+
+// Actualizar datos personales del estudiante (solo campos editables)
+exports.updateDatosPersonalesAlumno = async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params; // nControl
+    const { email, telefono, direccion } = req.body;
+
+    // Validaciones básicas
+    if (!email || !telefono) {
+      await connection.rollback();
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email y teléfono son obligatorios' 
+      });
+    }
+
+    // 1. Obtener id_dp del estudiante
+    const [estudiante] = await connection.query(
+      'SELECT id_dp FROM Estudiante WHERE nControl = ?',
+      [id]
+    );
+
+    if (estudiante.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ 
+        success: false,
+        message: 'Alumno no encontrado' 
+      });
+    }
+
+    const id_dp = estudiante[0].id_dp;
+
+    // 2. Actualizar solo los campos editables
+    await connection.query(
+      `UPDATE DatosPersonales 
+       SET email = ?, telefono = ?, direccion = ?
+       WHERE id_dp = ?`,
+      [email, telefono, direccion || null, id_dp]
+    );
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Datos actualizados exitosamente'
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error al actualizar datos personales:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al actualizar datos personales', 
+      error: error.message 
+    });
+  } finally {
+    connection.release();
+  }
+};

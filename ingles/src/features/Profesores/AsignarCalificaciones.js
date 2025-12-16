@@ -162,7 +162,7 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
       });
 
       if (response.data.success) {
-        showToast(`${parcialKey} guardado`, 'success');
+        // Guardado automático sin notificación
       }
     } catch (error) {
       console.error('Error al guardar parcial:', error);
@@ -426,8 +426,30 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
                     />
                   )
                 },
-                { field: 'promedio', headerName: 'Promedio', width: 120, align: 'center', headerAlign: 'center' },
-                { field: 'aprobado', headerName: 'Estado', width: 140, align: 'center', headerAlign: 'center' },
+                { field: 'promedio', headerName: 'Promedio', width: 120, align: 'center', headerAlign: 'center', 
+                  renderCell: (params) => {
+                    const prom = params.row.promedio;
+                    const color = prom >= 70 ? '#16a34a' : '#dc2626';
+                    return <span style={{ fontWeight: 'bold', color }}>{prom}</span>;
+                  }
+                },
+                { field: 'aprobado', headerName: 'Estado', width: 140, align: 'center', headerAlign: 'center',
+                  renderCell: (params) => {
+                    const estado = params.row.aprobado;
+                    const isAprobado = estado === 'APROBADO';
+                    return (
+                      <span style={{ 
+                        fontWeight: 'bold', 
+                        color: isAprobado ? '#16a34a' : '#dc2626',
+                        backgroundColor: isAprobado ? '#dcfce7' : '#fee2e2',
+                        padding: '4px 8px',
+                        borderRadius: '4px'
+                      }}>
+                        {estado}
+                      </span>
+                    );
+                  }
+                },
               ]}
               disableRowSelectionOnClick
               components={{ Toolbar: GridToolbar }}
@@ -438,7 +460,6 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
 
           <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}> 
             <div>
-              <Button variant="contained" color="primary" onClick={handleSaveAll} disabled={!allValid}>Guardar Calificaciones</Button>
               {!allValid && invalidStudents.length > 0 && (
                 <div style={{ marginTop: 8, color: '#b91c1c' }}>
                   {invalidStudents.length} estudiante(s) con parciales menores a 70. <Button size="small" onClick={() => setInvalidModalOpen(true)}>Ver detalles</Button>
@@ -451,14 +472,21 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
             </div>
           </div>
 
-          {/* Toast simple */}
-          {toast.open && (
-            <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 2000 }}>
-              <div style={{ padding: '10px 16px', borderRadius: 8, color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', background: toast.type === 'error' ? '#ef4444' : toast.type === 'info' ? '#2563eb' : '#10b981' }}>
-                {toast.message}
-              </div>
-            </div>
-          )}
+          {/* Toast usando Snackbar de Material-UI */}
+          <Snackbar
+            open={toast.open}
+            autoHideDuration={1000}
+            onClose={() => setToast(prev => ({ ...prev, open: false }))}
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <Alert 
+              onClose={() => setToast(prev => ({ ...prev, open: false }))} 
+              severity={toast.type === 'error' ? 'error' : toast.type === 'info' ? 'info' : 'success'} 
+              sx={{ width: '100%' }}
+            >
+              {toast.message}
+            </Alert>
+          </Snackbar>
         </div>
       </div>
     </div>

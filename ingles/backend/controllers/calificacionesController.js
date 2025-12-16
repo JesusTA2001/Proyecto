@@ -18,11 +18,15 @@ exports.getCalificacionesEstudiante = async (req, res) => {
         c.id_Grupo,
         n.nivel as nivel_nombre,
         p.descripcion as periodo_nombre,
-        g.grupo as grupo_nombre
+        g.grupo as grupo_nombre,
+        CONCAT(dp.apellidoPaterno, ' ', dp.apellidoMaterno, ' ', dp.nombre) as profesor_nombre
       FROM Calificaciones c
       LEFT JOIN Nivel n ON c.id_nivel = n.id_Nivel
       LEFT JOIN Periodo p ON c.id_Periodo = p.id_Periodo
       LEFT JOIN Grupo g ON c.id_Grupo = g.id_Grupo
+      LEFT JOIN Profesor prof ON g.id_Profesor = prof.id_Profesor
+      LEFT JOIN Empleado emp ON prof.id_empleado = emp.id_empleado
+      LEFT JOIN DatosPersonales dp ON emp.id_dp = dp.id_dp
       WHERE c.nControl = ?
       ORDER BY c.id_Periodo DESC, c.id_Grupo
     `, [nControl]);

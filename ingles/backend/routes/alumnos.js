@@ -8,7 +8,8 @@ const {
   createAlumno,
   updateAlumno,
   deleteAlumno,
-  toggleEstadoAlumno
+  toggleEstadoAlumno,
+  updateDatosPersonalesAlumno
 } = require('../controllers/alumnoController');
 
 // Todas las rutas requieren autenticación
@@ -20,6 +21,7 @@ router.get('/disponibles/list', getAlumnosDisponibles);
 router.get('/:id', getAlumnoById);
 router.post('/', createAlumno);
 router.put('/:id', updateAlumno);
+router.patch('/:id/datos-personales', updateDatosPersonalesAlumno);
 router.delete('/:id', deleteAlumno);
 router.patch('/:id/toggle-estado', toggleEstadoAlumno);
 

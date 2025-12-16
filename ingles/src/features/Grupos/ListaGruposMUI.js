@@ -74,7 +74,7 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
       const rowId = params && params.row ? params.row.id : null;
       const handleSelect = () => { const g = grupos.find(x => x.id === rowId); setSelectedGrupo(g); };
       return (
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <div className='acciones-cell' style={{ display: 'flex', gap: '0.4rem' }}>
           <button className='view-button icon-button' title='Ver' onClick={() => { handleSelect(); setOpenView(true); }}>👁️</button>
           {!isDirectivo && (
             <>

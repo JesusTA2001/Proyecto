@@ -97,13 +97,22 @@ exports.guardarAsistenciasMasivas = async (req, res) => {
 
     await connection.beginTransaction();
 
-    // Primero, eliminar todas las asistencias existentes para este grupo y fecha
-    await connection.query(
-      'DELETE FROM Asistencia WHERE id_Grupo = ? AND fecha = ?',
+    // Verificar si ya existen registros de asistencia para este grupo y fecha
+    const [existentes] = await connection.query(
+      'SELECT COUNT(*) as total FROM Asistencia WHERE id_Grupo = ? AND fecha = ?',
       [id_Grupo, fecha]
     );
 
-    // Luego, insertar solo los que están presentes
+    if (existentes[0].total > 0) {
+      await connection.rollback();
+      return res.status(400).json({ 
+        success: false, 
+        message: 'La asistencia para esta fecha ya fue registrada previamente',
+        yaRegistrada: true
+      });
+    }
+
+    // Insertar solo los que están presentes
     const presentes = asistencias.filter(a => a.presente);
     
     if (presentes.length > 0) {
@@ -247,22 +256,75 @@ exports.obtenerHistorialAlumno = async (req, res) => {
       });
     }
 
-    const [historial] = await pool.query(
-      `SELECT a.id_asistencia, a.fecha, 
-              g.grupo as nombreGrupo, g.ubicacion,
-              n.nivel as nombreNivel
-       FROM Asistencia a
-       JOIN Grupo g ON a.id_Grupo = g.id_Grupo
+    // Primero obtener el grupo actual del estudiante
+    const [grupoActual] = await pool.query(
+      `SELECT eg.id_Grupo, g.grupo as nombreGrupo, n.nivel as nombreNivel
+       FROM EstudianteGrupo eg
+       JOIN Grupo g ON eg.id_Grupo = g.id_Grupo
        JOIN Nivel n ON g.id_Nivel = n.id_Nivel
-       WHERE a.nControl = ?
-       ORDER BY a.fecha DESC`,
+       WHERE eg.nControl = ? AND eg.estado = 'actual'
+       LIMIT 1`,
       [nControl]
     );
+
+    if (grupoActual.length === 0) {
+      return res.json({ 
+        success: true,
+        nControl: parseInt(nControl),
+        totalAsistencias: 0,
+        totalFaltas: 0,
+        totalClases: 0,
+        historial: []
+      });
+    }
+
+    const idGrupo = grupoActual[0].id_Grupo;
+    const nombreGrupo = grupoActual[0].nombreGrupo;
+    const nombreNivel = grupoActual[0].nombreNivel;
+
+    // Obtener todas las fechas donde hubo clase (basado en registros de asistencia del grupo)
+    const [fechasClases] = await pool.query(
+      `SELECT DISTINCT fecha 
+       FROM Asistencia 
+       WHERE id_Grupo = ?
+       ORDER BY fecha DESC`,
+      [idGrupo]
+    );
+
+    // Obtener las asistencias del alumno
+    const [asistenciasAlumno] = await pool.query(
+      `SELECT fecha
+       FROM Asistencia
+       WHERE nControl = ? AND id_Grupo = ?`,
+      [nControl, idGrupo]
+    );
+
+    // Crear un Set con las fechas donde el alumno asistió
+    const fechasAsistio = new Set(asistenciasAlumno.map(a => a.fecha));
+
+    // Construir historial completo (asistencias y faltas)
+    const historial = fechasClases.map(fc => {
+      const asistio = fechasAsistio.has(fc.fecha);
+      return {
+        fecha: fc.fecha,
+        grupo_nombre: nombreGrupo,
+        nivel_nombre: nombreNivel,
+        presente: asistio,
+        tipo: asistio ? 'Asistencia' : 'Falta'
+      };
+    });
+
+    const totalClases = fechasClases.length;
+    const totalAsistencias = asistenciasAlumno.length;
+    const totalFaltas = totalClases - totalAsistencias;
 
     res.json({ 
       success: true,
       nControl: parseInt(nControl),
-      totalAsistencias: historial.length,
+      totalAsistencias,
+      totalFaltas,
+      totalClases,
+      porcentajeAsistencia: totalClases > 0 ? Math.round((totalAsistencias / totalClases) * 100) : 0,
       historial
     });
   } catch (error) {

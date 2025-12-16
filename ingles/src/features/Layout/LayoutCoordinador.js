@@ -112,9 +112,9 @@ function LayoutCoordinador({ children }) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
-                  <button type="button" className="menu__link menu__link--inside" onClick={() => { handleLogout(); closeMenu(); }}>
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
-                  </button>
+                  </a>
                 </li>
               </ul>
             </li>

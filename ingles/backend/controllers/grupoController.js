@@ -25,6 +25,7 @@ exports.getGrupos = async (req, res) => {
       LEFT JOIN DatosPersonales dp_prof ON e.id_dp = dp_prof.id_dp
       LEFT JOIN catalogohorarios ch ON g.id_cHorario = ch.id_cHorario
       LEFT JOIN Nivel n ON g.id_Nivel = n.id_Nivel
+      WHERE g.estado = 'activo'
       ORDER BY g.id_Grupo
     `);
 
@@ -109,10 +110,10 @@ exports.createGrupo = async (req, res) => {
     const { grupo, id_Periodo, id_Profesor, id_Nivel, ubicacion, id_cHorario, dia, horaInicio, horaFin, alumnoIds } = req.body;
 
     // Validar campos requeridos básicos
-    if (!grupo || !id_Profesor || !ubicacion) {
+    if (!grupo || !ubicacion) {
       await connection.rollback();
       return res.status(400).json({ 
-        message: 'Faltan campos requeridos (grupo, id_Profesor, ubicacion)' 
+        message: 'Faltan campos requeridos (grupo, ubicacion)' 
       });
     }
 
@@ -151,7 +152,7 @@ exports.createGrupo = async (req, res) => {
     // Insertar grupo
     const [result] = await connection.query(
       'INSERT INTO Grupo (grupo, id_Periodo, id_Profesor, id_Nivel, ubicacion, id_cHorario) VALUES (?, ?, ?, ?, ?, ?)',
-      [grupo, periodoFinal, id_Profesor, nivelFinal, ubicacion, horarioFinal]
+      [grupo, periodoFinal, id_Profesor || null, nivelFinal, ubicacion, horarioFinal]
     );
 
     const nuevoGrupoId = result.insertId;
@@ -205,9 +206,9 @@ exports.updateGrupo = async (req, res) => {
       return res.status(404).json({ message: 'Grupo no encontrado' });
     }
 
-    // Si se proporcionan día y horas pero no id_cHorario, buscar o crear el horario
+    // Si se proporcionan día y horas, buscar o crear el horario (independientemente de si ya tiene id_cHorario)
     let horarioFinal = id_cHorario;
-    if (dia && horaInicio && horaFin && !id_cHorario) {
+    if (dia && horaInicio && horaFin) {
       const horaCompleta = `${horaInicio}-${horaFin}`;
       
       // Buscar horario existente
@@ -231,7 +232,7 @@ exports.updateGrupo = async (req, res) => {
     // Actualizar grupo
     await connection.query(
       'UPDATE Grupo SET grupo = ?, id_Periodo = ?, id_Profesor = ?, id_Nivel = ?, ubicacion = ?, id_cHorario = ? WHERE id_Grupo = ?',
-      [grupo, id_Periodo, id_Profesor, id_Nivel, ubicacion, horarioFinal, id]
+      [grupo, id_Periodo, id_Profesor || null, id_Nivel, ubicacion, horarioFinal, id]
     );
 
     await connection.commit();

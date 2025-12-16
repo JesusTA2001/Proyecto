@@ -142,16 +142,7 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
             </div>
           </Link>
 
-          {/* Tarjeta 4: Promedio General (Simulado) */ }
-          <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
-            <div className="stat-card-info">
-              <p className="stat-card-title">PROMEDIO GENERAL (Sim.)</p>
-              <p className="stat-card-value">{promedioGeneral}</p>
-            </div>
-            <div className="stat-card-icon-wrapper" style={{ backgroundColor: '#fef3c7', color: '#f59e0b' }}>⭐</div>
-          </div>
-
-          {/* Tarjeta 5: Asignar Calificaciones */ }
+          {/* Tarjeta 4: Asignar Calificaciones */ }
           <Link to="/profesor/calificaciones" className="stat-card-link" style={{ marginLeft: 0 }}>
             <div className="stat-card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
               <div className="stat-card-info">
@@ -161,6 +152,15 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
               <div className="stat-card-icon-wrapper" style={{ backgroundColor: 'var(--color-primary-light, #f3e8ff)', color: 'var(--color-primary, #7A1F5C)' }}>✏️</div>
             </div>
           </Link>
+
+          {/* Tarjeta 5: Promedio General (Simulado) */ }
+          <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+            <div className="stat-card-info">
+              <p className="stat-card-title">PROMEDIO GENERAL (Sim.)</p>
+              <p className="stat-card-value">{promedioGeneral}</p>
+            </div>
+            <div className="stat-card-icon-wrapper" style={{ backgroundColor: '#fef3c7', color: '#f59e0b' }}>⭐</div>
+          </div>
           
           {/* Portal de Alumnos eliminado del dashboard */}
         </div>
@@ -193,35 +193,81 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
             )}
           </div>
 
-          {/* Estudiantes por Grupo (Gráfico de barras) */}
+          {/* Estudiantes por Grupo (Gráfico de barras verticales) */}
           <div className="card-white rounded-lg shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               📊 Estudiantes por Grupo
             </h2>
-            <div className="flex flex-col gap-4">
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-end', 
+              justifyContent: 'space-around', 
+              height: '300px',
+              gap: '12px',
+              borderBottom: '2px solid #e5e7eb',
+              paddingBottom: '0'
+            }}>
              {gruposAsignados.length > 0 && totalEstudiantes > 0 ? (
-                gruposAsignados.map((grupo) => {
-                  // Evitar división por cero si totalEstudiantes es 0
-                  const maxStudents = Math.max(totalEstudiantes, 1);
+                gruposAsignados.map((grupo, index) => {
                   const cantidadAlumnos = (grupo.alumnoIds || []).length;
-                  const porcentaje = Math.max(
-                    1, 
-                    (cantidadAlumnos / maxStudents) * 100
-                  );
+                  const maxAlumnos = Math.max(...gruposAsignados.map(g => (g.alumnoIds || []).length), 1);
+                  const alturaPorcentaje = ((cantidadAlumnos / maxAlumnos) * 85) + 10; // Escala de 10% a 95%
+                  
+                  // Array de colores llamativos
+                  const colores = [
+                    '#8b5cf6', // Púrpura
+                    '#3b82f6', // Azul
+                    '#10b981', // Verde
+                    '#f59e0b', // Amarillo/Naranja
+                    '#ef4444', // Rojo
+                    '#ec4899', // Rosa
+                    '#06b6d4', // Cian
+                    '#8b5cf6', // Púrpura (repite)
+                  ];
+                  
+                  const color = colores[index % colores.length];
+                  
                   return (
-                    <div key={grupo.id}>
-                      <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
-                        <span>{grupo.nombre}</span>
-                        <span>{cantidadAlumnos}</span>
+                    <div key={grupo.id} style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      flex: 1,
+                      minWidth: '60px',
+                      height: '100%'
+                    }}>
+                      <div style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '700',
+                        color: '#374151',
+                        marginBottom: '4px',
+                        textAlign: 'center'
+                      }}>
+                        {cantidadAlumnos}
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="h-2 rounded-full"
-                          style={{ 
-                            width: `${porcentaje}%`, 
-                            backgroundColor: 'var(--color-primary)' 
-                          }}
-                        ></div>
+                      <div style={{
+                        width: '100%',
+                        maxWidth: '80px',
+                        height: `${alturaPorcentaje}%`,
+                        backgroundColor: color,
+                        borderRadius: '8px 8px 0 0',
+                        transition: 'height 0.5s ease',
+                        boxShadow: '0 -2px 10px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}></div>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280',
+                        marginTop: '8px',
+                        textAlign: 'center',
+                        wordBreak: 'break-word',
+                        maxWidth: '100%',
+                        fontWeight: '500'
+                      }}>
+                        {grupo.nombre}
                       </div>
                     </div>
                   );
