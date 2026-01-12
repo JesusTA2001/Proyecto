@@ -1,5 +1,15 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 import { Link } from 'react-router-dom';
 import "../../styles/DashboardProfesor.css"; // opcional si luego quieres CSS personalizado
 // Importa los estilos compartidos para las tarjetas
@@ -104,6 +114,42 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
     }
   ];
 
+  // --- Datos para gráfica horizontal de grupos ---
+  ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+  const gruposLabels = gruposAsignados.map(g => g.nombre);
+  const gruposCounts = gruposAsignados.map(g => (g.alumnoIds || []).length);
+  const coloresChart = [
+    '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'
+  ];
+
+  const chartData = {
+    labels: gruposLabels,
+    datasets: [
+      {
+        label: 'Estudiantes',
+        data: gruposCounts,
+        backgroundColor: gruposLabels.map((_, i) => coloresChart[i % coloresChart.length]),
+        borderRadius: 8,
+        maxBarThickness: 80,
+        barPercentage: 0.6,
+        categoryPercentage: 0.7
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, title: { display: false } },
+    layout: { padding: { top: 8, right: 12, bottom: 8, left: 12 } },
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1, color: '#374151', font: { size: 12 } }, grid: { color: '#edf2f7' } },
+      x: { ticks: { autoSkip: false, color: '#374151', font: { size: 12 } }, grid: { color: '#f3f4f6' } }
+    },
+    elements: { bar: { borderRadius: 8, borderSkipped: false } }
+  };
+
   return (
     <div className="portal-container" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       <main className="flex-1 flex flex-col gap-6">
@@ -193,88 +239,17 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
             )}
           </div>
 
-          {/* Estudiantes por Grupo (Gráfico de barras verticales) */}
+          {/* Estudiantes por Grupo (Gráfica horizontal) */}
           <div className="card-white rounded-lg shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               📊 Estudiantes por Grupo
             </h2>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'flex-end', 
-              justifyContent: 'space-around', 
-              height: '300px',
-              gap: '12px',
-              borderBottom: '2px solid #e5e7eb',
-              paddingBottom: '0'
-            }}>
-             {gruposAsignados.length > 0 && totalEstudiantes > 0 ? (
-                gruposAsignados.map((grupo, index) => {
-                  const cantidadAlumnos = (grupo.alumnoIds || []).length;
-                  const maxAlumnos = Math.max(...gruposAsignados.map(g => (g.alumnoIds || []).length), 1);
-                  const alturaPorcentaje = ((cantidadAlumnos / maxAlumnos) * 85) + 10; // Escala de 10% a 95%
-                  
-                  // Array de colores llamativos
-                  const colores = [
-                    '#8b5cf6', // Púrpura
-                    '#3b82f6', // Azul
-                    '#10b981', // Verde
-                    '#f59e0b', // Amarillo/Naranja
-                    '#ef4444', // Rojo
-                    '#ec4899', // Rosa
-                    '#06b6d4', // Cian
-                    '#8b5cf6', // Púrpura (repite)
-                  ];
-                  
-                  const color = colores[index % colores.length];
-                  
-                  return (
-                    <div key={grupo.id} style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      flex: 1,
-                      minWidth: '60px',
-                      height: '100%'
-                    }}>
-                      <div style={{
-                        fontSize: '0.875rem',
-                        fontWeight: '700',
-                        color: '#374151',
-                        marginBottom: '4px',
-                        textAlign: 'center'
-                      }}>
-                        {cantidadAlumnos}
-                      </div>
-                      <div style={{
-                        width: '100%',
-                        maxWidth: '80px',
-                        height: `${alturaPorcentaje}%`,
-                        backgroundColor: color,
-                        borderRadius: '8px 8px 0 0',
-                        transition: 'height 0.5s ease',
-                        boxShadow: '0 -2px 10px rgba(0,0,0,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}></div>
-                      <div style={{
-                        fontSize: '0.75rem',
-                        color: '#6b7280',
-                        marginTop: '8px',
-                        textAlign: 'center',
-                        wordBreak: 'break-word',
-                        maxWidth: '100%',
-                        fontWeight: '500'
-                      }}>
-                        {grupo.nombre}
-                      </div>
-                    </div>
-                  );
-                })
-             ) : (
+            <div style={{ height: '380px', width: '100%' }}>
+              {gruposAsignados.length > 0 && totalEstudiantes > 0 ? (
+                <Bar data={chartData} options={chartOptions} />
+              ) : (
                 <p className="text-gray-500 text-center p-4">No hay datos de estudiantes para mostrar.</p>
-             )}
+              )}
             </div>
           </div>
         </div>

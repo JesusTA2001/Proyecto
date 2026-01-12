@@ -1,6 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/perfil-usuario.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
 // Dashboard adaptado: no incluye la barra superior del HTML original.
 function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], grupos = [] }) {
@@ -21,6 +31,35 @@ function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], gr
   // Para las barras: calcular máximo para normalizar anchos
   const ubicacionCounts = Object.values(conteoPorUbicacion);
   const maxUbicacionCount = ubicacionCounts.length ? Math.max(...ubicacionCounts) : 1;
+
+  // --- Configuración gráfica horizontal (Estudiantes por Ubicación) ---
+  ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+  const ubicacionLabels = Object.keys(conteoPorUbicacion);
+  const ubicacionData = ubicacionLabels.map(l => conteoPorUbicacion[l] || 0);
+  const colores = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
+  const ubicacionChartData = {
+    labels: ubicacionLabels,
+    datasets: [
+      {
+        label: 'Estudiantes',
+        data: ubicacionData,
+        backgroundColor: ubicacionLabels.map((_, i) => colores[i % colores.length]),
+        borderRadius: 8,
+        maxBarThickness: 80,
+        barPercentage: 0.6,
+        categoryPercentage: 0.7
+      }
+    ]
+  };
+
+  const ubicacionChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, title: { display: false } },
+    layout: { padding: { top: 8, right: 12, bottom: 8, left: 12 } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#374151', font: { size: 12 } }, grid: { color: '#edf2f7' } }, x: { ticks: { autoSkip: false, color: '#374151', font: { size: 12 } }, grid: { color: '#f3f4f6' } } },
+    elements: { bar: { borderRadius: 8, borderSkipped: false } }
+  };
 
   return (
     <main className="dashboard-container">
@@ -126,21 +165,14 @@ function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], gr
       {/* Barra dinámica: Estudiantes por Ubicación */}
       <div className="card academic-levels-card" style={{ marginTop: 20 }}>
         <h3 className="card-section-title">Estudiantes por Ubicación</h3>
-        <div className="levels-grid" style={{ display: 'block' }}>
-          {Object.keys(conteoPorUbicacion).map((ubicacion) => {
-            const count = conteoPorUbicacion[ubicacion] || 0;
-            const pct = Math.round((count / (maxUbicacionCount || 1)) * 100);
-            return (
-              <div key={ubicacion} style={{ marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-                  <div style={{ width: 180, fontSize: 12, color: '#374151' }}>{ubicacion}</div>
-                  <div style={{ flex: 1, background: '#e6e6e6', borderRadius: 999, height: 24, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--color-primary, #7A1F5C)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, color: '#fff', fontSize: 12 }}>{count}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div style={{ width: '100%', marginTop: 8 }}>
+          {ubicacionLabels.length > 0 ? (
+            <div style={{ height: Math.min(Math.max(ubicacionLabels.length * 64, 300), 520), width: '100%' }}>
+              <Bar data={ubicacionChartData} options={ubicacionChartOptions} />
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center p-4">No hay datos para mostrar.</p>
+          )}
         </div>
       </div>
     </main>
