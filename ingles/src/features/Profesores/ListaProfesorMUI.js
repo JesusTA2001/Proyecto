@@ -29,13 +29,13 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
   // --- Lógica de Filtrado (Simplificada) ---
   const filtered = (profesores || []).filter(p => {
     const term = (searchTerm || '').toLowerCase();
-    const textMatch = !term || (p.nombre || '').toLowerCase().includes(term) || String(p.numero_empleado || '').toLowerCase().includes(term);
+    const textMatch = !term || (p.nombreCompleto || '').toLowerCase().includes(term) || String(p.numero_empleado || '').toLowerCase().includes(term);
     // Se eliminaron locationMatch y statusMatch
     return textMatch;
   });
 
   // --- Filas para el DataGrid ---
-  const rows = filtered.map(p => ({ id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombre, ubicacion: p.ubicacion, grado: p.gradoEstudio, estado: p.estado }));
+  const rows = filtered.map(p => ({ id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombreCompleto, ubicacion: p.ubicacion, grado: p.gradoEstudio, estado: p.estado }));
 
   // --- Lógica de Exportación (Mejorada para usar la vista del DataGrid) ---
   const exportToCSV = () => {
@@ -52,10 +52,9 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
     if (!exportRows || exportRows.length === 0) { alert('No hay registros para exportar.'); return; }
 
     const headers = ['N° Empleado', 'Nombre', 'Ubicación', 'Grado', 'Estado'];
-    const rowsData = exportRows.map(a => [a.numero_empleado, a.nombre, a.ubicacion, a.grado, a.estado]);
-    const csvContent = [headers, ...rowsData].map(e => e.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-    const bom = '\uFEFF';
-    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const rowsData = exportRows.map(a => [a.numero_empleado, a.nombreCompleto || a.nombre, a.ubicacion, a.grado, a.estado]);
+    const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

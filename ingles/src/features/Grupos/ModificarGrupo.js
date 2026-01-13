@@ -8,6 +8,15 @@ import Button from '@mui/material/Button';
 import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
 
+// Función para obtener nombre completo
+const getNombreCompleto = (persona) => {
+    if (!persona) return 'N/A';
+    const apellidoPaterno = persona.apellidoPaterno || '';
+    const apellidoMaterno = persona.apellidoMaterno || '';
+    const nombre = persona.nombre || '';
+    return `${apellidoPaterno} ${apellidoMaterno} ${nombre}`.trim();
+};
+
 // Componente de multi-selección (puedes moverlo a un archivo separado e importarlo)
 function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
     return (
@@ -23,7 +32,7 @@ function MultiSelectAlumnos({ alumnos, seleccionados, onToggle }) {
                             onChange={() => onToggle(alumno.numero_control)}
                         />
                         <label htmlFor={`alumno-${alumno.numero_control}`} style={{ marginLeft: '5px', cursor: 'pointer' }}>
-                            {alumno.nombre} ({alumno.numero_control})
+                            {getNombreCompleto(alumno)} ({alumno.numero_control})
                         </label>
                     </div>
                 ))
@@ -59,8 +68,16 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
 
     // --- Cargar datos del grupo ---
     useEffect(() => {
+        console.log('🔍 ModificarGrupo - Cargando datos del grupo');
+        console.log('grupoProp:', grupoProp);
+        console.log('grupos:', grupos);
+        console.log('id desde ruta:', id);
+        
         // Si se recibe el grupo directamente (cuando se usa en modal), úsalo
         if (grupoProp) {
+            console.log('📦 Usando grupoProp:', grupoProp);
+            console.log('👥 alumnoIds recibidos:', grupoProp.alumnoIds);
+            
             setGrupo({ 
                 periodo: grupoProp.id_Periodo || '', 
                 dia: grupoProp.dia || '', 
@@ -70,6 +87,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
             });
             // Cargar alumnos usando alumnoIds del grupo
             const alumnoIdsArray = Array.isArray(grupoProp.alumnoIds) ? grupoProp.alumnoIds : [];
+            console.log('✅ Estableciendo alumnos seleccionados:', alumnoIdsArray);
             setAlumnosSeleccionados(new Set(alumnoIdsArray));
             return;
         }
@@ -77,6 +95,9 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
         if (grupos && id) {
             const grupoAEditar = grupos.find(g => g.id === id);
             if (grupoAEditar) {
+                console.log('📦 Usando grupo del array:', grupoAEditar);
+                console.log('👥 alumnoIds recibidos:', grupoAEditar.alumnoIds);
+                
                 setGrupo({ 
                     periodo: grupoAEditar.id_Periodo || '', 
                     dia: grupoAEditar.dia || '', 
@@ -85,6 +106,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                     ...grupoAEditar 
                 });
                 const alumnoIdsArray = Array.isArray(grupoAEditar.alumnoIds) ? grupoAEditar.alumnoIds : [];
+                console.log('✅ Estableciendo alumnos seleccionados:', alumnoIdsArray);
                 setAlumnosSeleccionados(new Set(alumnoIdsArray));
                 return;
             }
@@ -314,7 +336,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                 <Grid item xs={12} md={6}>
                     <Select name="profesorId" value={grupo.profesorId} onChange={handleChange} fullWidth size="small" displayEmpty>
                         <MenuItem value="">Selecciona un Profesor</MenuItem>
-                        {(profesoresDisponibles || []).map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{p.nombre} ({p.numero_empleado})</MenuItem>)}
+                        {(profesoresDisponibles || []).map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{getNombreCompleto(p)} ({p.numero_empleado})</MenuItem>)}
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={6} />

@@ -50,9 +50,8 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
 
     const headers = ['N° Empleado', 'Nombre', 'Estado'];
     const rowsData = exportRows.map(a => [a.numero_empleado, a.nombre, a.estado]);
-    const csvContent = [headers, ...rowsData].map(e => e.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-    const bom = '\uFEFF';
-    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

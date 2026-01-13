@@ -12,10 +12,20 @@ import api from '../../api/axios';
 import CrearPeriodo from '../Periodos/CrearPeriodo';
 import '../../styles/listaEstudiante.css';
 
+// Función para obtener nombre completo
+const getNombreCompleto = (persona) => {
+    if (!persona) return 'N/A';
+    const apellidoPaterno = persona.apellidoPaterno || '';
+    const apellidoMaterno = persona.apellidoMaterno || '';
+    const nombre = persona.nombre || '';
+    return `${apellidoPaterno} ${apellidoMaterno} ${nombre}`.trim();
+};
+
 // Recibe props: agregarGrupo, niveles, periodos, profesores, alumnos
-function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
+function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPeriodoCreado }) {
     const navigate = useNavigate();
     const [openCrearPeriodo, setOpenCrearPeriodo] = useState(false);
+    const [periodosLocal, setPeriodosLocal] = useState(periodos);
     const [grupo, setGrupo] = useState({
         nombre: '',
         nivel: '',
@@ -146,6 +156,11 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
 
     }, [grupo.ubicacion, grupo.nivel, niveles]);
 
+    // Sincronizar periodosLocal cuando cambien los periodos del prop
+    useEffect(() => {
+        setPeriodosLocal(periodos);
+    }, [periodos]);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -210,8 +225,23 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
     };
 
     const handlePeriodoCreado = (nuevoPeriodo) => {
-        // Recargar la página o actualizar el estado de periodos
-        window.location.reload();
+        console.log('✅ Nuevo periodo creado:', nuevoPeriodo);
+        // Agregar el nuevo periodo a la lista local
+        const periodoMapeado = {
+            id: nuevoPeriodo.id_Periodo,
+            id_Periodo: nuevoPeriodo.id_Periodo,
+            nombre: nuevoPeriodo.descripcion,
+            descripcion: nuevoPeriodo.descripcion,
+            año: nuevoPeriodo.año,
+            fecha_inicio: nuevoPeriodo.fecha_inicio,
+            fecha_fin: nuevoPeriodo.fecha_fin
+        };
+        setPeriodosLocal(prev => [...prev, periodoMapeado]);
+        setOpenCrearPeriodo(false);
+        // Notificar al componente padre si existe la función
+        if (onPeriodoCreado) {
+            onPeriodoCreado(periodoMapeado);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -272,7 +302,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty style={{ flex: 1 }}>
                             <MenuItem value="">Selecciona un Periodo</MenuItem>
-                            {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
+                            {(periodosLocal || []).map(p => <MenuItem key={p.id || p.id_Periodo} value={p.id || p.id_Periodo}>{p.nombre || p.descripcion}</MenuItem>)}
                         </Select>
                         <Tooltip title="Crear nuevo periodo" arrow>
                             <IconButton 
@@ -294,7 +324,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                 <Grid item xs={12} md={4}>
                     <Select name="profesorId" value={grupo.profesorId} onChange={handleChange} fullWidth size="small" displayEmpty>
                         <MenuItem value="">Selecciona un Profesor</MenuItem>
-                        {profesoresDisponibles.map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{p.nombre}</MenuItem>)}
+                        {profesoresDisponibles.map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{getNombreCompleto(p)}</MenuItem>)}
                     </Select>
                 </Grid>
 
@@ -376,7 +406,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos }) {
                                         onChange={() => handleAlumnoToggle(alumno.numero_control)}
                                     />
                                     <label htmlFor={`alumno-${alumno.numero_control}`} style={{ marginLeft: '8px' }}>
-                                        {alumno.nombre} ({alumno.numero_control})
+                                        {getNombreCompleto(alumno)} ({alumno.numero_control})
                                     </label>
                                 </div>
                             ))

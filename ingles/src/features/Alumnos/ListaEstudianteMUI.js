@@ -82,9 +82,8 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     const rowsData = exportRows.map(row => [row.numero_control, row.nombre, row.carrera, row.ubicacion, row.estado]);
     // -------------------------------------------------------------------------------
 
-    const csvContent = [headers, ...rowsData].map(e => e.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-    const bom = '\uFEFF';
-    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

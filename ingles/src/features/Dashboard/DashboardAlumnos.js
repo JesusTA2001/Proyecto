@@ -60,9 +60,17 @@ function DashboardAlumnos({ alumno }) {
         }
         
         // Cargar grupo actual del estudiante
-        // TODO: Crear endpoint para obtener grupo actual del estudiante
-        // const grupoResponse = await api.get(`/estudiantes/${nControl}/grupo-actual`);
-        // setGrupoActual(grupoResponse.data);
+        try {
+          const grupoResponse = await api.get(`/alumnos/${nControl}/grupo`);
+          if (grupoResponse.data.success && grupoResponse.data.grupo) {
+            setGrupoActual(grupoResponse.data.grupo);
+          } else {
+            setGrupoActual(null);
+          }
+        } catch (error) {
+          console.error('Error al cargar grupo del estudiante:', error);
+          setGrupoActual(null);
+        }
         
         // Cargar asistencias del estudiante
         try {
@@ -242,37 +250,6 @@ function DashboardAlumnos({ alumno }) {
             <span className="da-info-label">Dirección</span>
             <span className="da-info-value">{datosPersonales?.direccion || 'N/A'}</span>
           </div>
-        </div>
-      </section>
-
-      {/* Sección: Avance en Inglés */}
-      <section className="da-section section-blue">
-        <div className="da-section-header">
-          <h2>
-            <div className="da-section-icon icon-bg-blue">📚</div>
-            Mi Nivel de Inglés
-          </h2>
-        </div>
-        
-        <div className="da-progress-container">
-          <div className="da-stats-row">
-            <div className="da-stat-box">
-              <h4>Nivel Actual</h4>
-              <p className="da-stat-value">{grupoActual?.nivel || 'Sin asignar'}</p>
-            </div>
-            <div className="da-stat-box">
-              <h4>Grupo</h4>
-              <p className="da-stat-value">{grupoActual?.nombre || 'Sin grupo'}</p>
-            </div>
-          </div>
-          
-          {grupoActual && (
-            <div style={{ marginTop: '1.5rem' }}>
-              <span className="da-nivel-badge-large" style={{ backgroundColor: nivelColors[grupoActual.nivel] || '#3b82f6' }}>
-                {grupoActual.nivel}
-              </span>
-            </div>
-          )}
         </div>
       </section>
 

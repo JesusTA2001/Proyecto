@@ -4,6 +4,7 @@ import '../../styles/PortalCalificaciones.css';
 import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemText, Snackbar, Alert } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import api from '../../api/axios';
+import { useNavigate } from 'react-router-dom';
 
 function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos = [], niveles = [] }) {
   const [group, setGroup] = useState('');
@@ -208,6 +209,8 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
       nivel: nivel?.nombre || g.nivel || 'N/A'
     };
   }, [group, grupos, periodos, niveles]);
+
+  const navigate = useNavigate();
 
   return (
     <div className="portal-container">
@@ -468,7 +471,10 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
             </div>
             <div>
               {/* Botón Exportar a la derecha, color verde institucional */}
-              <button className="createbutton" onClick={exportToCSV} style={{ height: 38 }}>Exportar Excel</button>
+              <button className="createbutton" onClick={exportToCSV} style={{ height: 38, marginRight: 8 }}>Exportar Excel</button>
+              <Button variant="contained" color="success" onClick={() => navigate('/profesores/historial')} style={{ height: 38 }}>
+                Historial de Grupos
+              </Button>
             </div>
           </div>
 

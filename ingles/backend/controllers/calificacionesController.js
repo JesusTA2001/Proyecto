@@ -158,6 +158,46 @@ exports.guardarCalificaciones = async (req, res) => {
           id_Calificaciones: result.insertId 
         });
       }
+
+      // Si tiene las 3 calificaciones y calificación final >= 70, avanza de nivel
+      if (parcial1 !== null && parcial2 !== null && parcial3 !== null && final >= 70) {
+        // Cambiar estado del grupo de 'actual' a 'concluido' (aprobado)
+        await connection.query(
+          'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+          ['concluido', nControl, id_Grupo]
+        );
+
+        // Obtener el siguiente nivel
+        const [nivelActual] = await connection.query(
+          'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
+          [id_nivel]
+        );
+
+        if (nivelActual.length > 0) {
+          const siguienteNivel = nivelActual[0].id_Nivel + 1;
+          
+          // Verificar que existe el siguiente nivel (máximo 8: Intro a Diplomado 2)
+          const [existeSiguiente] = await connection.query(
+            'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
+            [siguienteNivel]
+          );
+
+          if (existeSiguiente.length > 0) {
+            // Actualizar nivel del estudiante
+            await connection.query(
+              'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
+              [siguienteNivel, nControl]
+            );
+          }
+        }
+      } else if (parcial1 !== null && parcial2 !== null && parcial3 !== null && final < 70) {
+        // Reprobó: cambiar estado a 'concluido' (reprobado)
+        await connection.query(
+          'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+          ['concluido', nControl, id_Grupo]
+        );
+        // NO se actualiza el id_Nivel, debe recursar el mismo nivel
+      }
     }
 
     await connection.commit();
@@ -233,6 +273,41 @@ exports.guardarCalificacionIndividual = async (req, res) => {
       );
 
       id_Calificaciones = calActual.id_Calificaciones;
+
+      // Si tiene las 3 calificaciones, aplicar lógica de aprobación/reprobación
+      if (p1 !== null && p2 !== null && p3 !== null && final !== null) {
+        if (final >= 70) {
+          // Aprobó: cambiar estado del grupo a 'concluido' y avanzar de nivel
+          await connection.query(
+            'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+            ['concluido', nControl, id_Grupo]
+          );
+
+          // Obtener el siguiente nivel
+          const siguienteNivel = id_nivel + 1;
+          
+          // Verificar que existe el siguiente nivel (máximo 8: Intro a Diplomado 2)
+          const [existeSiguiente] = await connection.query(
+            'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
+            [siguienteNivel]
+          );
+
+          if (existeSiguiente.length > 0) {
+            // Actualizar nivel del estudiante
+            await connection.query(
+              'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
+              [siguienteNivel, nControl]
+            );
+          }
+        } else {
+          // Reprobó: cambiar estado a 'concluido' (mantiene historial)
+          await connection.query(
+            'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+            ['concluido', nControl, id_Grupo]
+          );
+          // NO se actualiza el id_Nivel, debe recursar el mismo nivel
+        }
+      }
     } else {
       // Crear nuevo registro
       const final = valor !== null && valor !== undefined ? valor : null;

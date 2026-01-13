@@ -262,7 +262,8 @@ exports.obtenerHistorialAlumno = async (req, res) => {
        FROM EstudianteGrupo eg
        JOIN Grupo g ON eg.id_Grupo = g.id_Grupo
        JOIN Nivel n ON g.id_Nivel = n.id_Nivel
-       WHERE eg.nControl = ? AND eg.estado = 'actual'
+       WHERE eg.nControl = ?
+       ORDER BY eg.id_Grupo DESC
        LIMIT 1`,
       [nControl]
     );

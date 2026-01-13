@@ -26,7 +26,7 @@ export default function EliminarProfesorModal({ open, onClose, profesor, elimina
           <p>¿Estás seguro que deseas eliminar al siguiente profesor?</p>
           <div style={{ margin: '10px 0', border: '1px solid #ccc', padding: '12px', borderRadius: 8 }}>
             <p><strong>Número de Empleado:</strong> {profesor.numero_empleado}</p>
-            <p><strong>Nombre:</strong> {profesor.nombre}</p>
+            <p><strong>Nombre:</strong> {profesor.nombreCompleto || profesor.nombre}</p>
           </div>
           <div className="button-list">
             <button className='deletebutton' onClick={handleDelete}>Sí, Eliminar Profesor</button>

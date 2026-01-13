@@ -73,16 +73,20 @@ exports.createPeriodo = async (req, res) => {
       });
     }
 
-    // Insertar el periodo
-    const [result] = await pool.query(
-      'INSERT INTO Periodo (descripcion, año, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?)',
-      [descripcion, parseInt(año), fecha_inicio, fecha_fin]
+    // Obtener el siguiente ID disponible
+    const [maxId] = await pool.query('SELECT COALESCE(MAX(id_Periodo), 0) + 1 as nextId FROM Periodo');
+    const nuevoId = maxId[0].nextId;
+
+    // Insertar el periodo con el ID calculado
+    await pool.query(
+      'INSERT INTO Periodo (id_Periodo, descripcion, año, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?)',
+      [nuevoId, descripcion, parseInt(año), fecha_inicio, fecha_fin]
     );
 
     // Obtener el periodo creado
     const [nuevoPeriodo] = await pool.query(
       'SELECT id_Periodo, descripcion, año, fecha_inicio, fecha_fin FROM Periodo WHERE id_Periodo = ?',
-      [result.insertId]
+      [nuevoId]
     );
 
     res.status(201).json({ 

@@ -43,11 +43,23 @@ exports.login = async (req, res) => {
 
     console.log('Verificando contraseña...');
 
-    // Verificar contraseña - Comparación directa (sin bcrypt)
-    // Todas las contraseñas en la BD son: 123456
-    const isMatch = contraseña === passwordFromDB;
+    // Soporte para contraseñas hasheadas con bcrypt y plaintext como fallback
+    let isMatch = false;
+    try {
+      if (typeof passwordFromDB === 'string' && passwordFromDB.startsWith('$2')) {
+        // bcrypt hash detectado
+        isMatch = await bcrypt.compare(contraseña, passwordFromDB);
+      } else {
+        // fallback a comparación directa (legacy)
+        isMatch = contraseña === passwordFromDB;
+      }
+    } catch (err) {
+      console.error('Error verificando contraseña:', err.message);
+      return res.status(500).json({ message: 'Error al verificar la contraseña' });
+    }
+
     if (!isMatch) {
-      console.log('Contraseña incorrecta. Esperada:', passwordFromDB, 'Recibida:', contraseña);
+      console.log('Contraseña incorrecta. Recibida:', contraseña);
       return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
     }
 

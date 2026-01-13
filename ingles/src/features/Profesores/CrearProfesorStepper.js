@@ -28,7 +28,6 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
     curp: '',
     telefono: '',
     direccion: '',
-    numero_empleado: '',
     ubicacion: 'Tecnologico',
     gradoEstudio: '',
     estado: 'Activo',
@@ -68,8 +67,8 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
       }
     }
     if (activeStep === 1) {
-      if (!profesor.numero_empleado || !profesor.ubicacion || !profesor.gradoEstudio) {
-        alert('Por favor completa Número de empleado, Ubicación y Nivel de estudio.');
+      if (!profesor.ubicacion || !profesor.gradoEstudio) {
+        alert('Por favor completa Ubicación y Nivel de estudio.');
         return;
       }
     }
@@ -165,10 +164,6 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
           <Box>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Número de empleado" value={profesor.numero_empleado} onChange={handleChange('numero_empleado')} margin="dense" required />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
                 <Select
                   fullWidth
                   value={profesor.ubicacion}
@@ -216,9 +211,11 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
               <p><strong>Dirección:</strong> {profesor.direccion || 'No proporcionado'}</p>
               
               <h4 style={{ marginBottom: 12 }}>Academia</h4>
-              <p><strong>Número de empleado:</strong> {profesor.numero_empleado}</p>
               <p><strong>Ubicación:</strong> {profesor.ubicacion}</p>
               <p><strong>Nivel de estudio:</strong> {profesor.gradoEstudio}</p>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', fontStyle: 'italic', marginTop: '12px' }}>
+                * El número de empleado se asignará automáticamente al crear el profesor
+              </p>
             </Box>
           </Box>
         )}

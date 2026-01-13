@@ -7,7 +7,7 @@ import VerGrupoModal from './VerGrupoModal';
 import ModificarGrupoModal from './ModificarGrupoModal';
 import EliminarGrupoModal from './EliminarGrupoModal';
 
-export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos = [], niveles = [], periodos = [], agregarGrupo, actualizarGrupo, eliminarGrupo }) {
+export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos = [], niveles = [], periodos = [], agregarGrupo, actualizarGrupo, eliminarGrupo, onPeriodoCreado }) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const apiRef = useGridApiRef();
 
@@ -38,7 +38,7 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
     id: g.id, 
     nombre: g.nombre, 
     nivel: g.nivel, 
-    periodo: periodos.find(p => p.id === g.id_Periodo)?.nombre || 'N/A', 
+    periodo: periodos.find(p => p.id === g.id_Periodo)?.nombre || periodos.find(p => p.id_Periodo === g.id_Periodo)?.nombre || 'N/A', 
     ubicacion: g.ubicacion, 
     profesorId: g.profesorId, 
     profesor_nombre: g.profesor_nombre || 'No asignado',
@@ -46,7 +46,7 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
   }));
 
   const exportToCSV = () => {
-    let exportRows = filtered;
+    let exportRows = rows; // Usar rows en lugar de filtered
     try {
       if (apiRef && apiRef.current) {
         const visible = Array.from(apiRef.current.getVisibleRowModels().values());
@@ -55,10 +55,9 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
     } catch (e) {}
     if (!exportRows || exportRows.length === 0) { alert('No hay registros para exportar.'); return; }
     const headers = ['ID','Nombre','Nivel','Periodo','Ubicación','Profesor','# Alumnos'];
-    const rowsData = exportRows.map(a => [a.id, a.nombre, a.nivel, a.periodo, a.ubicacion, (profesores.find(p=>p.numero_empleado===a.profesorId)||{}).nombre||'', a.alumnosCount]);
-    const csvContent = [headers, ...rowsData].map(e => e.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-    const bom = '\uFEFF';
-    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const rowsData = exportRows.map(a => [a.id, a.nombre, a.nivel, a.periodo, a.ubicacion, a.profesor_nombre || '', a.alumnosCount]);
+    const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `grupos_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   };
@@ -103,7 +102,7 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
         <DataGrid apiRef={apiRef} rows={rows} columns={columns} components={{ Toolbar: GridToolbar }} componentsProps={{ toolbar: { showQuickFilter: true, quickFilterProps: { debounceMs: 300 }, csvOptions: { disableToolbarButton: true } } }} pageSizeOptions={[10,25,50,100]} disableRowSelectionOnClick density="comfortable" initialState={{ pagination: { paginationModel: { pageSize: 50, page: 0 } } }} sx={{ backgroundColor: 'white', borderRadius: 2, boxShadow: 2 }} />
       </Box>
 
-      <CrearGrupoModal open={openCreate} onClose={()=>setOpenCreate(false)} agregarGrupo={agregarGrupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} />
+      <CrearGrupoModal open={openCreate} onClose={()=>setOpenCreate(false)} agregarGrupo={agregarGrupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} onPeriodoCreado={onPeriodoCreado} />
       <VerGrupoModal open={openView} onClose={()=>setOpenView(false)} grupo={selectedGrupo} profesores={profesores} alumnos={alumnos} periodos={periodos} />
       <ModificarGrupoModal open={openEdit} onClose={()=>setOpenEdit(false)} grupo={selectedGrupo} actualizarGrupo={actualizarGrupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} />
       <EliminarGrupoModal open={openDelete} onClose={()=>setOpenDelete(false)} grupo={selectedGrupo} eliminarGrupo={eliminarGrupo} />

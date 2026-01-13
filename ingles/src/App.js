@@ -26,6 +26,8 @@ import LayoutAlumnos from './features/Layout/LayoutAlumnos';
 import LayoutCoordinador from './features/Layout/LayoutCoordinador';
 import LayoutDirectivos from './features/Layout/LayoutDirectivos';
 import AsignarCalificaciones from './features/Profesores/AsignarCalificaciones';
+import HistorialGrupos from './features/Profesores/HistorialGrupos';
+import HistorialGrupoDetalle from './features/Profesores/HistorialGrupoDetalle';
 // --- 1. IMPORTAR NUEVO COMPONENTE DE ASISTENCIA ---
 import ControlAsistencia from './features/Profesores/ControlAsistencia';
 // Administrar Periodos
@@ -138,9 +140,12 @@ function App() {
           nombreCompleto: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim(), // Nombre Apellido Paterno Apellido Materno
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
+          // Mantener ambas convenciones de nombres para compatibilidad
           email: a.email,
+          correo: a.email,
           genero: a.genero,
           CURP: a.CURP,
+          curp: a.CURP,
           telefono: a.telefono,
           direccion: a.direccion,
           ubicacion: a.ubicacion,
@@ -152,7 +157,8 @@ function App() {
         const profesoresMapeados = (profesoresRes.data || []).map(p => ({
           numero_empleado: p.id_Profesor,
           id_profesor: p.id_Profesor,
-          nombre: `${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''} ${p.nombre || ''}`.trim(),
+          nombreCompleto: `${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''} ${p.nombre || ''}`.trim(),
+          nombre: p.nombre,
           apellidoPaterno: p.apellidoPaterno,
           apellidoMaterno: p.apellidoMaterno,
           email: p.email,
@@ -311,12 +317,16 @@ function App() {
         const alumnosRes = await api.get('/alumnos');
         const alumnosMapeados = alumnosRes.data.map(a => ({
           numero_control: a.nControl,
-          nombre: `${a.apellidoPaterno} ${a.apellidoMaterno} ${a.nombre}`,
+          // nombre aquí es usado en algunos modales como título, mantener nombre y nombreCompleto
+          nombre: a.nombre,
+          nombreCompleto: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${a.nombre || ''}`.trim(),
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
           email: a.email,
+          correo: a.email,
           genero: a.genero,
           CURP: a.CURP,
+          curp: a.CURP,
           telefono: a.telefono,
           direccion: a.direccion,
           ubicacion: a.ubicacion,
@@ -652,34 +662,55 @@ function App() {
 
   const actualizarGrupo = async (grupoActualizado) => {
     try {
+      console.log('📝 Actualizando grupo con datos:', grupoActualizado);
+      
       // Buscar el id_Nivel basado en el nombre del nivel
-      let id_Nivel = grupoActualizado.id_Nivel || 1;
-      if (grupoActualizado.nivel && !grupoActualizado.id_Nivel) {
-        if (grupoActualizado.nivel === 'Intro') {
-          id_Nivel = 0;
+      let id_Nivel = grupoActualizado.id_Nivel;
+      
+      // Si no tiene id_Nivel pero sí tiene nombre de nivel, convertirlo
+      if (!id_Nivel && grupoActualizado.nivel) {
+        // Usar la variable 'niveles' del estado, no 'nivelesMapeados'
+        const nivelEncontrado = niveles.find(n => n.nombre === grupoActualizado.nivel);
+        if (nivelEncontrado) {
+          id_Nivel = nivelEncontrado.id;
+          console.log('✅ Nivel encontrado en array:', nivelEncontrado);
         } else {
-          const match = grupoActualizado.nivel.match(/\d+/);
-          if (match) {
-            id_Nivel = parseInt(match[0]);
+          // Fallback: intentar parsear del nombre
+          console.log('⚠️ Nivel no encontrado, usando fallback');
+          if (grupoActualizado.nivel === 'Intro') {
+            id_Nivel = 0;
+          } else {
+            const match = grupoActualizado.nivel.match(/\d+/);
+            if (match) {
+              id_Nivel = parseInt(match[0]);
+            }
           }
         }
       }
 
+      console.log('📊 id_Nivel determinado:', id_Nivel, 'para nivel:', grupoActualizado.nivel);
+      console.log('📅 id_Periodo:', grupoActualizado.periodo || grupoActualizado.id_Periodo);
+
       // Actualizar datos básicos del grupo
-      await api.put(`/grupos/${grupoActualizado.id}`, {
+      const datosActualizacion = {
         grupo: grupoActualizado.nombre,
-        id_Periodo: grupoActualizado.periodo || grupoActualizado.id_Periodo || 1,
-        id_Profesor: grupoActualizado.profesorId,
+        id_Periodo: grupoActualizado.periodo || grupoActualizado.id_Periodo,
+        id_Profesor: grupoActualizado.profesorId || null,
         id_Nivel: id_Nivel,
         ubicacion: grupoActualizado.ubicacion,
         id_cHorario: grupoActualizado.id_cHorario,
         dia: grupoActualizado.dia,
         horaInicio: grupoActualizado.horaInicio,
         horaFin: grupoActualizado.horaFin
-      });
+      };
+
+      console.log('📤 Enviando al backend:', datosActualizacion);
+
+      await api.put(`/grupos/${grupoActualizado.id}`, datosActualizacion);
 
       // Actualizar alumnos del grupo si se proporcionaron
       if (grupoActualizado.alumnoIds && Array.isArray(grupoActualizado.alumnoIds)) {
+        console.log('👥 Actualizando alumnos:', grupoActualizado.alumnoIds);
         await api.post(`/grupos/${grupoActualizado.id}/estudiantes`, {
           alumnoIds: grupoActualizado.alumnoIds
         });
@@ -719,8 +750,11 @@ function App() {
         };
       });
       setGrupos(gruposMapeados);
+      
+      console.log('✅ Grupo actualizado exitosamente');
     } catch (error) {
-      console.error('Error al actualizar grupo:', error);
+      console.error('❌ Error al actualizar grupo:', error);
+      console.error('Detalles:', error.response?.data);
       alert('Error al actualizar el grupo: ' + (error.response?.data?.message || error.message));
       throw error;
     }
@@ -1053,6 +1087,24 @@ function App() {
                 />
               </LayoutProfesor>
             } 
+          />
+
+          <Route
+            path="/profesores/historial"
+            element={
+              <LayoutProfesor>
+                <HistorialGrupos />
+              </LayoutProfesor>
+            }
+          />
+
+          <Route
+            path="/profesores/historial/:id"
+            element={
+              <LayoutProfesor>
+                <HistorialGrupoDetalle />
+              </LayoutProfesor>
+            }
           />
 
           {/* --- 2. AÑADIR LA NUEVA RUTA DE ASISTENCIA --- */}

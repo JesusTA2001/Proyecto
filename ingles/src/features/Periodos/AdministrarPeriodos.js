@@ -123,8 +123,18 @@ function AdministrarPeriodos() {
             startIcon={<AddIcon />}
             onClick={() => setOpenCrear(true)}
             sx={{ 
-              backgroundColor: '#3b82f6',
-              '&:hover': { backgroundColor: '#2563eb' }
+              fontSize: '1.01em',
+              fontWeight: 'bold',
+              padding: '10px 20px',
+              borderRadius: '10px',
+              border: '2px solid green',
+              boxShadow: '2px 2px 10px black',
+              color: 'white',
+              backgroundColor: '#00903D',
+              '&:hover': { 
+                backgroundColor: '#007a33',
+                cursor: 'pointer'
+              }
             }}
           >
             Nuevo Periodo

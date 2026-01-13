@@ -22,24 +22,48 @@ exports.getAlumnos = async (req, res) => {
   }
 };
 
-// Obtener alumnos disponibles (sin grupo asignado) - NUEVO
+// Obtener alumnos disponibles (sin grupo asignado o que reprobaron el nivel) - MODIFICADO
 exports.getAlumnosDisponibles = async (req, res) => {
   try {
     const { ubicacion, nivel } = req.query;
     
     let query = `
-      SELECT e.nControl, e.estado, e.ubicacion, e.id_Nivel,
+      SELECT DISTINCT e.nControl, e.estado, e.ubicacion, e.id_Nivel,
              n.nivel as nivel_nombre,
              dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
-             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion
+             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion,
+             ultima_calif.final as ultima_calificacion,
+             ultima_calif.id_nivel as ultimo_nivel_cursado
       FROM Estudiante e
       JOIN DatosPersonales dp ON e.id_dp = dp.id_dp
       LEFT JOIN Nivel n ON e.id_Nivel = n.id_Nivel
+      LEFT JOIN (
+        SELECT c1.nControl, c1.final, c1.id_nivel, c1.id_Periodo
+        FROM Calificaciones c1
+        INNER JOIN (
+          SELECT nControl, MAX(id_Calificaciones) as max_id
+          FROM Calificaciones
+          GROUP BY nControl
+        ) c2 ON c1.nControl = c2.nControl AND c1.id_Calificaciones = c2.max_id
+      ) ultima_calif ON e.nControl = ultima_calif.nControl
       WHERE e.estado = 'activo'
-        AND NOT EXISTS (
-          SELECT 1 FROM EstudianteGrupo eg 
-          WHERE eg.nControl = e.nControl 
-          AND eg.estado = 'actual'
+        AND (
+          -- No tiene grupo actual
+          NOT EXISTS (
+            SELECT 1 FROM EstudianteGrupo eg 
+            WHERE eg.nControl = e.nControl 
+            AND eg.estado = 'actual'
+          )
+          OR
+          -- Tiene grupo actual pero reprobó (calificación final < 70)
+          (
+            EXISTS (
+              SELECT 1 FROM EstudianteGrupo eg 
+              WHERE eg.nControl = e.nControl 
+              AND eg.estado = 'actual'
+            )
+            AND ultima_calif.final < 70
+          )
         )
     `;
     
@@ -51,8 +75,8 @@ exports.getAlumnosDisponibles = async (req, res) => {
     }
     
     if (nivel) {
-      query += ' AND e.id_Nivel = ?';
-      params.push(nivel);
+      query += ' AND (e.id_Nivel = ? OR ultima_calif.id_nivel = ?)';
+      params.push(nivel, nivel);
     }
     
     query += ' ORDER BY dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre';
@@ -367,5 +391,48 @@ exports.updateDatosPersonalesAlumno = async (req, res) => {
     });
   } finally {
     connection.release();
+  }
+};
+
+// Obtener grupo actual del estudiante
+exports.getGrupoEstudiante = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log(`Buscando grupo para estudiante: ${id}`);
+    
+    const [grupos] = await pool.query(`
+      SELECT g.id_Grupo, g.grupo as nombre, g.ubicacion,
+             n.nivel as nivel_nombre,
+             p.descripcion as periodo_nombre,
+             h.diaSemana, h.hora,
+             CONCAT(COALESCE(dp.apellidoPaterno, ''), ' ', COALESCE(dp.apellidoMaterno, ''), ' ', COALESCE(dp.nombre, '')) as profesor_nombre
+      FROM EstudianteGrupo eg
+      JOIN Grupo g ON eg.id_Grupo = g.id_Grupo
+      LEFT JOIN Nivel n ON g.id_Nivel = n.id_Nivel
+      LEFT JOIN Periodo p ON g.id_Periodo = p.id_Periodo
+      LEFT JOIN chorario h ON g.id_cHorario = h.id_cHorario
+      LEFT JOIN Profesor prof ON g.id_Profesor = prof.id_Profesor
+      LEFT JOIN Empleado emp ON prof.id_empleado = emp.id_empleado
+      LEFT JOIN DatosPersonales dp ON emp.id_dp = dp.id_dp
+      WHERE eg.nControl = ? 
+      ORDER BY eg.id_Grupo DESC
+      LIMIT 1
+    `, [id]);
+    
+    console.log(`Grupo encontrado:`, grupos.length > 0 ? grupos[0] : 'Ninguno');
+
+    if (grupos.length === 0) {
+      return res.json({ success: true, grupo: null });
+    }
+
+    res.json({ success: true, grupo: grupos[0] });
+  } catch (error) {
+    console.error('Error al obtener grupo del estudiante:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al obtener grupo del estudiante', 
+      error: error.message 
+    });
   }
 };
