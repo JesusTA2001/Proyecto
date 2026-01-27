@@ -17,6 +17,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Agregar timestamp a peticiones GET para evitar caché
+    if (config.method === 'get') {
+      const separator = config.url.includes('?') ? '&' : '?';
+      config.url = `${config.url}${separator}_t=${Date.now()}`;
+    }
+    
     return config;
   },
   (error) => {

@@ -152,22 +152,39 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
     if (Number.isNaN(pval)) return;
     if (pval < 0 || pval > 100) return showToast('Valor fuera de rango 0-100', 'error');
 
+    console.log('📝 Guardando parcial:', { 
+      studentId, 
+      parcialKey, 
+      valor: pval, 
+      id_Grupo: g.id,
+      id_Nivel: g.id_Nivel,
+      id_Periodo: g.id_Periodo,
+      grupoCompleto: g
+    });
+
     try {
-      const response = await api.post('/calificaciones/guardar-individual', {
+      const payload = {
         nControl: parseInt(studentId),
         parcial: parcialKey, // 'parcial1', 'parcial2', 'parcial3'
         valor: parseInt(pval),
         id_nivel: g.id_Nivel,
         id_Periodo: g.id_Periodo,
         id_Grupo: g.id
-      });
+      };
+
+      console.log('📤 Enviando payload:', payload);
+
+      const response = await api.post('/calificaciones/guardar-individual', payload);
 
       if (response.data.success) {
-        // Guardado automático sin notificación
+        console.log('✅ Parcial guardado exitosamente:', parcialKey);
+        // Recargar calificaciones para asegurar sincronización
+        await cargarCalificacionesGrupo(g.id);
       }
     } catch (error) {
-      console.error('Error al guardar parcial:', error);
-      showToast('Error al guardar parcial', 'error');
+      console.error('❌ Error al guardar parcial:', error);
+      console.error('❌ Error response:', error.response?.data);
+      showToast(`Error al guardar parcial: ${error.response?.data?.message || error.message}`, 'error');
     }
   };
 
@@ -472,9 +489,6 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
             <div>
               {/* Botón Exportar a la derecha, color verde institucional */}
               <button className="createbutton" onClick={exportToCSV} style={{ height: 38, marginRight: 8 }}>Exportar Excel</button>
-              <Button variant="contained" color="success" onClick={() => navigate('/profesores/historial')} style={{ height: 38 }}>
-                Historial de Grupos
-              </Button>
             </div>
           </div>
 

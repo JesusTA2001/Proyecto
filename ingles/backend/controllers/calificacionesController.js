@@ -159,31 +159,64 @@ exports.guardarCalificaciones = async (req, res) => {
         });
       }
 
-      // Si tiene las 3 calificaciones y calificación final >= 70, avanza de nivel
+      // Si tiene las 3 calificaciones y calificación final >= 70, validar fecha antes de avanzar
       if (parcial1 !== null && parcial2 !== null && parcial3 !== null && final >= 70) {
-        // Cambiar estado del grupo de 'actual' a 'concluido' (aprobado)
-        await connection.query(
-          'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
-          ['concluido', nControl, id_Grupo]
+        // Obtener fecha_fin del período
+        const [periodoData] = await connection.query(
+          'SELECT fecha_fin FROM Periodo WHERE id_Periodo = ?',
+          [id_Periodo]
         );
 
-        // Obtener el siguiente nivel
-        const [nivelActual] = await connection.query(
-          'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
-          [id_nivel]
-        );
+        if (periodoData.length > 0 && periodoData[0].fecha_fin) {
+          const hoy = new Date();
+          hoy.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+          const fechaFin = new Date(periodoData[0].fecha_fin);
+          fechaFin.setHours(0, 0, 0, 0); // Normalizar a inicio del día
 
-        if (nivelActual.length > 0) {
-          const siguienteNivel = nivelActual[0].id_Nivel + 1;
-          
-          // Verificar que existe el siguiente nivel (máximo 8: Intro a Diplomado 2)
+          if (hoy < fechaFin) {
+            // Período aún activo → BLOQUEAR avance temporal
+            console.log(`ℹ️ ${nControl}: Aprobado pero período activo. Bloqueando hasta ${periodoData[0].fecha_fin}`);
+            await connection.query(
+              'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+              ['aprobado_bloqueado', nControl, id_Grupo]
+            );
+            // No actualizar id_Nivel, esperar a que venza el período
+          } else {
+            // Período terminado → PERMITIR avance
+            console.log(`✅ ${nControl}: Período finalizado. Promoviendo al siguiente nivel`);
+            await connection.query(
+              'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+              ['concluido', nControl, id_Grupo]
+            );
+
+            const siguienteNivel = id_nivel + 1;
+            const [existeSiguiente] = await connection.query(
+              'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
+              [siguienteNivel]
+            );
+
+            if (existeSiguiente.length > 0) {
+              await connection.query(
+                'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
+                [siguienteNivel, nControl]
+              );
+            }
+          }
+        } else {
+          // Si no hay fecha_fin, permitir avance (retrocompatibilidad)
+          console.log(`⚠️ ${nControl}: Sin fecha_fin en período. Permitiendo avance`);
+          await connection.query(
+            'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+            ['concluido', nControl, id_Grupo]
+          );
+
+          const siguienteNivel = id_nivel + 1;
           const [existeSiguiente] = await connection.query(
             'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
             [siguienteNivel]
           );
 
           if (existeSiguiente.length > 0) {
-            // Actualizar nivel del estudiante
             await connection.query(
               'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
               [siguienteNivel, nControl]
@@ -192,6 +225,7 @@ exports.guardarCalificaciones = async (req, res) => {
         }
       } else if (parcial1 !== null && parcial2 !== null && parcial3 !== null && final < 70) {
         // Reprobó: cambiar estado a 'concluido' (reprobado)
+        console.log(`❌ ${nControl}: Reprobado (final: ${final}). Debe recursar el nivel`);
         await connection.query(
           'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
           ['concluido', nControl, id_Grupo]
@@ -228,7 +262,16 @@ exports.guardarCalificacionIndividual = async (req, res) => {
     const { nControl, parcial, valor, id_nivel, id_Periodo, id_Grupo } = req.body;
     // parcial puede ser: 'parcial1', 'parcial2', 'parcial3'
 
+    console.log('📝 [API] Guardando calificación individual:', {
+      nControl,
+      parcial,
+      valor,
+      id_Grupo,
+      id_Periodo
+    });
+
     if (!nControl || !parcial || !id_Grupo) {
+      console.log('❌ [API] Faltan campos requeridos');
       return res.status(400).json({ 
         success: false, 
         message: 'Faltan campos requeridos: nControl, parcial, id_Grupo' 
@@ -236,6 +279,7 @@ exports.guardarCalificacionIndividual = async (req, res) => {
     }
 
     if (!['parcial1', 'parcial2', 'parcial3'].includes(parcial)) {
+      console.log('❌ [API] Parcial inválido:', parcial);
       return res.status(400).json({ 
         success: false, 
         message: 'Parcial inválido. Debe ser: parcial1, parcial2 o parcial3' 
@@ -259,48 +303,104 @@ exports.guardarCalificacionIndividual = async (req, res) => {
       const p2 = parcial === 'parcial2' ? valor : calActual.parcial2;
       const p3 = parcial === 'parcial3' ? valor : calActual.parcial3;
 
+      console.log(`📊 [API] Actualizando registro existente ${calActual.id_Calificaciones}`);
+      console.log(`   Antes: P1=${calActual.parcial1}, P2=${calActual.parcial2}, P3=${calActual.parcial3}`);
+      console.log(`   Después: P1=${p1}, P2=${p2}, P3=${p3}`);
+
       // Recalcular final
       const parciales = [p1, p2, p3].filter(p => p !== null && p !== undefined);
       const final = parciales.length > 0 
         ? Math.round(parciales.reduce((a, b) => a + b, 0) / parciales.length) 
         : null;
 
-      await connection.query(
-        `UPDATE Calificaciones 
-         SET ${parcial} = ?, final = ?, id_nivel = ?
-         WHERE id_Calificaciones = ?`,
-        [valor, final, id_nivel, calActual.id_Calificaciones]
-      );
+      console.log(`   Final calculado: ${final}`);
+
+      // Actualizar solo el parcial y final (no modificar id_nivel si no viene)
+      if (id_nivel !== undefined && id_nivel !== null) {
+        await connection.query(
+          `UPDATE Calificaciones 
+           SET ${parcial} = ?, final = ?, id_nivel = ?
+           WHERE id_Calificaciones = ?`,
+          [valor, final, id_nivel, calActual.id_Calificaciones]
+        );
+      } else {
+        await connection.query(
+          `UPDATE Calificaciones 
+           SET ${parcial} = ?, final = ?
+           WHERE id_Calificaciones = ?`,
+          [valor, final, calActual.id_Calificaciones]
+        );
+      }
+
+      console.log(`✅ [API] Actualización ejecutada correctamente`);
 
       id_Calificaciones = calActual.id_Calificaciones;
 
-      // Si tiene las 3 calificaciones, aplicar lógica de aprobación/reprobación
+      // Si tiene las 3 calificaciones, aplicar lógica de aprobación/reprobación con validación de fecha
       if (p1 !== null && p2 !== null && p3 !== null && final !== null) {
         if (final >= 70) {
-          // Aprobó: cambiar estado del grupo a 'concluido' y avanzar de nivel
-          await connection.query(
-            'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
-            ['concluido', nControl, id_Grupo]
+          // Aprobó: validar fecha_fin antes de avanzar de nivel
+          const [periodoData] = await connection.query(
+            'SELECT fecha_fin FROM Periodo WHERE id_Periodo = ?',
+            [id_Periodo]
           );
 
-          // Obtener el siguiente nivel
-          const siguienteNivel = id_nivel + 1;
-          
-          // Verificar que existe el siguiente nivel (máximo 8: Intro a Diplomado 2)
-          const [existeSiguiente] = await connection.query(
-            'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
-            [siguienteNivel]
-          );
+          if (periodoData.length > 0 && periodoData[0].fecha_fin) {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const fechaFin = new Date(periodoData[0].fecha_fin);
+            fechaFin.setHours(0, 0, 0, 0);
 
-          if (existeSiguiente.length > 0) {
-            // Actualizar nivel del estudiante
+            if (hoy < fechaFin) {
+              // Período aún activo → Mantener estado 'actual' (no avanzar de nivel todavía)
+              console.log(`ℹ️ ${nControl}: Aprobado pero período activo. Manteniendo 'actual' hasta ${periodoData[0].fecha_fin}`);
+              // No se cambia el estado, se mantiene como 'actual'
+              // No se avanza de nivel hasta que termine el período
+            } else {
+              // Período terminado → PERMITIR avance
+              console.log(`✅ ${nControl}: Período finalizado. Promoviendo al siguiente nivel`);
+              await connection.query(
+                'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+                ['concluido', nControl, id_Grupo]
+              );
+
+              const siguienteNivel = id_nivel + 1;
+              const [existeSiguiente] = await connection.query(
+                'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
+                [siguienteNivel]
+              );
+
+              if (existeSiguiente.length > 0) {
+                await connection.query(
+                  'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
+                  [siguienteNivel, nControl]
+                );
+              }
+            }
+          } else {
+            // Sin fecha_fin, permitir avance
+            console.log(`⚠️ ${nControl}: Sin fecha_fin. Permitiendo avance`);
             await connection.query(
-              'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
-              [siguienteNivel, nControl]
+              'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
+              ['concluido', nControl, id_Grupo]
             );
+
+            const siguienteNivel = id_nivel + 1;
+            const [existeSiguiente] = await connection.query(
+              'SELECT id_Nivel FROM Nivel WHERE id_Nivel = ?',
+              [siguienteNivel]
+            );
+
+            if (existeSiguiente.length > 0) {
+              await connection.query(
+                'UPDATE Estudiante SET id_Nivel = ? WHERE nControl = ?',
+                [siguienteNivel, nControl]
+              );
+            }
           }
         } else {
           // Reprobó: cambiar estado a 'concluido' (mantiene historial)
+          console.log(`❌ ${nControl}: Reprobado (final: ${final}). Debe recursar el nivel`);
           await connection.query(
             'UPDATE EstudianteGrupo SET estado = ? WHERE nControl = ? AND id_Grupo = ?',
             ['concluido', nControl, id_Grupo]
@@ -336,11 +436,16 @@ exports.guardarCalificacionIndividual = async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error al guardar calificación individual:', error);
+    console.error('❌ [API] Error al guardar calificación individual:', error);
+    console.error('❌ [API] Stack trace:', error.stack);
+    console.error('❌ [API] SQL Error Code:', error.code);
+    console.error('❌ [API] SQL State:', error.sqlState);
     res.status(500).json({ 
       success: false, 
       message: 'Error al guardar calificación', 
-      error: error.message 
+      error: error.message,
+      sqlCode: error.code,
+      sqlState: error.sqlState
     });
   } finally {
     connection.release();
