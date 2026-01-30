@@ -6,6 +6,15 @@ import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import api from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 
+// Función para obtener nombre completo
+const getNombreCompleto = (estudiante) => {
+  if (!estudiante) return 'N/A';
+  const apellidoPaterno = estudiante.apellidoPaterno || '';
+  const apellidoMaterno = estudiante.apellidoMaterno || '';
+  const nombre = estudiante.nombre || '';
+  return `${apellidoPaterno} ${apellidoMaterno} ${nombre}`.trim();
+};
+
 function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos = [], niveles = [] }) {
   const [group, setGroup] = useState('');
   const [studentsInGroup, setStudentsInGroup] = useState([]);
@@ -81,7 +90,7 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
       return {
         No: String(idx + 1).padStart(2, '0'),
         Control: s.numero_control,
-        Nombre: s.nombre,
+        Nombre: getNombreCompleto(s),
         Faltas: faltas,
         Parcial1: p1,
         Parcial2: p2,
@@ -304,7 +313,7 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
                 id: s.numero_control,
                 no: String(idx + 1).padStart(2, '0'),
                 control: s.numero_control,
-                nombre: s.nombre,
+                nombre: getNombreCompleto(s),
                 faltas: faltasByStudent[s.numero_control] || 0,
                 p1: partialGrades[s.numero_control]?.p1 ?? '',
                 p2: partialGrades[s.numero_control]?.p2 ?? '',

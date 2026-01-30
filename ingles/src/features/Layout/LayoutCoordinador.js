@@ -84,22 +84,6 @@ function LayoutCoordinador({ children }) {
               <Link to="/dashboard-coordinador" className="menu__link" onClick={closeMenu}>Inicio</Link>
             </li>
 
-            <li className="menu__item menu__item--show">
-              <span className="menu__link">Accesos</span>
-              <ul className="menu__nesting">
-                <li className="menu__inside">
-                  <Link to="/lista-estudiantes" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Estudiantes
-                  </Link>
-                </li>
-                <li className="menu__inside">
-                  <Link to="/lista-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Grupos
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
             {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>

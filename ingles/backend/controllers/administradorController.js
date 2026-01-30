@@ -97,15 +97,15 @@ exports.createAdministrador = async (req, res) => {
 
     const id_administrador = adminResult.insertId;
 
-    // 4. Crear usuario si se proporcionó
-    if (usuario && contraseña) {
-      const hashedPassword = await bcrypt.hash(contraseña, 10);
-      await connection.query(
-        `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
-         VALUES (?, ?, 'ADMINISTRADOR', ?)`,
-        [usuario, hashedPassword, id_administrador]
-      );
-    }
+    // 4. Crear usuario automáticamente con credenciales por defecto
+    // Usuario: email, Contraseña: 123456
+    const defaultPassword = '123456';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    await connection.query(
+      `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
+       VALUES (?, ?, 'ADMINISTRADOR', ?)`,
+      [email, hashedPassword, id_administrador]
+    );
 
     await connection.commit();
 

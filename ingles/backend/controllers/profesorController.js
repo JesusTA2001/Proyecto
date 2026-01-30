@@ -97,15 +97,15 @@ exports.createProfesor = async (req, res) => {
 
     const id_profesor = profesorResult.insertId;
 
-    // 4. Crear usuario si se proporcionó
-    if (usuario && contraseña) {
-      const hashedPassword = await bcrypt.hash(contraseña, 10);
-      await connection.query(
-        `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
-         VALUES (?, ?, 'PROFESOR', ?)`,
-        [usuario, hashedPassword, id_profesor]
-      );
-    }
+    // 4. Crear usuario automáticamente con credenciales por defecto
+    // Usuario: RFC, Contraseña: 123456
+    const defaultPassword = '123456';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    await connection.query(
+      `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
+       VALUES (?, ?, 'PROFESOR', ?)`,
+      [RFC, hashedPassword, id_profesor]
+    );
 
     await connection.commit();
 

@@ -123,7 +123,7 @@ export default function HistorialGruposAdmin() {
     id: g.id_Grupo || idx,
     grupo: g.grupo,
     nivel: g.nivel_nombre || g.id_Nivel,
-    periodo: g.periodo_nombre || g.id_Periodo,
+    periodo: g.periodo_descripcion || g.periodo_nombre || g.id_Periodo,
     alumnosCount: Array.isArray(g.alumnos) ? g.alumnos.length : 0,
   }));
 
@@ -246,7 +246,7 @@ export default function HistorialGruposAdmin() {
               {grupoSeleccionado && (
                 <Typography variant="body2" style={{ color: '#666', marginTop: 4 }}>
                   Nivel: {grupoSeleccionado.nivel_nombre || grupoSeleccionado.id_Nivel} | 
-                  Período: {grupoSeleccionado.periodo_nombre || grupoSeleccionado.id_Periodo}
+                  Período: {grupoSeleccionado.periodo_descripcion || grupoSeleccionado.periodo_nombre || grupoSeleccionado.id_Periodo}
                 </Typography>
               )}
             </div>

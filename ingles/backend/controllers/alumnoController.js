@@ -156,15 +156,15 @@ exports.createAlumno = async (req, res) => {
       [nControl, id_dp, ubicacion]
     );
 
-    // 4. Crear usuario si se proporcionó
-    if (usuario && contraseña) {
-      const hashedPassword = await bcrypt.hash(contraseña, 10);
-      await connection.query(
-        `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
-         VALUES (?, ?, 'ESTUDIANTE', ?)`,
-        [usuario, hashedPassword, nControl]
-      );
-    }
+    // 4. Crear usuario automáticamente con credenciales por defecto
+    // Usuario: nControl, Contraseña: 123456
+    const defaultPassword = '123456';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    await connection.query(
+      `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
+       VALUES (?, ?, 'ESTUDIANTE', ?)`,
+      [nControl.toString(), hashedPassword, nControl]
+    );
 
     await connection.commit();
 
