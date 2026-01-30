@@ -129,8 +129,8 @@ function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], gr
           </div>
         </Link>
 
-        {/* Horarios - nuevo botón que dirige a la lista de horarios */}
-        <Link to="/lista-horarios" className="stat-card-link">
+        {/* Horarios - ahora dirige a la lista de profesores donde se puede ver el horario */}
+        <Link to="/lista-profesores" className="stat-card-link">
           <div className="stat-card" style={{ borderLeft: '4px solid #2b6cb0' }}>
             <div className="stat-card-info">
               <p className="stat-card-title">HORARIOS</p>

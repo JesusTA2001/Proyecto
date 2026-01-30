@@ -83,11 +83,6 @@ function Layout({children}) {
                     Lista De Profesores
                   </Link>
                 </li>
-                <li className="menu__inside">
-                  <Link to="/lista-horarios" className="menu__link menu__link--inside" onClick={closeMenu}>
-                  Horarios
-                  </Link>
-                </li>
               </ul>
             </li>
 
@@ -110,6 +105,11 @@ function Layout({children}) {
                 <li className="menu__inside">
                   <Link to="/administrar-periodos" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Administrar Periodos
+                  </Link>
+                </li>
+                <li className="menu__inside">
+                  <Link to="/historial-grupos-admin" className="menu__link menu__link--inside" onClick={closeMenu}>
+                    Historial de Grupos
                   </Link>
                 </li>
               </ul>

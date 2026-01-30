@@ -97,11 +97,6 @@ function LayoutCoordinador({ children }) {
                     Grupos
                   </Link>
                 </li>
-                <li className="menu__inside">
-                  <Link to="/lista-horarios" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Horarios
-                  </Link>
-                </li>
               </ul>
             </li>
 

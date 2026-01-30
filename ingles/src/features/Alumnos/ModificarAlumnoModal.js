@@ -9,7 +9,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
 import '../../styles/listaEstudiante.css';
 import { generoOptions, carrerasOptions } from '../../data/mapping';
-import { initialModalidades } from '../../data/modalidad';
 import { initialNiveles } from '../../data/niveles';
 
 export default function ModificarAlumnoModal({ open, onClose, alumno, actualizarAlumno }) {
@@ -18,10 +17,11 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
   const [errors, setErrors] = useState({ curp: '', telefono: '' });
 
   useEffect(() => {
-    if (alumno) {
+    if (alumno && open) {
+      // Crear una copia profunda del alumno para evitar modificar el original
       setForm({ ...alumno });
     }
-  }, [alumno]);
+  }, [alumno, open]);
 
   useEffect(() => {
     if (!form) return;
@@ -29,6 +29,16 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
     if (form.ubicacion === 'Tecnologico') setNivelesDisponibles(initialNiveles.filter(n => tecNivelIdsPattern.test(n.id)));
     else setNivelesDisponibles(initialNiveles);
   }, [form?.ubicacion]);
+
+  // Función para manejar el cierre del modal
+  const handleClose = () => {
+    // Resetear el formulario al estado original del alumno
+    if (alumno) {
+      setForm({ ...alumno });
+    }
+    setErrors({ curp: '', telefono: '' });
+    onClose();
+  };
 
   if (!form) return null;
 
@@ -70,14 +80,14 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="md"
       fullWidth
       PaperProps={{ sx: { width: '95vw', maxWidth: 1000, maxHeight: '90vh' } }}
     >
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
         Modificar Alumno
-        <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
+        <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>
       </DialogTitle>
@@ -118,21 +128,14 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
               <TextField label="Dirección" name="direccion" value={form.direccion || ''} onChange={handleChange} fullWidth size="small" margin="dense" />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6}>
               <Select name="ubicacion" value={form.ubicacion} onChange={handleChange} fullWidth size="small" displayEmpty>
                 <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
                 <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
               </Select>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
-              <Select name="modalidad" value={form.modalidad} onChange={handleChange} fullWidth size="small" displayEmpty>
-                <MenuItem value="">Selecciona una modalidad</MenuItem>
-                {initialModalidades.map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
-              </Select>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6}>
               <Select name="nivel" value={form.nivel} onChange={handleChange} fullWidth size="small" displayEmpty>
                 <MenuItem value="">Selecciona un nivel</MenuItem>
                 {nivelesDisponibles.map(n => <MenuItem key={n.id} value={n.nombre}>{n.nombre}</MenuItem>)}
@@ -149,7 +152,7 @@ export default function ModificarAlumnoModal({ open, onClose, alumno, actualizar
 
             <Grid item xs={12}>
               <div className="button-list" style={{ justifyContent: 'flex-end', paddingTop: 8 }}>
-                <button className='createbutton' type='button' onClick={onClose} style={{ backgroundColor: '#777', borderColor: '#666' }}>Cancelar</button>
+                <button className='createbutton' type='button' onClick={handleClose} style={{ backgroundColor: '#777', borderColor: '#666' }}>Cancelar</button>
                 <button className='modifybutton' type='submit' style={{ marginLeft: 12 }}>Guardar Cambios</button>
               </div>
             </Grid>

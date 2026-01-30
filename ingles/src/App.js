@@ -13,7 +13,6 @@ import ListaEstudiante from './features/Alumnos/ListaEstudianteMUI';
 import ListaProfesor from './features/Profesores/ListaProfesorMUI';
 import ListaAdministrador from './features/Administradores/ListaAdministradorMUI';
 import ListaGrupos from './features/Grupos/ListaGruposMUI';
-import ListaHorarios from './features/Horario/ListaHorarioMUI';
 
 // Dashboard Profesor
 import DashboardProfesor from './features/Dashboard/DashboardProfesor';
@@ -43,15 +42,13 @@ import CrearProfesor from './features/Profesores/CrearProfesorStepper';
 
 // CRUD Administradores
 import CrearAdministrador from './features/Administradores/CrearAdministradorStepper';
+import HistorialGruposAdmin from './features/Administradores/HistorialGruposAdmin';
 
 // CRUD Grupos
 import CrearGrupo from './features/Grupos/CrearGrupo';
 import ModificarGrupo from './features/Grupos/ModificarGrupo';
 import EliminarGrupo from './features/Grupos/EliminarGrupo';
 import VerGrupo from './features/Grupos/VerGrupo';
-
-// Horarios
-import VerHorario from './features/Horario/VerHorario'; 
 
 // reportes
 import ReporteProfesores from './features/Reportes/ReporteProfesores';
@@ -867,11 +864,11 @@ function App() {
             currentUser && currentUser.role === 'directivo'
               ? (
                 <LayoutDirectivos>
-                  <ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} />
+                  <ListaProfesor profesores={profesores} grupos={grupos} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} />
                 </LayoutDirectivos>
               ) : (
                 <Layout>
-                  <ListaProfesor profesores={profesores} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} eliminarProfesor={eliminarProfesor} />
+                  <ListaProfesor profesores={profesores} grupos={grupos} toggleEstado={toggleEstado} agregarProfesor={agregarProfesor} actualizarProfesor={actualizarProfesor} />
                 </Layout>
               )
           } />
@@ -927,7 +924,7 @@ function App() {
             currentUser && currentUser.role === 'administrador'
               ? (
                 <Layout>
-                  <CrearGrupo agregarGrupo={agregarGrupo} profesores={profesores} alumnos={alumnos} />
+                  <CrearGrupo agregarGrupo={agregarGrupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} />
                 </Layout>
               ) : (
                 <Navigate to="/" replace />
@@ -937,7 +934,7 @@ function App() {
             currentUser && currentUser.role === 'administrador'
               ? (
                 <Layout>
-                  <ModificarGrupo grupos={grupos} actualizarGrupo={actualizarGrupo} profesores={profesores} alumnos={alumnos} />
+                  <ModificarGrupo grupos={grupos} actualizarGrupo={actualizarGrupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} />
                 </Layout>
               ) : (
                 <Navigate to="/" replace />
@@ -971,22 +968,16 @@ function App() {
               )
           } />
 
-
-          {/* Horarios */}
-          <Route path="/lista-horarios" element={
-            currentUser && currentUser.role === 'directivo'
+          {/* Historial de Grupos (solo Administrador) */}
+          <Route path="/historial-grupos-admin" element={
+            currentUser && currentUser.role === 'administrador'
               ? (
-                <LayoutDirectivos>
-                  <ListaHorarios horarios={horarios} profesores={profesores} grupos={grupos} />
-                </LayoutDirectivos>
+                <Layout><HistorialGruposAdmin /></Layout>
               ) : (
-                <Layout>
-                  <ListaHorarios horarios={horarios} profesores={profesores} grupos={grupos} />
-                </Layout>
+                <Navigate to="/" replace />
               )
           } />
-          <Route path="/ver-horario/:id" element={<Layout><VerHorario horarios={horarios} profesores={profesores} grupos={grupos} /></Layout>} />
-
+          
 {/* --- 2. AÑADIR NUEVAS RUTAS DE REPORTE --- */}
           <Route 
             path="/reporte-profesores" 

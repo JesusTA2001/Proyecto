@@ -362,3 +362,78 @@ exports.quitarAlumno = async (req, res) => {
     connection.release();
   }
 };
+
+// Obtener historial de grupos finalizados
+exports.getHistorialGrupos = async (req, res) => {
+  try {
+    const { id_Periodo } = req.query;
+    
+    let query = `
+      SELECT 
+        g.id_Grupo,
+        g.grupo,
+        g.id_Periodo,
+        g.id_Profesor,
+        g.id_Nivel,
+        g.ubicacion,
+        g.id_cHorario,
+        g.estado,
+        per.descripcion as periodo_descripcion,
+        per.año as periodo_año,
+        CONCAT(dp_prof.apellidoPaterno, ' ', dp_prof.apellidoMaterno, ' ', dp_prof.nombre) as profesor_nombre,
+        ch.diaSemana,
+        ch.hora,
+        n.nivel as nivel_nombre,
+        (SELECT COUNT(*) FROM EstudianteGrupo eg WHERE eg.id_Grupo = g.id_Grupo) as num_alumnos
+      FROM Grupo g
+      LEFT JOIN Periodo per ON g.id_Periodo = per.id_Periodo
+      LEFT JOIN Profesor p ON g.id_Profesor = p.id_Profesor
+      LEFT JOIN Empleado e ON p.id_empleado = e.id_empleado
+      LEFT JOIN DatosPersonales dp_prof ON e.id_dp = dp_prof.id_dp
+      LEFT JOIN catalogohorarios ch ON g.id_cHorario = ch.id_cHorario
+      LEFT JOIN Nivel n ON g.id_Nivel = n.id_Nivel
+      WHERE g.estado = 'concluido'
+    `;
+    
+    const params = [];
+    if (id_Periodo) {
+      query += ' AND g.id_Periodo = ?';
+      params.push(id_Periodo);
+    }
+    
+    query += ' ORDER BY per.año DESC, g.id_Grupo DESC';
+    
+    const [grupos] = await pool.query(query, params);
+
+    // Para cada grupo, obtener los alumnos (incluidos los históricos)
+    for (let grupo of grupos) {
+      const [alumnos] = await pool.query(`
+        SELECT 
+          eg.nControl,
+          eg.estado as estado_en_grupo,
+          CONCAT(dp.apellidoPaterno, ' ', dp.apellidoMaterno, ' ', dp.nombre) as nombre_completo,
+          dp.email,
+          e.ubicacion
+        FROM EstudianteGrupo eg
+        JOIN Estudiante e ON eg.nControl = e.nControl
+        JOIN DatosPersonales dp ON e.id_dp = dp.id_dp
+        WHERE eg.id_Grupo = ?
+        ORDER BY dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre
+      `, [grupo.id_Grupo]);
+      
+      grupo.alumnos = alumnos;
+    }
+
+    res.json({
+      success: true,
+      grupos: grupos
+    });
+  } catch (error) {
+    console.error('Error al obtener historial de grupos:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al obtener historial de grupos', 
+      error: error.message 
+    });
+  }
+};

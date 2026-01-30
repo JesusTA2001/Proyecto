@@ -6,9 +6,8 @@ import '../../styles/listaEstudiante.css';
 import CrearAdministradorModal from './CrearAdministradorModal';
 import VerAdministradorModal from './VerAdministradorModal';
 import ModificarAdministradorModal from './ModificarAdministradorModal';
-import EliminarAdministradorModal from './EliminarAdministradorModal';
 
-export default function ListaAdministradorMUI({ administradores = [], toggleEstado, agregarAdministrador, actualizarAdministrador, eliminarAdministrador }) {
+export default function ListaAdministradorMUI({ administradores = [], toggleEstado, agregarAdministrador, actualizarAdministrador }) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedStatus] = React.useState('');
   const apiRef = useGridApiRef();
@@ -25,7 +24,6 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
-  const [openDelete, setOpenDelete] = React.useState(false);
   const [selectedAdmin, setSelectedAdmin] = React.useState(null);
 
   const filtered = (administradores || []).filter(a => {
@@ -88,7 +86,6 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
             {!isDirectivo && (
               <>
                 <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedAdmin(admin); setOpenEdit(true); }}>✏️</button>
-                <button className='deletebutton icon-button' title='Eliminar' onClick={() => { setSelectedAdmin(admin); setOpenDelete(true); }}>🗑️</button>
               </>
             )}
           </div>
@@ -130,7 +127,6 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
       <CrearAdministradorModal open={openCreate} onClose={() => setOpenCreate(false)} agregarAdministrador={agregarAdministrador} />
       <VerAdministradorModal open={openView} onClose={() => setOpenView(false)} admin={selectedAdmin} />
       <ModificarAdministradorModal open={openEdit} onClose={() => setOpenEdit(false)} admin={selectedAdmin} actualizarAdministrador={actualizarAdministrador} />
-      <EliminarAdministradorModal open={openDelete} onClose={() => setOpenDelete(false)} admin={selectedAdmin} eliminarAdministrador={eliminarAdministrador} />
 
     </div>
   );

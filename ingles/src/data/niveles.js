@@ -9,7 +9,7 @@ export const initialNiveles = [
   { id: 'T2', nombre: 'Teens 2', disponibilidad: 'L-M, M-J, W-V (4pm-6pm)' },
   { id: 'T3', nombre: 'Teens 3', disponibilidad: 'L-M, M-J, W-V (4pm-6pm)' },
   { id: 'T4', nombre: 'Teens 4', disponibilidad: 'L-M, M-J, W-V (4pm-6pm)' },
-  { id: 'N0', nombre: 'Nivel Intro', disponibilidad: 'Varios horarios (9am-11pm)' },
+  { id: 'N0', nombre: 'Intro', disponibilidad: 'Varios horarios (9am-11pm)' },
   { id: 'N1', nombre: 'Nivel 1', disponibilidad: 'Varios horarios (9am-11pm)' },
   { id: 'N2', nombre: 'Nivel 2', disponibilidad: 'Varios horarios (9am-11pm)' },
   { id: 'N3', nombre: 'Nivel 3', disponibilidad: 'Varios horarios (9am-11pm)' },

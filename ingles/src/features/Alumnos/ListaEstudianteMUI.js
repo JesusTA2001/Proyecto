@@ -6,9 +6,8 @@ import '../../styles/listaEstudiante.css';
 import CrearAlumnoModal from './CrearAlumnoModal';
 import VerAlumnoModal from './VerAlumnoModal';
 import ModificarAlumnoModal from './ModificarAlumnoModal';
-import EliminarAlumnoModal from './EliminarAlumnoModal';
 
-export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumno, actualizarAlumno, eliminarAlumno }) {
+export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumno, actualizarAlumno }) {
   // --- Estados para filtros ---
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedStatus] = React.useState('');
@@ -140,13 +139,6 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
                 >
                   ✏️
                 </button>
-                <button
-                  className="accion-link icon-button"
-                  title="Eliminar"
-                  onClick={() => { setSelectedAlumno(alum); setOpenDelete(true); }}
-                >
-                  🗑️
-                </button>
               </>
             )}
           </div>
@@ -158,7 +150,6 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   const [openModal, setOpenModal] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
-  const [openDelete, setOpenDelete] = React.useState(false);
   const [selectedAlumno, setSelectedAlumno] = React.useState(null);
 
   return (
@@ -197,10 +188,9 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
       {/* Modal del Stepper */}
       <CrearAlumnoModal open={openModal} onClose={() => setOpenModal(false)} agregarAlumno={agregarAlumno} />
 
-      {/* Modales: ver, editar y eliminar alumno (respetan colores institucionales) */}
+      {/* Modales: ver y editar alumno (respetan colores institucionales) */}
       <VerAlumnoModal open={openView} onClose={() => setOpenView(false)} alumno={selectedAlumno} />
       <ModificarAlumnoModal open={openEdit} onClose={() => setOpenEdit(false)} alumno={selectedAlumno} actualizarAlumno={actualizarAlumno} />
-      <EliminarAlumnoModal open={openDelete} onClose={() => setOpenDelete(false)} alumno={selectedAlumno} eliminarAlumno={eliminarAlumno} />
 
       {/* DataGrid con toolbar de Material UI */}
       <Box sx={{ height: 600, width: '100%', mt: 2 }}>

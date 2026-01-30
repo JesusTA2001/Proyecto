@@ -48,12 +48,16 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     const navigate = useNavigate();
     const [grupo, setGrupo] = useState(null); // Estado para el grupo a editar
     const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(new Set());
+    const [alumnosOriginalesDelGrupo, setAlumnosOriginalesDelGrupo] = useState([]); // Mantener lista original
     const [nivelesDisponibles, setNivelesDisponibles] = useState([]);
     const [profesoresDisponibles, setProfesoresDisponibles] = useState([]);
     const [alumnosDisponibles, setAlumnosDisponibles] = useState([]);
 
     // Opciones para el select de días
     const diasSemana = [
+        { value: 'Lunes-Miercoles', label: 'Lunes y Miércoles' },
+        { value: 'Martes-Jueves', label: 'Martes y Jueves' },
+        { value: 'Lunes-Viernes', label: 'Lunes a Viernes' },
         { value: 'Lunes', label: 'Lunes' },
         { value: 'Martes', label: 'Martes' },
         { value: 'Miercoles', label: 'Miércoles' },
@@ -61,9 +65,6 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
         { value: 'Viernes', label: 'Viernes' },
         { value: 'Sabado', label: 'Sábado' },
         { value: 'Domingo', label: 'Domingo' },
-        { value: 'Lunes-Miercoles', label: 'Lunes y Miércoles' },
-        { value: 'Martes-Jueves', label: 'Martes y Jueves' },
-        { value: 'Lunes-Viernes', label: 'Lunes a Viernes' },
     ];
 
     // --- Cargar datos del grupo ---
@@ -89,6 +90,11 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
             const alumnoIdsArray = Array.isArray(grupoProp.alumnoIds) ? grupoProp.alumnoIds : [];
             console.log('✅ Estableciendo alumnos seleccionados:', alumnoIdsArray);
             setAlumnosSeleccionados(new Set(alumnoIdsArray));
+            
+            // Guardar lista original de alumnos del grupo
+            const alumnosOriginales = (alumnos || []).filter(a => alumnoIdsArray.includes(a.numero_control));
+            setAlumnosOriginalesDelGrupo(alumnosOriginales);
+            
             return;
         }
         // Si no, intenta buscar en el array 'grupos' usando el id de la ruta
@@ -108,6 +114,11 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                 const alumnoIdsArray = Array.isArray(grupoAEditar.alumnoIds) ? grupoAEditar.alumnoIds : [];
                 console.log('✅ Estableciendo alumnos seleccionados:', alumnoIdsArray);
                 setAlumnosSeleccionados(new Set(alumnoIdsArray));
+                
+                // Guardar lista original de alumnos del grupo
+                const alumnosOriginales = (alumnos || []).filter(a => alumnoIdsArray.includes(a.numero_control));
+                setAlumnosOriginalesDelGrupo(alumnosOriginales);
+                
                 return;
             }
         }
@@ -163,12 +174,13 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                     nivel: nivelObj.id
                 };
 
+                // Usar /alumnos/disponibles/list para obtener solo estudiantes sin grupo
                 const response = await api.get('/alumnos/disponibles/list', { params });
                 
                 // Mapear la respuesta para que tenga el formato esperado
                 const alumnosMapeados = response.data.map(a => ({
                     numero_control: a.nControl,
-                    nombre: `${a.apellidoPaterno} ${a.apellidoMaterno} ${a.nombre}`.trim(),
+                    nombre: a.nombre,
                     apellidoPaterno: a.apellidoPaterno,
                     apellidoMaterno: a.apellidoMaterno,
                     email: a.email,
@@ -177,13 +189,26 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                     estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
                 }));
                 
-                // Agregar alumnos que ya están seleccionados en el grupo (para que no desaparezcan)
-                const alumnosYaSeleccionados = (alumnos || []).filter(a => 
-                    alumnosSeleccionados.has(a.numero_control)
-                );
+                // Agregar alumnos ORIGINALES del grupo (los que estaban cuando se abrió el modal)
+                // Esto permite que sigan visibles aunque los deselecciones
+                const alumnosDelGrupoOriginal = alumnosOriginalesDelGrupo
+                    .filter(a => 
+                        a.ubicacion === grupo.ubicacion &&
+                        (a.id_Nivel === nivelObj.id || a.nivel_nombre === grupo.nivel)
+                    )
+                    .map(a => ({
+                        numero_control: a.nControl || a.numero_control,
+                        nombre: a.nombre,
+                        apellidoPaterno: a.apellidoPaterno,
+                        apellidoMaterno: a.apellidoMaterno,
+                        email: a.email,
+                        ubicacion: a.ubicacion,
+                        nivel: a.nivel_nombre || `Nivel ${a.id_Nivel}`,
+                        estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
+                    }));
                 
-                // Combinar y eliminar duplicados
-                const todosLosAlumnos = [...alumnosMapeados, ...alumnosYaSeleccionados];
+                // Combinar disponibles + los del grupo original, eliminando duplicados
+                const todosLosAlumnos = [...alumnosMapeados, ...alumnosDelGrupoOriginal];
                 const uniqueAlumnos = Array.from(new Map(todosLosAlumnos.map(a => [a.numero_control, a])).values());
                 
                 setAlumnosDisponibles(uniqueAlumnos);
@@ -195,7 +220,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
 
         cargarAlumnosDisponibles();
         
-    }, [grupo?.ubicacion, grupo?.nivel, niveles, alumnosSeleccionados]);
+    }, [grupo?.ubicacion, grupo?.nivel, niveles, alumnosOriginalesDelGrupo]);
 
 
     const handleChange = (e) => {
@@ -244,13 +269,14 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
         });
     };
 
-    const handleAlumnoToggle = (alumnoId) => {
+    const handleAlumnoToggle = (alumno) => {
          setAlumnosSeleccionados(prev => {
              const newSet = new Set(prev);
-             if (newSet.has(alumnoId)) {
-                 newSet.delete(alumnoId);
+             if (newSet.has(alumno.numero_control)) {
+                 newSet.delete(alumno.numero_control);
+                //  setAlumnosDisponibles(alumnosDisponibles => [...alumnosDisponibles, alumno]); // Reagregar a disponibles
              } else {
-                 newSet.add(alumnoId);
+                 newSet.add(alumno.numero_control);
              }
              return newSet;
          });
@@ -394,10 +420,10 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                                         type="checkbox"
                                         id={`alumno-${alumno.numero_control}`}
                                         checked={alumnosSeleccionados.has(alumno.numero_control)}
-                                        onChange={() => handleAlumnoToggle(alumno.numero_control)}
+                                        onChange={() => handleAlumnoToggle(alumno)}
                                     />
                                     <label htmlFor={`alumno-${alumno.numero_control}`} style={{ marginLeft: '8px', cursor: 'pointer' }}>
-                                        {alumno.nombre} ({alumno.numero_control})
+                                        {getNombreCompleto(alumno)} ({alumno.numero_control})
                                     </label>
                                 </div>
                             ))

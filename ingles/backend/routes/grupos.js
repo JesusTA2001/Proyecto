@@ -7,6 +7,7 @@ const { authMiddleware } = require('../middleware/auth');
 router.use(authMiddleware);
 
 // Rutas para grupos
+router.get('/historial', grupoController.getHistorialGrupos);
 router.get('/', grupoController.getGrupos);
 router.get('/:id', grupoController.getGrupoById);
 router.post('/', grupoController.createGrupo);

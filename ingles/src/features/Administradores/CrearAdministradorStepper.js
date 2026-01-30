@@ -67,8 +67,8 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
       }
     }
     if (activeStep === 1) {
-      if (!admin.ubicacion || !admin.gradoEstudio) {
-        alert('Por favor completa Ubicación y Nivel de estudio.');
+      if (!admin.gradoEstudio) {
+        alert('Por favor completa el Nivel de estudio.');
         return;
       }
     }
@@ -163,22 +163,7 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
         {activeStep === 1 && (
           <Box>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Select
-                  fullWidth
-                  value={admin.ubicacion}
-                  onChange={handleChange('ubicacion')}
-                  size="small"
-                  displayEmpty
-                  required
-                  sx={{ mt: 0.5 }}
-                >
-                  <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
-                  <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
-                </Select>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <Select
                   fullWidth
                   value={admin.gradoEstudio}
@@ -211,7 +196,6 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
               <p><strong>Dirección:</strong> {admin.direccion || 'No proporcionado'}</p>
               
               <h4 style={{ marginBottom: 12 }}>Academia</h4>
-              <p><strong>Ubicación:</strong> {admin.ubicacion}</p>
               <p><strong>Nivel de estudio:</strong> {admin.gradoEstudio}</p>
             </Box>
           </Box>

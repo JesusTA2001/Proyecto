@@ -13,15 +13,9 @@ import {
   TableRow, 
   Paper,
   Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
+  IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import api from '../../api/axios';
 import CrearPeriodo from './CrearPeriodo';
@@ -31,7 +25,7 @@ function AdministrarPeriodos() {
   const [periodos, setPeriodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openCrear, setOpenCrear] = useState(false);
-  const [periodoEliminar, setPeriodoEliminar] = useState(null);
+  const [periodoModificar, setPeriodoModificar] = useState(null);
 
   useEffect(() => {
     cargarPeriodos();
@@ -53,17 +47,9 @@ function AdministrarPeriodos() {
     cargarPeriodos();
   };
 
-  const handleEliminar = async () => {
-    if (!periodoEliminar) return;
-
-    try {
-      await api.delete(`/periodos/${periodoEliminar.id_Periodo}`);
-      cargarPeriodos();
-      setPeriodoEliminar(null);
-    } catch (error) {
-      console.error('Error al eliminar periodo:', error);
-      alert(error.response?.data?.message || 'Error al eliminar el periodo');
-    }
+  const handlePeriodoModificado = () => {
+    cargarPeriodos();
+    setPeriodoModificar(null);
   };
 
   const formatearFecha = (fecha) => {
@@ -93,11 +79,17 @@ function AdministrarPeriodos() {
 
   const getSemestreInfo = (descripcion) => {
     if (descripcion?.includes('-1')) {
-      return { semestre: '1', periodo: 'Feb - Jun', color: '#3b82f6' };
+      return { tipo: 'Semestre 1', periodo: 'Feb - Jun', color: '#3b82f6', icono: '📘' };
     } else if (descripcion?.includes('-2')) {
-      return { semestre: '2', periodo: 'Ago - Ene', color: '#8b5cf6' };
+      return { tipo: 'Semestre 2', periodo: 'Ago - Ene', color: '#8b5cf6', icono: '📗' };
+    } else if (descripcion?.includes('-I1')) {
+      return { tipo: 'Intensivo 1', periodo: 'Feb - Jun (2 niveles)', color: '#f59e0b', icono: '⚡' };
+    } else if (descripcion?.includes('-I2')) {
+      return { tipo: 'Intensivo 2', periodo: 'Ago - Ene (2 niveles)', color: '#ef4444', icono: '⚡' };
+    } else if (descripcion?.includes('-V')) {
+      return { tipo: 'Verano', periodo: 'Julio (1 nivel)', color: '#10b981', icono: '☀️' };
     }
-    return { semestre: '?', periodo: 'Desconocido', color: '#6b7280' };
+    return { tipo: 'Desconocido', periodo: 'Sin definir', color: '#6b7280', icono: '❓' };
   };
 
   if (loading) {
@@ -148,7 +140,7 @@ function AdministrarPeriodos() {
             <TableHead sx={{ backgroundColor: '#f9fafb' }}>
               <TableRow>
                 <TableCell><strong>Periodo</strong></TableCell>
-                <TableCell><strong>Semestre</strong></TableCell>
+                <TableCell><strong>Tipo</strong></TableCell>
                 <TableCell><strong>Año</strong></TableCell>
                 <TableCell><strong>Fecha Inicio</strong></TableCell>
                 <TableCell><strong>Fecha Fin</strong></TableCell>
@@ -186,7 +178,7 @@ function AdministrarPeriodos() {
                       </TableCell>
                       <TableCell>
                         <Chip 
-                          label={`Semestre ${semestreInfo.semestre} (${semestreInfo.periodo})`}
+                          label={`${semestreInfo.icono} ${semestreInfo.tipo}`}
                           size="small"
                           sx={{ 
                             backgroundColor: semestreInfo.color,
@@ -194,6 +186,9 @@ function AdministrarPeriodos() {
                             fontWeight: '500'
                           }}
                         />
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>
+                          {semestreInfo.periodo}
+                        </div>
                       </TableCell>
                       <TableCell>{periodo.año}</TableCell>
                       <TableCell>{formatearFecha(periodo.fecha_inicio)}</TableCell>
@@ -207,14 +202,19 @@ function AdministrarPeriodos() {
                         />
                       </TableCell>
                       <TableCell align="center">
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => setPeriodoEliminar(periodo)}
-                          title="Eliminar periodo"
+                        <button
+                          onClick={() => setPeriodoModificar(periodo)}
+                          title="Modificar periodo"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '1.2em',
+                            padding: '4px 8px'
+                          }}
                         >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                          ✏️
+                        </button>
                       </TableCell>
                     </TableRow>
                   );
@@ -232,26 +232,15 @@ function AdministrarPeriodos() {
         onPeriodoCreado={handlePeriodoCreado}
       />
 
-      {/* Dialog de confirmación para eliminar */}
-      <Dialog open={Boolean(periodoEliminar)} onClose={() => setPeriodoEliminar(null)}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de eliminar el periodo <strong>{periodoEliminar?.descripcion}</strong>?
-          </Typography>
-          <Typography variant="body2" color="error" sx={{ marginTop: '10px' }}>
-            ⚠️ Esta acción eliminará todos los grupos asociados a este periodo.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPeriodoEliminar(null)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleEliminar} color="error" variant="contained">
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Dialog para modificar periodo */}
+      {periodoModificar && (
+        <CrearPeriodo
+          open={Boolean(periodoModificar)}
+          onClose={() => setPeriodoModificar(null)}
+          onPeriodoCreado={handlePeriodoModificado}
+          periodoEditar={periodoModificar}
+        />
+      )}
     </div>
   );
 }

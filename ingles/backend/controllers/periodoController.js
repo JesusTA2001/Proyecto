@@ -152,4 +152,71 @@ exports.deletePeriodo = async (req, res) => {
   }
 };
 
+// Actualizar un periodo
+exports.updatePeriodo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { descripcion, año, fecha_inicio, fecha_fin } = req.body;
+
+    // Validaciones
+    if (!descripcion || !año || !fecha_inicio || !fecha_fin) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Todos los campos son obligatorios (descripcion, año, fecha_inicio, fecha_fin)' 
+      });
+    }
+
+    // Verificar que el periodo exista
+    const [periodo] = await pool.query(
+      'SELECT id_Periodo FROM Periodo WHERE id_Periodo = ?',
+      [id]
+    );
+
+    if (periodo.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Periodo no encontrado' 
+      });
+    }
+
+    // Verificar que no exista otro periodo con la misma descripción
+    const [existente] = await pool.query(
+      'SELECT id_Periodo FROM Periodo WHERE descripcion = ? AND id_Periodo != ?',
+      [descripcion, id]
+    );
+
+    if (existente.length > 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Ya existe otro periodo con esa descripción' 
+      });
+    }
+
+    // Actualizar el periodo
+    await pool.query(
+      'UPDATE Periodo SET descripcion = ?, año = ?, fecha_inicio = ?, fecha_fin = ? WHERE id_Periodo = ?',
+      [descripcion, parseInt(año), fecha_inicio, fecha_fin, id]
+    );
+
+    // Obtener el periodo actualizado
+    const [periodoActualizado] = await pool.query(
+      'SELECT id_Periodo, descripcion, año, fecha_inicio, fecha_fin FROM Periodo WHERE id_Periodo = ?',
+      [id]
+    );
+
+    res.json({ 
+      success: true,
+      message: 'Periodo actualizado correctamente',
+      periodo: periodoActualizado[0]
+    });
+  } catch (error) {
+    console.error('Error al actualizar periodo:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al actualizar periodo', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = exports;

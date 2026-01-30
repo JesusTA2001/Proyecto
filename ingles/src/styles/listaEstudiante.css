@@ -687,19 +687,35 @@ body {
 }
 
 .levels-path-list li {
-    background-color: #e9ecef;
-    padding: 5px 10px;
-    border-radius: 15px; /* Bordes redondeados */
+    background-color: transparent;
+    padding: 8px 14px;
+    border-radius: 20px;
     font-size: 0.85rem;
     color: #495057;
+    border: 2px solid #e9ecef;
+    font-weight: 500;
 }
 
-/* Estilo para resaltar el nivel actual en la lista de posibles */
-.levels-path-list li.current-level {
-    background-color: var(--color-primary); /* Color principal */
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* Nivel completado/aprobado - Verde */
+.levels-path-list li.completed-level {
+    border-color: #22c55e; /* Verde */
+    color: #22c55e;
+    font-weight: 600;
+}
+
+/* Nivel reprobado - Rojo */
+.levels-path-list li.failed-level {
+    border-color: #ef4444; /* Rojo */
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* Nivel en curso - Naranja */
+.levels-path-list li.in-progress-level {
+    border-color: #f97316; /* Naranja */
+    color: #f97316;
+    font-weight: 700;
+    box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2);
 }
 
 /* --- Botones dentro del DataGrid (sin borde, tamaño uniforme) --- */

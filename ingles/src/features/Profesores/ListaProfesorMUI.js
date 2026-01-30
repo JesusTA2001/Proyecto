@@ -6,9 +6,9 @@ import '../../styles/listaEstudiante.css';
 import CrearProfesorModal from './CrearProfesorModal';
 import VerProfesorModal from './VerProfesorModal';
 import ModificarProfesorModal from './ModificarProfesorModal';
-import EliminarProfesorModal from './EliminarProfesorModal';
+import VerHorarioModal from '../Horario/VerHorarioModal';
 
-export default function ListaProfesorMUI({ profesores = [], toggleEstado, agregarProfesor, actualizarProfesor, eliminarProfesor }) {
+export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleEstado, agregarProfesor, actualizarProfesor }) {
   // --- Estados de Filtro (Solo término de búsqueda) ---
   const [searchTerm, setSearchTerm] = React.useState('');
   // Se eliminaron selectedLocation y selectedStatus
@@ -23,7 +23,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
-  const [openDelete, setOpenDelete] = React.useState(false);
+  const [openHorario, setOpenHorario] = React.useState(false);
   const [selectedProfesor, setSelectedProfesor] = React.useState(null);
 
   // --- Lógica de Filtrado (Simplificada) ---
@@ -35,7 +35,10 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
   });
 
   // --- Filas para el DataGrid ---
-  const rows = filtered.map(p => ({ id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombreCompleto, ubicacion: p.ubicacion, grado: p.gradoEstudio, estado: p.estado }));
+  const rows = filtered.map(p => {
+    const cantidadGrupos = (grupos || []).filter(g => g.profesorId === p.numero_empleado).length;
+    return { id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombreCompleto, ubicacion: p.ubicacion, grado: p.gradoEstudio, estado: p.estado, cantidadGrupos };
+  });
 
   // --- Lógica de Exportación (Mejorada para usar la vista del DataGrid) ---
   const exportToCSV = () => {
@@ -72,6 +75,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
     { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 200 },
     { field: 'ubicacion', headerName: 'Ubicación', width: 160 },
     { field: 'grado', headerName: 'Grado de Estudio', width: 160 },
+    { field: 'cantidadGrupos', headerName: 'Grupos Asignados', width: 140, align: 'center', headerAlign: 'center' },
     {
       field: 'estado', headerName: 'Estado', width: 130,
       renderCell: (params) => (
@@ -85,10 +89,10 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
         return (
           <div className='acciones-cell' style={{ display: 'flex', gap: '0.4rem' }}>
             <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedProfesor(p); setOpenView(true); }}>👁️</button>
+            <button className='view-button icon-button' title='Ver Horario' onClick={() => { setSelectedProfesor(p); setOpenHorario(true); }}>📅</button>
             {!isDirectivo && (
               <>
                 <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedProfesor(p); setOpenEdit(true); }}>✏️</button>
-                <button className='deletebutton icon-button' title='Eliminar' onClick={() => { setSelectedProfesor(p); setOpenDelete(true); }}>🗑️</button>
               </>
             )}
           </div>
@@ -149,7 +153,7 @@ export default function ListaProfesorMUI({ profesores = [], toggleEstado, agrega
       <CrearProfesorModal open={openCreate} onClose={() => setOpenCreate(false)} agregarProfesor={agregarProfesor} />
       <VerProfesorModal open={openView} onClose={() => setOpenView(false)} profesor={selectedProfesor} />
       <ModificarProfesorModal open={openEdit} onClose={() => setOpenEdit(false)} profesor={selectedProfesor} actualizarProfesor={actualizarProfesor} />
-      <EliminarProfesorModal open={openDelete} onClose={() => setOpenDelete(false)} profesor={selectedProfesor} eliminarProfesor={eliminarProfesor} />
+      <VerHorarioModal open={openHorario} onClose={() => setOpenHorario(false)} profesor={selectedProfesor} grupos={grupos} />
     </div>
   );
 }

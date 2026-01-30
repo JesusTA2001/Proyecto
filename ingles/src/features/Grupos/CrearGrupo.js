@@ -127,8 +127,9 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
                 };
 
                 console.log('📡 Llamando API con params:', params);
+                // Usar /alumnos/disponibles/list para obtener SOLO estudiantes sin grupo
                 const response = await api.get('/alumnos/disponibles/list', { params });
-                console.log('📥 Respuesta recibida:', response.data.length, 'alumnos');
+                console.log('📥 Respuesta recibida:', response.data.length, 'alumnos disponibles');
                 
                 // Mapear la respuesta para que tenga el formato esperado
                 const alumnosMapeados = response.data.map(a => ({
@@ -158,8 +159,35 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
 
     // Sincronizar periodosLocal cuando cambien los periodos del prop
     useEffect(() => {
-        setPeriodosLocal(periodos);
+        if (periodos && periodos.length > 0) {
+            setPeriodosLocal(periodos);
+        }
     }, [periodos]);
+
+    // Cargar periodos si no se reciben como prop
+    useEffect(() => {
+        const cargarPeriodos = async () => {
+            if (!periodos || periodos.length === 0) {
+                try {
+                    const response = await api.get('/periodos');
+                    const periodosMapeados = response.data.map(p => ({
+                        id: p.id_Periodo,
+                        id_Periodo: p.id_Periodo,
+                        nombre: p.descripcion,
+                        descripcion: p.descripcion,
+                        año: p.año,
+                        fecha_inicio: p.fecha_inicio,
+                        fecha_fin: p.fecha_fin
+                    }));
+                    setPeriodosLocal(periodosMapeados);
+                    console.log('✅ Periodos cargados desde API:', periodosMapeados.length);
+                } catch (error) {
+                    console.error('Error al cargar periodos:', error);
+                }
+            }
+        };
+        cargarPeriodos();
+    }, []);
 
 
     const handleChange = (e) => {
@@ -224,23 +252,32 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
         setAlumnosSeleccionados(seleccion);
     };
 
-    const handlePeriodoCreado = (nuevoPeriodo) => {
-        console.log('✅ Nuevo periodo creado:', nuevoPeriodo);
-        // Agregar el nuevo periodo a la lista local
-        const periodoMapeado = {
-            id: nuevoPeriodo.id_Periodo,
-            id_Periodo: nuevoPeriodo.id_Periodo,
-            nombre: nuevoPeriodo.descripcion,
-            descripcion: nuevoPeriodo.descripcion,
-            año: nuevoPeriodo.año,
-            fecha_inicio: nuevoPeriodo.fecha_inicio,
-            fecha_fin: nuevoPeriodo.fecha_fin
-        };
-        setPeriodosLocal(prev => [...prev, periodoMapeado]);
+    const handlePeriodoCreado = async (nuevoPeriodo) => {
+        console.log('✅ Periodo guardado:', nuevoPeriodo);
+        
+        // Recargar todos los periodos desde la API para asegurar datos actualizados
+        try {
+            const response = await api.get('/periodos');
+            const periodosMapeados = response.data.map(p => ({
+                id: p.id_Periodo,
+                id_Periodo: p.id_Periodo,
+                nombre: p.descripcion,
+                descripcion: p.descripcion,
+                año: p.año,
+                fecha_inicio: p.fecha_inicio,
+                fecha_fin: p.fecha_fin
+            }));
+            setPeriodosLocal(periodosMapeados);
+            console.log('✅ Periodos actualizados:', periodosMapeados.length);
+        } catch (error) {
+            console.error('Error al recargar periodos:', error);
+        }
+        
         setOpenCrearPeriodo(false);
+        
         // Notificar al componente padre si existe la función
         if (onPeriodoCreado) {
-            onPeriodoCreado(periodoMapeado);
+            onPeriodoCreado(nuevoPeriodo);
         }
     };
 
