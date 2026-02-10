@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Paper, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import api from '../../api/axios';
@@ -16,7 +16,7 @@ export default function HistorialGrupos() {
     const fetchPeriodos = async () => {
       try {
         const res = await api.get('/periodos');
-        if (res.data && Array.isArray(res.data.periodos)) setPeriodos(res.data.periodos);
+        if (res.data && Array.isArray(res.data)) setPeriodos(res.data);
       } catch (e) {
         // ignore
       }
@@ -24,7 +24,7 @@ export default function HistorialGrupos() {
     fetchPeriodos();
   }, []);
 
-  const fetchHistorial = async () => {
+  const fetchHistorial = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -44,11 +44,11 @@ export default function HistorialGrupos() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [periodoSel]);
 
   useEffect(() => {
     fetchHistorial();
-  }, []);
+  }, [fetchHistorial]);
 
   const rows = grupos.map((g, idx) => ({
     id: g.id_Grupo || idx,
@@ -93,9 +93,8 @@ export default function HistorialGrupos() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <select value={periodoSel} onChange={(e) => setPeriodoSel(e.target.value)} className="form-select">
             <option value="">Todos</option>
-            {periodos.map(p => <option key={p.id} value={p.id}>{p.descripcion || p.nombre || p.id}</option>)}
+            {periodos.map(p => <option key={p.id_Periodo} value={p.id_Periodo}>{p.descripcion || p.nombre || p.id_Periodo}</option>)}
           </select>
-          <Button variant="contained" color="primary" onClick={fetchHistorial}>Filtrar</Button>
         </div>
       </div>
 

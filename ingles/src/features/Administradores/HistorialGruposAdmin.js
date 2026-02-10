@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Paper, Typography, Modal, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import api from '../../api/axios';
@@ -32,7 +32,7 @@ export default function HistorialGruposAdmin() {
   }, []);
 
   // Cargar historial de grupos (con filtro opcional)
-  const fetchHistorial = async () => {
+  const fetchHistorial = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -56,12 +56,12 @@ export default function HistorialGruposAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [periodoSel]);
 
   // Cargar historial al montar y cuando cambia el período
   useEffect(() => {
     fetchHistorial();
-  }, []);
+  }, [fetchHistorial]);
 
   // Abrir modal de calificaciones
   const handleVerCalificaciones = async (grupo) => {
@@ -179,14 +179,11 @@ export default function HistorialGruposAdmin() {
             >
               <option value="">Todos los Períodos</option>
               {periodos.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.descripcion || p.nombre || `Período ${p.id}`}
+                <option key={p.id_Periodo} value={p.id_Periodo}>
+                  {p.descripcion || p.nombre || `Período ${p.id_Periodo}`}
                 </option>
               ))}
             </select>
-            <Button variant="contained" color="primary" onClick={fetchHistorial}>
-              Filtrar
-            </Button>
           </div>
         </div>
 

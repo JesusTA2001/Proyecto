@@ -1,0 +1,438 @@
+const { pool } = require('../config/db');
+const bcrypt = require('bcrypt');
+
+// Obtener todos los alumnos
+exports.getAlumnos = async (req, res) => {
+  try {
+    const [alumnos] = await pool.query(`
+      SELECT e.nControl, e.estado, e.ubicacion, e.id_Nivel,
+             n.nivel as nivel_nombre,
+             dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
+             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion
+      FROM Estudiante e
+      JOIN DatosPersonales dp ON e.id_dp = dp.id_dp
+      LEFT JOIN Nivel n ON e.id_Nivel = n.id_Nivel
+      ORDER BY dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre
+    `);
+    
+    res.json(alumnos);
+  } catch (error) {
+    console.error('Error al obtener alumnos:', error);
+    res.status(500).json({ message: 'Error al obtener alumnos', error: error.message });
+  }
+};
+
+// Obtener alumnos disponibles (sin grupo asignado o que reprobaron el nivel) - MODIFICADO
+exports.getAlumnosDisponibles = async (req, res) => {
+  try {
+    const { ubicacion, nivel } = req.query;
+    
+    let query = `
+      SELECT DISTINCT e.nControl, e.estado, e.ubicacion, e.id_Nivel,
+             n.nivel as nivel_nombre,
+             dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
+             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion,
+             ultima_calif.final as ultima_calificacion,
+             ultima_calif.id_nivel as ultimo_nivel_cursado
+      FROM Estudiante e
+      JOIN DatosPersonales dp ON e.id_dp = dp.id_dp
+      LEFT JOIN Nivel n ON e.id_Nivel = n.id_Nivel
+      LEFT JOIN (
+        SELECT c1.nControl, c1.final, c1.id_nivel, c1.id_Periodo
+        FROM Calificaciones c1
+        INNER JOIN (
+          SELECT nControl, MAX(id_Calificaciones) as max_id
+          FROM Calificaciones
+          GROUP BY nControl
+        ) c2 ON c1.nControl = c2.nControl AND c1.id_Calificaciones = c2.max_id
+      ) ultima_calif ON e.nControl = ultima_calif.nControl
+      WHERE e.estado = 'activo'
+        AND (
+          -- No tiene grupo actual
+          NOT EXISTS (
+            SELECT 1 FROM EstudianteGrupo eg 
+            WHERE eg.nControl = e.nControl 
+            AND eg.estado = 'actual'
+          )
+          OR
+          -- Tiene grupo actual pero reprobó (calificación final < 70)
+          (
+            EXISTS (
+              SELECT 1 FROM EstudianteGrupo eg 
+              WHERE eg.nControl = e.nControl 
+              AND eg.estado = 'actual'
+            )
+            AND ultima_calif.final < 70
+          )
+        )
+    `;
+    
+    const params = [];
+    
+    if (ubicacion) {
+      query += ' AND e.ubicacion = ?';
+      params.push(ubicacion);
+    }
+    
+    if (nivel) {
+      query += ' AND (e.id_Nivel = ? OR ultima_calif.id_nivel = ?)';
+      params.push(nivel, nivel);
+    }
+    
+    query += ' ORDER BY dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre';
+    
+    const [alumnos] = await pool.query(query, params);
+    
+    res.json(alumnos);
+  } catch (error) {
+    console.error('Error al obtener alumnos disponibles:', error);
+    res.status(500).json({ message: 'Error al obtener alumnos disponibles', error: error.message });
+  }
+};
+
+// Obtener un alumno por nControl
+exports.getAlumnoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [alumnos] = await pool.query(`
+      SELECT e.nControl, e.estado, e.ubicacion,
+             dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
+             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion
+      FROM Estudiante e
+      JOIN DatosPersonales dp ON e.id_dp = dp.id_dp
+      WHERE e.nControl = ?
+    `, [id]);
+
+    if (alumnos.length === 0) {
+      return res.status(404).json({ message: 'Alumno no encontrado' });
+    }
+
+    res.json(alumnos[0]);
+  } catch (error) {
+    console.error('Error al obtener alumno:', error);
+    res.status(500).json({ message: 'Error al obtener alumno', error: error.message });
+  }
+};
+
+// Crear alumno
+exports.createAlumno = async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    const {
+      apellidoPaterno,
+      apellidoMaterno,
+      nombre,
+      email,
+      genero,
+      CURP,
+      telefono,
+      direccion,
+      ubicacion,
+      usuario,
+      contraseña
+    } = req.body;
+
+    // 1. Insertar datos personales
+    const [dpResult] = await connection.query(
+      `INSERT INTO DatosPersonales (apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion]
+    );
+
+    const id_dp = dpResult.insertId;
+
+    // 2. Generar número de control
+    const nControl = ubicacion === 'Tecnologico'
+      ? parseInt(`21${Math.floor(10000 + Math.random() * 90000)}`)
+      : parseInt(`22${Math.floor(10000 + Math.random() * 90000)}`);
+
+    // 3. Insertar estudiante
+    await connection.query(
+      `INSERT INTO Estudiante (nControl, id_dp, estado, ubicacion)
+       VALUES (?, ?, 'activo', ?)`,
+      [nControl, id_dp, ubicacion]
+    );
+
+    // 4. Crear usuario automáticamente con credenciales por defecto
+    // Usuario: nControl, Contraseña: 123456
+    const defaultPassword = '123456';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    await connection.query(
+      `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
+       VALUES (?, ?, 'ESTUDIANTE', ?)`,
+      [nControl.toString(), hashedPassword, nControl]
+    );
+
+    await connection.commit();
+
+    res.status(201).json({
+      success: true,
+      message: 'Alumno creado exitosamente',
+      nControl,
+      id_dp
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error al crear alumno:', error);
+    res.status(500).json({ message: 'Error al crear alumno', error: error.message });
+  } finally {
+    connection.release();
+  }
+};
+
+// Actualizar alumno
+exports.updateAlumno = async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params;
+    const {
+      apellidoPaterno,
+      apellidoMaterno,
+      nombre,
+      email,
+      genero,
+      CURP,
+      telefono,
+      direccion,
+      ubicacion,
+      estado
+    } = req.body;
+
+    // 1. Obtener id_dp del estudiante
+    const [estudiante] = await connection.query(
+      'SELECT id_dp FROM Estudiante WHERE nControl = ?',
+      [id]
+    );
+
+    if (estudiante.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Alumno no encontrado' });
+    }
+
+    const id_dp = estudiante[0].id_dp;
+
+    // 2. Actualizar datos personales
+    await connection.query(
+      `UPDATE DatosPersonales 
+       SET apellidoPaterno = ?, apellidoMaterno = ?, nombre = ?, 
+           email = ?, genero = ?, CURP = ?, telefono = ?, direccion = ?
+       WHERE id_dp = ?`,
+      [apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion, id_dp]
+    );
+
+    // 3. Actualizar estudiante
+    await connection.query(
+      `UPDATE Estudiante 
+       SET ubicacion = ?, estado = ?
+       WHERE nControl = ?`,
+      [ubicacion, estado, id]
+    );
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Alumno actualizado exitosamente'
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error al actualizar alumno:', error);
+    res.status(500).json({ message: 'Error al actualizar alumno', error: error.message });
+  } finally {
+    connection.release();
+  }
+};
+
+// Eliminar alumno
+exports.deleteAlumno = async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params;
+
+    // 1. Obtener id_dp del estudiante
+    const [estudiante] = await connection.query(
+      'SELECT id_dp FROM Estudiante WHERE nControl = ?',
+      [id]
+    );
+
+    if (estudiante.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Alumno no encontrado' });
+    }
+
+    const id_dp = estudiante[0].id_dp;
+
+    // 2. Eliminar usuario asociado
+    await connection.query(
+      'DELETE FROM Usuarios WHERE rol = "ESTUDIANTE" AND id_relacion = ?',
+      [id]
+    );
+
+    // 3. Eliminar de EstudianteGrupo
+    await connection.query('DELETE FROM EstudianteGrupo WHERE nControl = ?', [id]);
+
+    // 4. Eliminar de EstudianteCalificaciones
+    await connection.query('DELETE FROM EstudianteCalificaciones WHERE nControl = ?', [id]);
+
+    // 5. Eliminar calificaciones
+    await connection.query('DELETE FROM Calificaciones WHERE nControl = ?', [id]);
+
+    // 6. Eliminar asistencias
+    await connection.query('DELETE FROM Asistencia WHERE nControl = ?', [id]);
+
+    // 7. Eliminar estudiante
+    await connection.query('DELETE FROM Estudiante WHERE nControl = ?', [id]);
+
+    // 8. Eliminar datos personales
+    await connection.query('DELETE FROM DatosPersonales WHERE id_dp = ?', [id_dp]);
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Alumno eliminado exitosamente'
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error al eliminar alumno:', error);
+    res.status(500).json({ message: 'Error al eliminar alumno', error: error.message });
+  } finally {
+    connection.release();
+  }
+};
+
+// Cambiar estado del alumno
+exports.toggleEstadoAlumno = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await pool.query(
+      `UPDATE Estudiante 
+       SET estado = IF(estado = 'activo', 'inactivo', 'activo')
+       WHERE nControl = ?`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Estado actualizado exitosamente'
+    });
+  } catch (error) {
+    console.error('Error al cambiar estado:', error);
+    res.status(500).json({ message: 'Error al cambiar estado', error: error.message });
+  }
+};
+
+// Actualizar datos personales del estudiante (solo campos editables)
+exports.updateDatosPersonalesAlumno = async (req, res) => {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params; // nControl
+    const { email, telefono, direccion } = req.body;
+
+    // Validaciones básicas
+    if (!email || !telefono) {
+      await connection.rollback();
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email y teléfono son obligatorios' 
+      });
+    }
+
+    // 1. Obtener id_dp del estudiante
+    const [estudiante] = await connection.query(
+      'SELECT id_dp FROM Estudiante WHERE nControl = ?',
+      [id]
+    );
+
+    if (estudiante.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ 
+        success: false,
+        message: 'Alumno no encontrado' 
+      });
+    }
+
+    const id_dp = estudiante[0].id_dp;
+
+    // 2. Actualizar solo los campos editables
+    await connection.query(
+      `UPDATE DatosPersonales 
+       SET email = ?, telefono = ?, direccion = ?
+       WHERE id_dp = ?`,
+      [email, telefono, direccion || null, id_dp]
+    );
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Datos actualizados exitosamente'
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error al actualizar datos personales:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al actualizar datos personales', 
+      error: error.message 
+    });
+  } finally {
+    connection.release();
+  }
+};
+
+// Obtener grupo actual del estudiante
+exports.getGrupoEstudiante = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log(`Buscando grupo para estudiante: ${id}`);
+    
+    const [grupos] = await pool.query(`
+      SELECT g.id_Grupo, g.grupo as nombre, g.ubicacion,
+             n.nivel as nivel_nombre,
+             p.descripcion as periodo_nombre,
+             h.diaSemana, h.hora,
+             CONCAT(COALESCE(dp.apellidoPaterno, ''), ' ', COALESCE(dp.apellidoMaterno, ''), ' ', COALESCE(dp.nombre, '')) as profesor_nombre
+      FROM EstudianteGrupo eg
+      JOIN Grupo g ON eg.id_Grupo = g.id_Grupo
+      LEFT JOIN Nivel n ON g.id_Nivel = n.id_Nivel
+      LEFT JOIN Periodo p ON g.id_Periodo = p.id_Periodo
+      LEFT JOIN chorario h ON g.id_cHorario = h.id_cHorario
+      LEFT JOIN Profesor prof ON g.id_Profesor = prof.id_Profesor
+      LEFT JOIN Empleado emp ON prof.id_empleado = emp.id_empleado
+      LEFT JOIN DatosPersonales dp ON emp.id_dp = dp.id_dp
+      WHERE eg.nControl = ? 
+      ORDER BY eg.id_Grupo DESC
+      LIMIT 1
+    `, [id]);
+    
+    console.log(`Grupo encontrado:`, grupos.length > 0 ? grupos[0] : 'Ninguno');
+
+    if (grupos.length === 0) {
+      return res.json({ success: true, grupo: null });
+    }
+
+    res.json({ success: true, grupo: grupos[0] });
+  } catch (error) {
+    console.error('Error al obtener grupo del estudiante:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error al obtener grupo del estudiante', 
+      error: error.message 
+    });
+  }
+};
