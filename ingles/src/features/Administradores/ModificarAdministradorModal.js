@@ -27,7 +27,7 @@ export default function ModificarAdministradorModal({ open, onClose, admin, actu
       value = String(value).replace(/\D/g, '').slice(0, 10);
       setErrors(prev => ({ ...prev, telefono: value && value.length !== 10 ? 'Debe tener 10 dígitos' : '' }));
     }
-    if (name === 'curp') {
+    if (name === 'CURP') {
       value = String(value).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18);
       setErrors(prev => ({ ...prev, curp: value && value.length !== 18 ? 'CURP debe tener 18 caracteres' : '' }));
     }
@@ -37,7 +37,7 @@ export default function ModificarAdministradorModal({ open, onClose, admin, actu
   const handleSubmit = (e) => {
     e.preventDefault();
     // Validaciones de formato
-    if (form.curp && form.curp.length !== 18) {
+    if (form.CURP && form.CURP.length !== 18) {
       setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
       return;
     }
@@ -75,7 +75,7 @@ export default function ModificarAdministradorModal({ open, onClose, admin, actu
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <TextField label="Email" name="correo" type="email" value={form.correo} onChange={handleChange} fullWidth size="small" required margin="dense" />
+              <TextField label="Email" name="email" type="email" value={form.email || ''} onChange={handleChange} fullWidth size="small" required margin="dense" />
             </Grid>
             <Grid item xs={12} sm={6}>
               <Select name="genero" value={form.genero || ''} onChange={handleChange} fullWidth size="small" displayEmpty required>
@@ -84,7 +84,7 @@ export default function ModificarAdministradorModal({ open, onClose, admin, actu
               </Select>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="CURP" name="curp" value={form.curp || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 18 }} helperText={errors.curp || '18 caracteres (alfanumérico)'} error={Boolean(errors.curp)} />
+              <TextField label="CURP" name="CURP" value={form.CURP || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 18 }} helperText={errors.curp || '18 caracteres (alfanumérico)'} error={Boolean(errors.curp)} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField label="Número de Teléfono" name="telefono" value={form.telefono || ''} onChange={handleChange} fullWidth size="small" margin="dense" inputProps={{ maxLength: 10 }} helperText={errors.telefono || '10 dígitos'} error={Boolean(errors.telefono)} />
