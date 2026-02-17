@@ -154,7 +154,7 @@ function App() {
         const profesoresMapeados = (profesoresRes.data || []).map(p => ({
           numero_empleado: p.id_Profesor,
           id_profesor: p.id_Profesor,
-          nombreCompleto: `${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''} ${p.nombre || ''}`.trim(),
+          nombreCompleto: `${p.nombre || ''} ${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''}`.trim(),
           nombre: p.nombre,
           apellidoPaterno: p.apellidoPaterno,
           apellidoMaterno: p.apellidoMaterno,
@@ -172,7 +172,7 @@ function App() {
         const administradoresMapeados = (administradoresRes.data || []).map(a => ({
           numero_empleado: a.id_Administrador,
           id_administrador: a.id_Administrador,
-          nombre: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${a.nombre || ''}`.trim(),
+          nombre: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim(),
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
           email: a.email,
@@ -316,7 +316,7 @@ function App() {
           numero_control: a.nControl,
           // nombre aquí es usado en algunos modales como título, mantener nombre y nombreCompleto
           nombre: a.nombre,
-          nombreCompleto: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${a.nombre || ''}`.trim(),
+          nombreCompleto: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim(),
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
           email: a.email,
@@ -356,7 +356,7 @@ function App() {
       
       const alumnoConNombre = {
         ...alumnoActualizado,
-        nombreCompleto: `${alumnoActualizado.apellidoPaterno || ''} ${alumnoActualizado.apellidoMaterno || ''} ${alumnoActualizado.nombre || ''}`.trim()
+        nombreCompleto: `${alumnoActualizado.nombre || ''} ${alumnoActualizado.apellidoPaterno || ''} ${alumnoActualizado.apellidoMaterno || ''}`.trim()
       };
       setAlumnos(alumnos.map(a => a.numero_control === alumnoActualizado.numero_control ? alumnoConNombre : a));
     } catch (error) {
@@ -399,8 +399,8 @@ function App() {
         const profesoresMapeados = profesoresRes.data.map(p => ({
           numero_empleado: p.numero_empleado,
           id_profesor: p.id_profesor,
-          nombre: `${p.apellidoPaterno} ${p.apellidoMaterno} ${p.nombre}`,
-          nombreCompleto: `${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''} ${p.nombre || ''}`.trim(),
+          nombre: `${p.nombre} ${p.apellidoPaterno} ${p.apellidoMaterno}`,
+          nombreCompleto: `${p.nombre || ''} ${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''}`.trim(),
           apellidoPaterno: p.apellidoPaterno,
           apellidoMaterno: p.apellidoMaterno,
           email: p.email,
@@ -443,7 +443,7 @@ function App() {
       
       const profesorConNombre = {
         ...profesorActualizado,
-        nombreCompleto: `${profesorActualizado.apellidoPaterno || ''} ${profesorActualizado.apellidoMaterno || ''} ${profesorActualizado.nombre || ''}`.trim()
+        nombreCompleto: `${profesorActualizado.nombre || ''} ${profesorActualizado.apellidoPaterno || ''} ${profesorActualizado.apellidoMaterno || ''}`.trim()
       };
       setProfesores(profesores.map(p => p.numero_empleado === profesorActualizado.numero_empleado ? profesorConNombre : p));
     } catch (error) {
@@ -487,7 +487,7 @@ function App() {
         const administradoresMapeados = administradoresRes.data.map(a => ({
           numero_empleado: a.id_administrador,
           id_administrador: a.id_administrador,
-          nombre: `${a.apellidoPaterno} ${a.apellidoMaterno} ${a.nombre}`,
+          nombre: `${a.nombre} ${a.apellidoPaterno} ${a.apellidoMaterno}`,
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
           email: a.email,
@@ -527,7 +527,7 @@ function App() {
       
       const adminConNombre = {
         ...adminActualizado,
-        nombreCompleto: `${adminActualizado.apellidoPaterno || ''} ${adminActualizado.apellidoMaterno || ''} ${adminActualizado.nombre || ''}`.trim()
+        nombreCompleto: `${adminActualizado.nombre || ''} ${adminActualizado.apellidoPaterno || ''} ${adminActualizado.apellidoMaterno || ''}`.trim()
       };
       setAdministradores(administradores.map(a => a.numero_empleado === adminActualizado.numero_empleado ? adminConNombre : a));
     } catch (error) {

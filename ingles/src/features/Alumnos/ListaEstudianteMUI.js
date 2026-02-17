@@ -25,7 +25,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   // --- Filtros personalizados ---
   const filteredAlumnos = (alumnos || []).filter(alumno => {
     const term = (searchTerm || '').toLowerCase();
-    const nombreCompleto = alumno.nombreCompleto || `${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''} ${alumno.nombre || ''}`.trim();
+    const nombreCompleto = alumno.nombreCompleto || `${alumno.nombre || ''} ${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''}`.trim();
     const matchesSearch =
       !term ||
       nombreCompleto.toLowerCase().includes(term) ||
