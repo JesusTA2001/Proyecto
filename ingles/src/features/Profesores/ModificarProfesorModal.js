@@ -95,7 +95,8 @@ export default function ModificarProfesorModal({ open, onClose, profesor, actual
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <Select name="ubicacion" value={form.ubicacion} onChange={handleChange} fullWidth size="small" displayEmpty>
+              <Select name="ubicacion" value={form.ubicacion || ''} onChange={handleChange} fullWidth size="small" displayEmpty>
+                <MenuItem value="">Seleccionar Campus</MenuItem>
                 <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
                 <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
               </Select>
