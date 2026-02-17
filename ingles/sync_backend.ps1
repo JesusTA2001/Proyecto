@@ -41,6 +41,6 @@ $r = Read-Host "Subir cambios? (s/n)"
 if ($r -eq "s") {
     git add .
     git commit -m "Update controllers"
-    git push origin main
+    git push origin master
     Write-Host "Listo!" -ForegroundColor Green
 }
