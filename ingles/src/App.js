@@ -396,6 +396,7 @@ function App() {
           numero_empleado: p.numero_empleado,
           id_profesor: p.id_profesor,
           nombre: `${p.apellidoPaterno} ${p.apellidoMaterno} ${p.nombre}`,
+          nombreCompleto: `${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''} ${p.nombre || ''}`.trim(),
           apellidoPaterno: p.apellidoPaterno,
           apellidoMaterno: p.apellidoMaterno,
           email: p.email,
@@ -436,7 +437,11 @@ function App() {
         estado: profesorActualizado.estado === 'Activo' ? 'activo' : 'inactivo'
       });
       
-      setProfesores(profesores.map(p => p.numero_empleado === profesorActualizado.numero_empleado ? profesorActualizado : p));
+      const profesorConNombre = {
+        ...profesorActualizado,
+        nombreCompleto: `${profesorActualizado.apellidoPaterno || ''} ${profesorActualizado.apellidoMaterno || ''} ${profesorActualizado.nombre || ''}`.trim()
+      };
+      setProfesores(profesores.map(p => p.numero_empleado === profesorActualizado.numero_empleado ? profesorConNombre : p));
     } catch (error) {
       console.error('Error al actualizar profesor:', error);
       alert('Error al actualizar profesor. Por favor, intenta de nuevo.');
@@ -516,7 +521,11 @@ function App() {
         estado: adminActualizado.estado === 'Activo' ? 'activo' : 'inactivo'
       });
       
-      setAdministradores(administradores.map(a => a.numero_empleado === adminActualizado.numero_empleado ? adminActualizado : a));
+      const adminConNombre = {
+        ...adminActualizado,
+        nombreCompleto: `${adminActualizado.apellidoPaterno || ''} ${adminActualizado.apellidoMaterno || ''} ${adminActualizado.nombre || ''}`.trim()
+      };
+      setAdministradores(administradores.map(a => a.numero_empleado === adminActualizado.numero_empleado ? adminConNombre : a));
     } catch (error) {
       console.error('Error al actualizar administrador:', error);
       alert('Error al actualizar administrador. Por favor, intenta de nuevo.');

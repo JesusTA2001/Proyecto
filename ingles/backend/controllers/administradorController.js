@@ -171,20 +171,20 @@ exports.updateAdministrador = async (req, res) => {
       [apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion, id_dp]
     );
 
-    // 3. Actualizar empleado
+    // 3. Actualizar empleado (solo estado)
     await connection.query(
       `UPDATE Empleado 
-       SET ubicacion = ?, estado = ?
+       SET estado = ?
        WHERE id_empleado = ?`,
-      [ubicacion, estado, id_empleado]
+      [estado, id_empleado]
     );
 
-    // 4. Actualizar administrador
+    // 4. Actualizar administrador (solo estado)
     await connection.query(
       `UPDATE Administrador 
-       SET gradoEstudio = ?
+       SET estado = ?
        WHERE id_administrador = ?`,
-      [gradoEstudio, id]
+      [estado, id]
     );
 
     await connection.commit();
