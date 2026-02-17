@@ -354,7 +354,11 @@ function App() {
         estado: alumnoActualizado.estado === 'Activo' ? 'activo' : 'inactivo'
       });
       
-      setAlumnos(alumnos.map(a => a.numero_control === alumnoActualizado.numero_control ? alumnoActualizado : a));
+      const alumnoConNombre = {
+        ...alumnoActualizado,
+        nombreCompleto: `${alumnoActualizado.apellidoPaterno || ''} ${alumnoActualizado.apellidoMaterno || ''} ${alumnoActualizado.nombre || ''}`.trim()
+      };
+      setAlumnos(alumnos.map(a => a.numero_control === alumnoActualizado.numero_control ? alumnoConNombre : a));
     } catch (error) {
       console.error('Error al actualizar alumno:', error);
       alert('Error al actualizar alumno. Por favor, intenta de nuevo.');
