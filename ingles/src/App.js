@@ -68,9 +68,25 @@ function App() {
   const [administradores, setAdministradores] = useState([]);
   const [grupos, setGrupos] = useState([]);
   const [horarios, setHorarios] = useState([]);
+
+  // Helper: construir nombre completo
+  const construirNombreCompleto = (nombre, apellidoPaterno, apellidoMaterno) =>
+    `${nombre || ''} ${apellidoPaterno || ''} ${apellidoMaterno || ''}`.trim();
+
+  // Helper: extrae solo el nombre de pila quitando apellidos del campo nombre
+  const extraerNombreSolo = (nombre, apellidoPaterno, apellidoMaterno) => {
+    const tokens = (nombre || '').split(/\s+/);
+    const normalizar = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const apP = normalizar(apellidoPaterno);
+    const apM = normalizar(apellidoMaterno);
+    const filtrados = tokens.filter(t => normalizar(t) !== apP && normalizar(t) !== apM);
+    return filtrados.join(' ').trim() || (nombre || '').trim();
+  };
   const [periodos, setPeriodos] = useState([]);
   const [niveles, setNiveles] = useState([]);
   const [loading, setLoading] = useState(true);
+
+
 
   // Cargar datos desde la API al montar el componente
   useEffect(() => {
@@ -154,7 +170,7 @@ function App() {
         const profesoresMapeados = (profesoresRes.data || []).map(p => ({
           numero_empleado: p.id_Profesor,
           id_profesor: p.id_Profesor,
-          nombreCompleto: `${p.nombre || ''} ${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''}`.trim(),
+          nombreCompleto: construirNombreCompleto(p.nombre, p.apellidoPaterno, p.apellidoMaterno),
           nombre: p.nombre,
           apellidoPaterno: p.apellidoPaterno,
           apellidoMaterno: p.apellidoMaterno,
@@ -169,12 +185,15 @@ function App() {
           estado: p.estado === 'activo' ? 'Activo' : 'Inactivo'
         }));
 
-        const administradoresMapeados = (administradoresRes.data || []).map(a => ({
+        const administradoresMapeados = (administradoresRes.data || []).map(a => {
+          const nombreSolo = extraerNombreSolo(a.nombre, a.apellidoPaterno, a.apellidoMaterno);
+          return {
           numero_empleado: a.id_Administrador,
           id_administrador: a.id_Administrador,
-          nombre: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim(),
+          nombre: nombreSolo,
           apellidoPaterno: a.apellidoPaterno,
           apellidoMaterno: a.apellidoMaterno,
+          nombreCompleto: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${nombreSolo}`.trim(),
           email: a.email,
           genero: a.genero,
           CURP: a.CURP,
@@ -182,7 +201,8 @@ function App() {
           direccion: a.direccion,
           RFC: a.RFC,
           estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
-        }));
+        };
+        });
 
         const gruposMapeados = (gruposRes.data || []).map(g => {
           // Separar la hora en horaInicio y horaFin
@@ -299,14 +319,14 @@ function App() {
         apellidoPaterno: alumno.apellidoPaterno,
         apellidoMaterno: alumno.apellidoMaterno,
         nombre: alumno.nombre,
-        email: alumno.email,
+        email: alumno.email || alumno.correo,
         genero: alumno.genero,
-        CURP: alumno.CURP,
+        CURP: alumno.CURP || alumno.curp,
         telefono: alumno.telefono,
         direccion: alumno.direccion,
         ubicacion: alumno.ubicacion,
-        usuario: alumno.email, // O el campo que uses para usuario
-        contraseña: alumno.CURP // O la contraseña que desees usar por defecto
+        usuario: alumno.email || alumno.correo,
+        contraseña: alumno.CURP || alumno.curp
       });
 
       if (response.data.success) {
@@ -381,17 +401,17 @@ function App() {
         apellidoPaterno: profesor.apellidoPaterno,
         apellidoMaterno: profesor.apellidoMaterno,
         nombre: profesor.nombre,
-        email: profesor.email,
+        email: profesor.email || profesor.correo,
         genero: profesor.genero,
-        CURP: profesor.CURP,
+        CURP: profesor.CURP || profesor.curp,
         telefono: profesor.telefono,
         direccion: profesor.direccion,
         ubicacion: profesor.ubicacion,
         numero_empleado: profesor.numero_empleado,
         RFC: profesor.RFC,
         nivelEstudio: profesor.gradoEstudio,
-        usuario: profesor.email,
-        contraseña: profesor.CURP
+        usuario: profesor.email || profesor.correo,
+        contraseña: profesor.CURP || profesor.curp
       });
 
       if (response.data.success) {
@@ -399,8 +419,8 @@ function App() {
         const profesoresMapeados = profesoresRes.data.map(p => ({
           numero_empleado: p.numero_empleado,
           id_profesor: p.id_profesor,
-          nombre: `${p.nombre} ${p.apellidoPaterno} ${p.apellidoMaterno}`,
-          nombreCompleto: `${p.nombre || ''} ${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''}`.trim(),
+          nombre: p.nombre || '',
+          nombreCompleto: construirNombreCompleto(p.nombre, p.apellidoPaterno, p.apellidoMaterno),
           apellidoPaterno: p.apellidoPaterno,
           apellidoMaterno: p.apellidoMaterno,
           email: p.email,
@@ -471,34 +491,37 @@ function App() {
         apellidoPaterno: admin.apellidoPaterno,
         apellidoMaterno: admin.apellidoMaterno,
         nombre: admin.nombre,
-        email: admin.email,
+        email: admin.email || admin.correo,
         genero: admin.genero,
-        CURP: admin.CURP,
+        CURP: admin.CURP || admin.curp,
         telefono: admin.telefono,
         direccion: admin.direccion,
         ubicacion: admin.ubicacion,
         gradoEstudio: admin.gradoEstudio,
-        usuario: admin.email,
-        contraseña: admin.CURP
+        usuario: admin.email || admin.correo,
+        contraseña: admin.CURP || admin.curp
       });
 
       if (response.data.success) {
         const administradoresRes = await api.get('/administradores');
-        const administradoresMapeados = administradoresRes.data.map(a => ({
-          numero_empleado: a.id_administrador,
-          id_administrador: a.id_administrador,
-          nombre: `${a.nombre} ${a.apellidoPaterno} ${a.apellidoMaterno}`,
-          apellidoPaterno: a.apellidoPaterno,
-          apellidoMaterno: a.apellidoMaterno,
-          email: a.email,
-          genero: a.genero,
-          CURP: a.CURP,
-          telefono: a.telefono,
-          direccion: a.direccion,
-          ubicacion: a.ubicacion,
-          gradoEstudio: a.gradoEstudio,
-          estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
-        }));
+        const administradoresMapeados = administradoresRes.data.map(a => {
+            const nombreSolo = extraerNombreSolo(a.nombre, a.apellidoPaterno, a.apellidoMaterno);
+            return {
+            numero_empleado: a.id_Administrador || a.id_administrador,
+            id_administrador: a.id_Administrador || a.id_administrador,
+            nombre: nombreSolo,
+            apellidoPaterno: a.apellidoPaterno,
+            apellidoMaterno: a.apellidoMaterno,
+            nombreCompleto: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${nombreSolo}`.trim(),
+            email: a.email,
+            genero: a.genero,
+            CURP: a.CURP,
+            telefono: a.telefono,
+            direccion: a.direccion,
+            RFC: a.RFC,
+            estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
+            };
+          });
         setAdministradores(administradoresMapeados);
         return response.data;
       }
@@ -527,7 +550,7 @@ function App() {
       
       const adminConNombre = {
         ...adminActualizado,
-        nombreCompleto: `${adminActualizado.nombre || ''} ${adminActualizado.apellidoPaterno || ''} ${adminActualizado.apellidoMaterno || ''}`.trim()
+        nombreCompleto: `${adminActualizado.apellidoPaterno || ''} ${adminActualizado.apellidoMaterno || ''} ${adminActualizado.nombre || ''}`.trim()
       };
       setAdministradores(administradores.map(a => a.numero_empleado === adminActualizado.numero_empleado ? adminConNombre : a));
     } catch (error) {

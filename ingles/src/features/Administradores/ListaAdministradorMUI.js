@@ -28,12 +28,12 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
 
   const filtered = (administradores || []).filter(a => {
     const term = (searchTerm || '').toLowerCase();
-    const matchesSearch = !term || (a.nombre || '').toLowerCase().includes(term) || String(a.numero_empleado || '').toLowerCase().includes(term);
+    const matchesSearch = !term || (a.nombreCompleto || '').toLowerCase().includes(term) || String(a.numero_empleado || '').toLowerCase().includes(term);
     const matchesStatus = !selectedStatus || a.estado === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
-  const rows = filtered.map(a => ({ id: a.numero_empleado, numero_empleado: a.numero_empleado, nombre: a.nombre, estado: a.estado }));
+  const rows = filtered.map(a => ({ id: a.numero_empleado, numero_empleado: a.numero_empleado, nombre: a.nombre, nombreCompleto: a.nombreCompleto, estado: a.estado }));
 
   const exportToCSV = () => {
     let exportRows = filtered;
@@ -63,7 +63,7 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
 
   const columns = [
     { field: 'numero_empleado', headerName: 'N° Empleado', width: 160 },
-    { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 220 },
+    { field: 'nombreCompleto', headerName: 'Nombre Completo', flex: 1, minWidth: 220 },
     {
       field: 'estado', headerName: 'Estado', width: 140,
       renderCell: (params) => (
@@ -118,7 +118,7 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
           pageSizeOptions={[10, 25, 50, 100]}
           disableRowSelectionOnClick
           density="comfortable"
-          initialState={{ pagination: { paginationModel: { pageSize: 50, page: 0 } }, sorting: { sortModel: [{ field: 'nombre', sort: 'asc' }] } }}
+          initialState={{ pagination: { paginationModel: { pageSize: 50, page: 0 } }, sorting: { sortModel: [{ field: 'nombreCompleto', sort: 'asc' }] } }}
           sx={{ backgroundColor: 'white', borderRadius: 2, boxShadow: 2 }}
         />
       </Box>

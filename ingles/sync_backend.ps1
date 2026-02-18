@@ -1,6 +1,6 @@
 # Script para sincronizar backend con Azure
 $backendLocal = "c:\Users\jesus\OneDrive\Escritorio\CURSOS PROGRAMACION\Proyecto Maestria\ingles\backend"
-$repoAzure = "c:\Users\jesus\OneDrive\Escritorio\CURSOS PROGRAMACION\API-AZURE"
+$repoAzure = "c:\Users\jesus\OneDrive\Escritorio\CURSOS PROGRAMACION\API-AZURE\backend"
 
 Write-Host "Sincronizando backend..." -ForegroundColor Cyan
 
@@ -33,7 +33,7 @@ foreach ($archivo in $archivos) {
     }
 }
 
-Set-Location $repoAzure
+Set-Location "c:\Users\jesus\OneDrive\Escritorio\CURSOS PROGRAMACION\API-AZURE"
 git status
 
 Write-Host ""

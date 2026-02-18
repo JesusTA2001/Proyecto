@@ -5,10 +5,6 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
 
@@ -56,6 +52,11 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     const [nivelesDisponibles, setNivelesDisponibles] = useState([]);
     const [profesoresDisponibles, setProfesoresDisponibles] = useState([]);
     const [alumnosDisponibles, setAlumnosDisponibles] = useState([]);
+    const [filtroDisponibles, setFiltroDisponibles] = useState('');
+    const [filtroSeleccionados, setFiltroSeleccionados] = useState('');
+
+    // Quitar acentos para búsqueda
+    const normalizar = (str) => String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
     // Opciones para el select de días
     const diasSemana = [
@@ -340,198 +341,155 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
             <Grid container spacing={2}>
                 <input type="hidden" name="id" value={grupo.id} />
 
-                {/* ── SECCIÓN: Información General ── */}
+                {/* ── SELECTS Y BOTONES ARRIBA ── */}
                 <Grid item xs={12}>
-                    <Divider sx={{ mb: 1 }}>
-                        <Typography variant="caption" sx={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>
-                            Información General
-                        </Typography>
-                    </Divider>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
                     <TextField label="Nombre del Grupo" name="nombre" value={grupo.nombre} onChange={handleChange} fullWidth required size="small" margin="dense" />
                 </Grid>
+
+                <Grid item xs={12} md={3}>
+                    <Select name="ubicacion" value={grupo.ubicacion || ''} onChange={handleChange} fullWidth size="small" displayEmpty>
+                        <MenuItem value="">Seleccionar Campus</MenuItem>
+                        <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
+                        <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
+                    </Select>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Select name="nivel" value={grupo.nivel} onChange={handleChange} fullWidth size="small" displayEmpty>
+                        <MenuItem value="">Selecciona un Nivel</MenuItem>
+                        {(nivelesDisponibles || []).map(n => <MenuItem key={n.id} value={n.nombre}>{n.nombre}</MenuItem>)}
+                    </Select>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty>
+                        <MenuItem value="">Selecciona un Periodo</MenuItem>
+                        {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
+                    </Select>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Select name="profesorId" value={grupo.profesorId} onChange={handleChange} fullWidth size="small" displayEmpty>
+                        <MenuItem value="">Selecciona un Profesor</MenuItem>
+                        {(profesoresDisponibles || []).map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{getNombreCompleto(p)} ({p.numero_empleado})</MenuItem>)}
+                    </Select>
+                </Grid>
+
+                <Grid item xs={12}>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={3}>
+                            <Select name="dia" value={grupo.dia} onChange={handleChange} fullWidth size="small" displayEmpty>
+                                <MenuItem value="">Selecciona el día/días</MenuItem>
+                                {diasSemana.map(dia => (
+                                    <MenuItem key={dia.value} value={dia.value}>{dia.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </Grid>
+                        <Grid item xs={6} md={2}>
+                            <TextField
+                                type="time" label="Hora Inicio" name="horaInicio"
+                                value={grupo.horaInicio} onChange={handleChange}
+                                fullWidth size="small" InputLabelProps={{ shrink: true }}
+                                inputProps={{ min: "07:00", max: "23:00", step: 1800 }}
+                            />
+                        </Grid>
+                        <Grid item xs={6} md={2}>
+                            <TextField
+                                type="time" label="Hora Fin" name="horaFin"
+                                value={grupo.horaFin} onChange={handleChange}
+                                fullWidth size="small" InputLabelProps={{ shrink: true }}
+                                inputProps={{ min: "07:00", max: "23:00", step: 1800 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={5}>
+                            <div className="button-list" style={{ justifyContent: 'flex-end', gap: 10, width: '100%' }}>
+                                <button className='modifybutton' type='button' onClick={autoCompletarHasta20}>Autocompletar hasta 20</button>
+                                <button className='modifybutton' type='submit'>Guardar Cambios</button>
+                            </div>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                {/* ── LISTAS DE ALUMNOS ABAJO ── */}
                 <Grid item xs={12} md={6}>
-                    <FormControl fullWidth size="small">
-                        <InputLabel>Campus</InputLabel>
-                        <Select name="ubicacion" value={grupo.ubicacion || ''} onChange={handleChange} label="Campus">
-                            <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
-                            <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                    <FormControl fullWidth size="small">
-                        <InputLabel>Nivel</InputLabel>
-                        <Select name="nivel" value={grupo.nivel || ''} onChange={handleChange} label="Nivel">
-                            <MenuItem value="">Selecciona un Nivel</MenuItem>
-                            {(nivelesDisponibles || []).map(n => <MenuItem key={n.id} value={n.nombre}>{n.nombre}</MenuItem>)}
-                        </Select>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <FormControl fullWidth size="small">
-                        <InputLabel>Periodo</InputLabel>
-                        <Select name="periodo" value={grupo.periodo || ''} onChange={handleChange} label="Periodo">
-                            <MenuItem value="">Selecciona un Periodo</MenuItem>
-                            {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
-                        </Select>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <FormControl fullWidth size="small">
-                        <InputLabel>Profesor</InputLabel>
-                        <Select name="profesorId" value={grupo.profesorId || ''} onChange={handleChange} label="Profesor">
-                            <MenuItem value="">Selecciona un Profesor</MenuItem>
-                            {(profesoresDisponibles || []).map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{getNombreCompleto(p)} ({p.numero_empleado})</MenuItem>)}
-                        </Select>
-                    </FormControl>
-                </Grid>
-
-                {/* ── SECCIÓN: Horario ── */}
-                <Grid item xs={12}>
-                    <Divider sx={{ mt: 1, mb: 1 }}>
-                        <Typography variant="caption" sx={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>
-                            Horario
-                        </Typography>
-                    </Divider>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                    <FormControl fullWidth size="small">
-                        <InputLabel>Día(s)</InputLabel>
-                        <Select name="dia" value={grupo.dia || ''} onChange={handleChange} label="Día(s)">
-                            <MenuItem value="">Selecciona el día/días</MenuItem>
-                            {diasSemana.map(dia => (
-                                <MenuItem key={dia.value} value={dia.value}>{dia.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                    <TextField
-                        type="time" label="Hora Inicio" name="horaInicio"
-                        value={grupo.horaInicio} onChange={handleChange}
-                        fullWidth size="small" InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: "07:00", max: "23:00", step: 1800 }}
-                    />
-                </Grid>
-                <Grid item xs={6} md={4}>
-                    <TextField
-                        type="time" label="Hora Fin" name="horaFin"
-                        value={grupo.horaFin} onChange={handleChange}
-                        fullWidth size="small" InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: "07:00", max: "23:00", step: 1800 }}
-                    />
-                </Grid>
-
-                {/* ── SECCIÓN: Alumnos ── */}
-                <Grid item xs={12}>
-                    <Divider sx={{ mt: 1, mb: 1 }}>
-                        <Typography variant="caption" sx={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>
-                            Alumnos del Grupo
-                        </Typography>
-                    </Divider>
-                </Grid>
-
-                <Grid item xs={12} md={8}>
-                    <div style={{
-                        border: '1.5px solid #c084db',
-                        borderRadius: 10,
-                        overflow: 'hidden',
-                        boxShadow: '0 2px 8px rgba(138,47,131,0.08)'
-                    }}>
-                        <div style={{
-                            background: 'linear-gradient(90deg, var(--color-primary) 0%, #b05dab 100%)',
-                            color: '#fff',
-                            padding: '8px 14px',
-                            fontWeight: 600,
-                            fontSize: 13,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                        }}>
-                            <span>Alumnos — Nivel: {grupo.nivel || '—'} | Campus: {grupo.ubicacion || '—'}</span>
-                            <span style={{ background: 'rgba(255,255,255,0.25)', borderRadius: 20, padding: '2px 10px', fontSize: 12 }}>
-                                {alumnosSeleccionados.size} seleccionados
-                            </span>
-                        </div>
-                        <div style={{ maxHeight: '40vh', overflowY: 'auto', padding: '10px 14px 12px', background: '#faf5ff' }}>
-                            {alumnosDisponibles.length > 0 ? (
-                                alumnosDisponibles.map(alumno => (
-                                    <div
-                                        key={alumno.numero_control}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: 8,
-                                            padding: '5px 6px', borderRadius: 6, marginBottom: 3,
-                                            background: alumnosSeleccionados.has(alumno.numero_control) ? 'rgba(138,47,131,0.10)' : 'transparent',
-                                            cursor: 'pointer', transition: 'background 0.15s'
-                                        }}
-                                        onClick={() => handleAlumnoToggle(alumno)}
-                                    >
+                    <fieldset style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px' }}>
+                        <legend>Alumnos Disponibles ({alumnosDisponibles.length})</legend>
+                        <input
+                            type="text"
+                            placeholder="🔍 Buscar por nombre o N° control..."
+                            className="search-input"
+                            style={{ width: '100%', marginBottom: 8 }}
+                            value={filtroDisponibles}
+                            onChange={e => setFiltroDisponibles(e.target.value)}
+                        />
+                        <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
+                            {alumnosDisponibles.filter(a => {
+                                if (!filtroDisponibles) return true;
+                                const f = normalizar(filtroDisponibles);
+                                return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
+                            }).length > 0 ? (
+                                alumnosDisponibles.filter(a => {
+                                    if (!filtroDisponibles) return true;
+                                    const f = normalizar(filtroDisponibles);
+                                    return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
+                                }).map(alumno => (
+                                    <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
                                         <input
                                             type="checkbox"
-                                            id={`alumno-${alumno.numero_control}`}
+                                            id={`disp-${alumno.numero_control}`}
                                             checked={alumnosSeleccionados.has(alumno.numero_control)}
                                             onChange={() => handleAlumnoToggle(alumno)}
-                                            style={{ accentColor: 'var(--color-primary)', width: 15, height: 15, cursor: 'pointer' }}
-                                            onClick={e => e.stopPropagation()}
                                         />
-                                        <label htmlFor={`alumno-${alumno.numero_control}`} style={{ cursor: 'pointer', fontSize: 13, flex: 1 }}>
-                                            <strong>{getNombreCompleto(alumno)}</strong>
-                                            <span style={{ color: '#888', marginLeft: 6, fontSize: 12 }}>({alumno.numero_control})</span>
+                                        <label htmlFor={`disp-${alumno.numero_control}`} style={{ marginLeft: '8px', cursor: 'pointer' }}>
+                                            {getNombreCompleto(alumno)} ({alumno.numero_control})
                                         </label>
                                     </div>
                                 ))
                             ) : (
-                                <p style={{ color: '#999', fontSize: 13, textAlign: 'center', marginTop: 8 }}>
-                                    No hay alumnos disponibles para este nivel y campus.
+                                <p style={{ color: '#999', fontSize: 13 }}>Sin resultados.</p>
+                            )}
+                        </div>
+                    </fieldset>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                    <fieldset style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px' }}>
+                        <legend>Alumnos Seleccionados ({alumnosSeleccionados.size})</legend>
+                        <input
+                            type="text"
+                            placeholder="🔍 Buscar por nombre o N° control..."
+                            className="search-input"
+                            style={{ width: '100%', marginBottom: 8 }}
+                            value={filtroSeleccionados}
+                            onChange={e => setFiltroSeleccionados(e.target.value)}
+                        />
+                        <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
+                            {alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
+                                if (!filtroSeleccionados) return true;
+                                const f = normalizar(filtroSeleccionados);
+                                return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
+                            }).length > 0 ? (
+                                alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
+                                    if (!filtroSeleccionados) return true;
+                                    const f = normalizar(filtroSeleccionados);
+                                    return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
+                                }).map(alumno => (
+                                    <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id={`sel-${alumno.numero_control}`}
+                                            checked={true}
+                                            onChange={() => handleAlumnoToggle(alumno)}
+                                        />
+                                        <label htmlFor={`sel-${alumno.numero_control}`} style={{ marginLeft: '8px', cursor: 'pointer' }}>
+                                            {getNombreCompleto(alumno)} ({alumno.numero_control})
+                                        </label>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ color: '#999', fontSize: 13 }}>
+                                    {alumnosSeleccionados.size === 0 ? 'Ningún alumno seleccionado.' : 'Sin resultados.'}
                                 </p>
                             )}
                         </div>
-                    </div>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <div style={{
-                            background: 'linear-gradient(135deg, #f5f0ff 0%, #ede9fe 100%)',
-                            border: '1px solid #c084db', borderRadius: 10, padding: '14px 16px'
-                        }}>
-                            <Typography sx={{ fontWeight: 700, fontSize: 13, color: 'var(--color-primary)', mb: 1 }}>Resumen</Typography>
-                            <div style={{ fontSize: 13, color: '#555', lineHeight: 2 }}>
-                                <div>👥 Seleccionados: <strong>{alumnosSeleccionados.size}</strong></div>
-                                <div>📋 Disponibles: <strong>{alumnosDisponibles.length}</strong></div>
-                                <div style={{ color: alumnosSeleccionados.size > 20 ? '#dc2626' : '#16a34a', fontWeight: 600 }}>
-                                    {alumnosSeleccionados.size > 20 ? '⚠️ Límite excedido (máx. 20)' : `✅ Cupo: ${alumnosSeleccionados.size}/20`}
-                                </div>
-                            </div>
-                        </div>
-                        <Button
-                            variant="contained"
-                            onClick={autoCompletarHasta20}
-                            sx={{ backgroundColor: 'var(--color-primary)', '&:hover': { backgroundColor: 'var(--color-primary-hover)' }, borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-                        >
-                            Autocompletar hasta 20
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setAlumnosSeleccionados(new Set())}
-                            sx={{ borderColor: '#dc2626', color: '#dc2626', '&:hover': { borderColor: '#b91c1c', background: '#fef2f2' }, borderRadius: 2, textTransform: 'none' }}
-                        >
-                            Limpiar selección
-                        </Button>
-                        <p style={{ margin: 0, fontSize: 12, color: '#777', textAlign: 'center' }}>Puedes desmarcar alumnos para eliminarlos del grupo.</p>
-                    </div>
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Divider sx={{ mb: 1 }} />
-                    <div className="button-list" style={{ justifyContent: 'flex-end' }}>
-                        <button className='modifybutton' type='submit'>Guardar Cambios</button>
-                    </div>
+                    </fieldset>
                 </Grid>
             </Grid>
         </form>

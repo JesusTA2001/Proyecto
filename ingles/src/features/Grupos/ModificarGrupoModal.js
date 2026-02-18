@@ -9,14 +9,14 @@ import ModificarGrupo from './ModificarGrupo';
 export default function ModificarGrupoModal({ open, onClose, grupo, actualizarGrupo, niveles, periodos, profesores, alumnos }) {
   if (!grupo) return null;
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { width: '95vw', maxWidth: 1100, maxHeight: '90vh' } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth disableScrollLock PaperProps={{ sx: { width: '95vw', maxWidth: 1125, maxHeight: '120vh' } }}>
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
         Modificar Grupo
         <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '78vh', px: 3, py: 2 }}>
+      <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '100vh', px: 3, py: 2 }}>
         <ModificarGrupo grupo={grupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} actualizarGrupo={(g) => { actualizarGrupo(g); onClose(); }} onClose={onClose} />
       </DialogContent>
     </Dialog>
