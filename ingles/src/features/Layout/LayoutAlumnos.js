@@ -30,7 +30,7 @@ function LayoutAlumnos({ children }) {
     setMenuOpen(false);
   };
   return (
-    <div className="perfil-usuario">
+    <div className="layout-wrapper">
       <nav className="menu">
         <section className="menu__container">
           <img
@@ -79,9 +79,10 @@ function LayoutAlumnos({ children }) {
           </ul>
         </section>
       </nav>
-
-      {/* header title removed to simplify layout — pages provide headings when needed */}
-      <main>{children}</main>
+      <div className="perfil-usuario">
+        {/* header title removed to simplify layout — pages provide headings when needed */}
+        <main>{children}</main>
+      </div>
     </div>
   );
 }

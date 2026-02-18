@@ -49,7 +49,7 @@ export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ m:0,p:2, backgroundColor: 'var(--color-primary)', color:'#fff' }}>
-        Horario de {profesor.nombre}
+        Horario de {profesor.nombreCompleto || `${profesor.nombre} ${profesor.apellidoPaterno || ''} ${profesor.apellidoMaterno || ''}`.trim()}
         <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right:8, top:8 }}>
           <span style={{ fontSize:20, lineHeight:1, color:'#fff' }}>×</span>
         </IconButton>

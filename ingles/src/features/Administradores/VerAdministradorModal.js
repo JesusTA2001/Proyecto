@@ -7,6 +7,7 @@ import '../../styles/listaEstudiante.css';
 
 export default function VerAdministradorModal({ open, onClose, admin }) {
   if (!admin) return null;
+  console.log('VerAdministradorModal admin:', admin);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>

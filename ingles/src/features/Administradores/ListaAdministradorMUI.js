@@ -26,14 +26,41 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
   const [openEdit, setOpenEdit] = React.useState(false);
   const [selectedAdmin, setSelectedAdmin] = React.useState(null);
 
-  const filtered = (administradores || []).filter(a => {
-    const term = (searchTerm || '').toLowerCase();
-    const matchesSearch = !term || (a.nombreCompleto || '').toLowerCase().includes(term) || String(a.numero_empleado || '').toLowerCase().includes(term);
-    const matchesStatus = !selectedStatus || a.estado === selectedStatus;
-    return matchesSearch && matchesStatus;
-  });
+  const filtered = (administradores || [])
+    .filter(a => {
+      const term = (searchTerm || '').toLowerCase();
+      const matchesSearch = !term || (a.nombreCompleto || '').toLowerCase().includes(term) || String(a.numero_empleado || '').toLowerCase().includes(term);
+      const matchesStatus = !selectedStatus || a.estado === selectedStatus;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      const nombreA = (a.nombre || '').toLowerCase();
+      const nombreB = (b.nombre || '').toLowerCase();
+      const apA = (a.apellidoPaterno || '').toLowerCase();
+      const apB = (b.apellidoPaterno || '').toLowerCase();
+      const amA = (a.apellidoMaterno || '').toLowerCase();
+      const amB = (b.apellidoMaterno || '').toLowerCase();
+      if (nombreA !== nombreB) return nombreA.localeCompare(nombreB);
+      if (apA !== apB) return apA.localeCompare(apB);
+      return amA.localeCompare(amB);
+    });
 
-  const rows = filtered.map(a => ({ id: a.numero_empleado, numero_empleado: a.numero_empleado, nombre: a.nombre, nombreCompleto: a.nombreCompleto, estado: a.estado }));
+  const rows = filtered.map(a => ({
+    id: a.numero_empleado,
+    numero_empleado: a.numero_empleado,
+    nombre: a.nombre,
+    nombreCompleto: a.nombreCompleto,
+    apellidoPaterno: a.apellidoPaterno,
+    apellidoMaterno: a.apellidoMaterno,
+    estado: a.estado,
+    email: a.email,
+    CURP: a.CURP,
+    telefono: a.telefono,
+    direccion: a.direccion,
+    genero: a.genero,
+    ubicacion: a.ubicacion,
+    gradoEstudio: a.gradoEstudio
+  }));
 
   const exportToCSV = () => {
     let exportRows = filtered;
@@ -79,13 +106,14 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
     {
       field: 'acciones', headerName: 'Acciones', width: 200, sortable: false,
       renderCell: (params) => {
-        const admin = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado);
+        // Siempre pasar el objeto original completo de administradores
+        const adminOriginal = administradores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado) || params.row;
         return (
           <div className='acciones-cell' style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedAdmin(admin); setOpenView(true); }}>👁️</button>
+            <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedAdmin(adminOriginal); setOpenView(true); }}>👁️</button>
             {!isDirectivo && (
               <>
-                <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedAdmin(admin); setOpenEdit(true); }}>✏️</button>
+                <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedAdmin(adminOriginal); setOpenEdit(true); }}>✏️</button>
               </>
             )}
           </div>

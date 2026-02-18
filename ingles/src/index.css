@@ -1,0 +1,34 @@
+/* Estilos globales para asegurar sticky y modales */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Estilos globales para asegurar que los modales de Material-UI estén sobre el menú sticky */
+.MuiDialog-root,
+.MuiModal-root,
+.MuiPopover-root {
+  z-index: 2000 !important;
+}
+
+/* Mantener backdrop detrás del contenido del modal */
+.MuiDialog-root .MuiBackdrop-root,
+.MuiModal-root .MuiBackdrop-root {
+  z-index: -1 !important;
+}
+
+/* Compatibilidad para modales no MUI (si existen en listas legacy) */
+.modal {
+  z-index: 2000 !important;
+}
+
+.modal-backdrop {
+  z-index: 1990 !important;
+}
+

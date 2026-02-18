@@ -30,16 +30,36 @@ body {
   }
 }
 
+/* ===== Contenedor principal del layout ===== */
+.layout-wrapper {
+  min-height: 100vh;
+  padding-top: 70px;
+}
+
+/* ===== Contenedor del contenido ===== */
+.perfil-usuario {
+  padding: 0;
+  margin: 0;
+  background-color: var(--color-bg);
+}
+
+.perfil-usuario main {
+  padding: 0;
+}
+
 /* ===== Menú principal ===== */
-.menu {
+.layout-wrapper > .menu {
   background: linear-gradient(90deg, var(--color-primary) 0%, #5a1d57 100%);
   color: var(--color-text-on-primary);
   height: 70px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   border-bottom: 2px solid rgba(255,255,255,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin-top: 0 !important;
+  z-index: 1001 !important;
+  width: 100% !important;
 }
 
 .menu__container {
@@ -209,7 +229,11 @@ body {
 }
 
 @media (max-width: 480px) {
-  .menu {
+  .layout-wrapper {
+    padding-top: 60px;
+  }
+
+  .layout-wrapper > .menu {
     height: 60px;
   }
 

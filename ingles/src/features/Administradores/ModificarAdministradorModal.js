@@ -15,7 +15,10 @@ export default function ModificarAdministradorModal({ open, onClose, admin, actu
   const [errors, setErrors] = useState({ curp: '', telefono: '' });
 
   useEffect(() => {
-    if (admin) setForm({ ...admin });
+    if (admin) {
+      console.log('ModificarAdministradorModal admin:', admin);
+      setForm({ ...admin });
+    }
   }, [admin]);
 
   if (!form) return null;

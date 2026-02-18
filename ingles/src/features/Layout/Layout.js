@@ -32,7 +32,7 @@ function Layout({children}) {
   };
 
   return (
-    <div className="perfil-usuario">
+    <div className="layout-wrapper">
       <nav className="menu">
         <section className="menu__container">
           <img 
@@ -115,32 +115,7 @@ function Layout({children}) {
               </ul>
             </li>
 
-            {/* Reportes*/}
-            <li className="menu__item menu__item--show">
-              <span className="menu__link">Reportes</span>
-              <ul className="menu__nesting">
-                <li className="menu__inside">
-                  {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
-                  <Link to="/reporte-profesores" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Reporte Profesores
-                  </Link>
-                </li>
-                <li className="menu__inside">
-                  {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
-                  <Link to="/reporte-estudiantes" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Reporte Estudiantes
-                  </Link>
-                </li>
-                <li className="menu__inside">
-                  {/* Cambiado de 'a' a 'Link' y 'href' a 'to' */}
-                  <Link to="/reporte-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Reporte Grupos
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            {/* Cuenta / Cerrar sesión (al lado de Reportes) */}
+            {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>
                 Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
@@ -156,10 +131,12 @@ function Layout({children}) {
           </ul>
         </section>
       </nav>
-      {/* header title removed to let pages control their own headings */}
+      <div className="perfil-usuario">
+        {/* header title removed to let pages control their own headings */}
         <main>
-            {children}
+          {children}
         </main>
+      </div>
     </div>
   );
 }

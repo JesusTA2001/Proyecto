@@ -119,7 +119,7 @@ export default function VerAlumnoModal({ open, onClose, alumno }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
-        {alumno.nombre}
+        {alumno.nombreCompleto || `${alumno.nombre} ${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''}`.trim()}
         <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>

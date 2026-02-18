@@ -50,11 +50,6 @@ import ModificarGrupo from './features/Grupos/ModificarGrupo';
 import EliminarGrupo from './features/Grupos/EliminarGrupo';
 import VerGrupo from './features/Grupos/VerGrupo';
 
-// reportes
-import ReporteProfesores from './features/Reportes/ReporteProfesores';
-import ReporteEstudiantes from './features/Reportes/ReporteEstudiantes';
-import ReporteGrupos from './features/Reportes/ReporteGrupos';
-
 // Datos iniciales - COMENTADOS para usar la base de datos
 // import { initialAlumnos } from './data/alumnos';
 // import { initialProfesores } from './data/profesores';
@@ -185,23 +180,26 @@ function App() {
           estado: p.estado === 'activo' ? 'Activo' : 'Inactivo'
         }));
 
+        if (administradoresRes.data && administradoresRes.data.length > 0) {
+          console.log('Ejemplo de administrador recibido del backend:', administradoresRes.data[0]);
+        }
         const administradoresMapeados = (administradoresRes.data || []).map(a => {
           const nombreSolo = extraerNombreSolo(a.nombre, a.apellidoPaterno, a.apellidoMaterno);
           return {
-          numero_empleado: a.id_Administrador,
-          id_administrador: a.id_Administrador,
-          nombre: nombreSolo,
-          apellidoPaterno: a.apellidoPaterno,
-          apellidoMaterno: a.apellidoMaterno,
-          nombreCompleto: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${nombreSolo}`.trim(),
-          email: a.email,
-          genero: a.genero,
-          CURP: a.CURP,
-          telefono: a.telefono,
-          direccion: a.direccion,
-          RFC: a.RFC,
-          estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
-        };
+            numero_empleado: a.id_Administrador,
+            id_administrador: a.id_Administrador,
+            nombre: nombreSolo,
+            apellidoPaterno: a.apellidoPaterno,
+            apellidoMaterno: a.apellidoMaterno,
+            nombreCompleto: `${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''} ${nombreSolo}`.trim(),
+            email: a.email,
+            genero: a.genero,
+            CURP: a.CURP,
+            telefono: a.telefono,
+            direccion: a.direccion,
+            RFC: a.RFC,
+            estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
+          };
         });
 
         const gruposMapeados = (gruposRes.data || []).map(g => {
@@ -1013,77 +1011,6 @@ function App() {
                 <Navigate to="/" replace />
               )
           } />
-          
-{/* --- 2. AÑADIR NUEVAS RUTAS DE REPORTE --- */}
-          <Route 
-            path="/reporte-profesores" 
-            element={
-              currentUser && currentUser.role === 'directivo'
-                ? (
-                  <LayoutDirectivos>
-                    <ReporteProfesores 
-                      profesores={profesores} 
-                      grupos={grupos}
-                      alumnos={alumnos}
-                    />
-                  </LayoutDirectivos>
-                ) : (
-                  <Layout>
-                    <ReporteProfesores 
-                      profesores={profesores} 
-                      grupos={grupos}
-                      alumnos={alumnos}
-                    />
-                  </Layout>
-                )
-            } 
-          />
-          <Route 
-            path="/reporte-estudiantes" 
-            element={
-              currentUser && currentUser.role === 'directivo'
-                ? (
-                  <LayoutDirectivos>
-                    <ReporteEstudiantes 
-                      alumnos={alumnos}
-                      grupos={grupos}
-                      profesores={profesores}
-                    />
-                  </LayoutDirectivos>
-                ) : (
-                  <Layout>
-                    <ReporteEstudiantes 
-                      alumnos={alumnos}
-                      grupos={grupos}
-                      profesores={profesores}
-                    />
-                  </Layout>
-                )
-            } 
-          />
-          <Route 
-            path="/reporte-grupos" 
-            element={
-              currentUser && currentUser.role === 'directivo'
-                ? (
-                  <LayoutDirectivos>
-                    <ReporteGrupos 
-                      grupos={grupos}
-                      alumnos={alumnos}
-                      profesores={profesores}
-                    />
-                  </LayoutDirectivos>
-                ) : (
-                  <Layout>
-                    <ReporteGrupos 
-                      grupos={grupos}
-                      alumnos={alumnos}
-                      profesores={profesores}
-                    />
-                  </Layout>
-                )
-            } 
-          />
           
           {/* --- RUTAS DEL PROFESOR --- */}
           

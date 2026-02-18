@@ -149,8 +149,8 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {periodoEditar ? 'Modificar Periodo' : 'Crear Nuevo Periodo'}
+      <DialogTitle sx={{ backgroundColor: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center' }}>
+        <span>{periodoEditar ? 'Modificar Periodo' : 'Crear Nuevo Periodo'}</span>
         <Tooltip 
           title={
             <div style={{ fontSize: '0.875rem', lineHeight: '1.5' }}>
@@ -168,8 +168,8 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
           placement="right"
           arrow
         >
-          <IconButton size="small" sx={{ ml: 1 }}>
-            <InfoIcon fontSize="small" />
+          <IconButton size="small" sx={{ ml: 1, color: '#fff' }}>
+            <InfoIcon fontSize="small" sx={{ color: '#fff' }} />
           </IconButton>
         </Tooltip>
       </DialogTitle>

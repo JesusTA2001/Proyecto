@@ -117,9 +117,9 @@ function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], gr
         <Link to="/lista-grupos" className="stat-card-link">
           <div className="stat-card" style={{ borderLeft: '4px solid #6b21a8' }}>
             <div className="stat-card-info">
-              <p className="stat-card-title">GRUPOS ACTIVOS</p>
-              <p className="stat-card-value">{totalGrupos}</p>
-              <p className="stat-card-detail">Ver grupos</p>
+                <p className="stat-card-title">GRUPOS ACTIVOS</p>
+                <p className="stat-card-value">Ver Grupos</p>
+                <p className="stat-card-detail">Total Grupos: {totalGrupos}</p>
             </div>
             <div className="stat-card-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -129,23 +129,7 @@ function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], gr
           </div>
         </Link>
 
-        {/* Horarios - ahora dirige a la lista de profesores donde se puede ver el horario */}
-        <Link to="/lista-profesores" className="stat-card-link">
-          <div className="stat-card" style={{ borderLeft: '4px solid #2b6cb0' }}>
-            <div className="stat-card-info">
-              <p className="stat-card-title">HORARIOS</p>
-              <p className="stat-card-value">Ver</p>
-              <p className="stat-card-detail">Horarios de profesores</p>
-            </div>
-            <div className="stat-card-icon-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a1 1 0 011 1v1h2V3a1 1 0 112 0v1h1a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1h2V3a1 1 0 011-1zM7 9h6v2H7V9z" />
-              </svg>
-            </div>
-          </div>
-        </Link>
-
-        {/* Periodos - nuevo botón para administrar periodos */}
+        {/* Administrar Periodos */}
         <Link to="/administrar-periodos" className="stat-card-link">
           <div className="stat-card" style={{ borderLeft: '4px solid #8b5cf6' }}>
             <div className="stat-card-info">
@@ -156,6 +140,22 @@ function PerfilUsuario({ alumnos = [], profesores = [], administradores = [], gr
             <div className="stat-card-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </Link>
+
+        {/* Historial de Grupos */}
+        <Link to="/historial-grupos-admin" className="stat-card-link">
+          <div className="stat-card" style={{ borderLeft: '4px solid #059669' }}>
+            <div className="stat-card-info">
+              <p className="stat-card-title">HISTORIAL DE GRUPOS</p>
+              <p className="stat-card-value">Ver</p>
+              <p className="stat-card-detail">Grupos concluidos</p>
+            </div>
+            <div className="stat-card-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm6 6H7v2h6v-2z" clipRule="evenodd" />
               </svg>
             </div>
           </div>
