@@ -337,7 +337,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     }
 
     return (
-        <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0 }}>
+        <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0, background: 'transparent', boxShadow: 'none', padding: 0 }}>
             <Grid container spacing={2}>
                 <input type="hidden" name="id" value={grupo.id} />
 

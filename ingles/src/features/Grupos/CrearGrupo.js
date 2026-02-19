@@ -316,7 +316,7 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
 
     return (
         <>
-        <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0 }}>
+        <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '100%', margin: 0, background: 'transparent', boxShadow: 'none', padding: 0 }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                     <TextField label="Nombre del Grupo" name="nombre" value={grupo.nombre} onChange={handleChange} fullWidth required size="small" margin="dense" placeholder="Ej: Tec-N1-Mat-A" />
@@ -409,56 +409,93 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
                     </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={8}>
-                    <fieldset style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px', maxHeight: '48vh', overflowY: 'auto' }}>
-                        <legend>Alumnos para el Grupo (Nivel: {grupo.nivel || 'N/A'}, Ubic: {grupo.ubicacion})</legend>
+                <Grid item xs={12} md={6}>
+                    <fieldset style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px', maxHeight: '38vh', overflowY: 'auto' }}>
+                        <legend>Alumnos Disponibles ({alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).length})</legend>
                         <input
                             type="text"
-                            placeholder="Buscar alumno por nombre o N° Control..."
-                            className="usuario"
-                            style={{ width: '100%', marginBottom: '10px' }}
+                            placeholder="🔍 Buscar por nombre o N° Control..."
+                            className="search-input"
+                            style={{ width: '100%', marginBottom: 8 }}
                             value={filtroAlumno}
                             onChange={(e) => setFiltroAlumno(e.target.value)}
                         />
-                        {alumnosDisponibles.filter(a => {
-                            if (!filtroAlumno) return true; // Si no hay filtro, mostrar todos
-                            
-                            const filtroLower = filtroAlumno.toLowerCase();
-                            const nombre = String(a.nombre || '').toLowerCase();
-                            const numeroControl = String(a.numero_control || '').toLowerCase();
-                            return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
-                        }).length > 0 ? (
-                            alumnosDisponibles.filter(a => {
-                                if (!filtroAlumno) return true; // Si no hay filtro, mostrar todos
-                                
+                        <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
+                            {alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).filter(a => {
+                                if (!filtroAlumno) return true;
                                 const filtroLower = filtroAlumno.toLowerCase();
                                 const nombre = String(a.nombre || '').toLowerCase();
                                 const numeroControl = String(a.numero_control || '').toLowerCase();
                                 return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
-                            }).map(alumno => (
-                                <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        id={`alumno-${alumno.numero_control}`}
-                                        checked={alumnosSeleccionados.has(alumno.numero_control)}
-                                        onChange={() => handleAlumnoToggle(alumno.numero_control)}
-                                    />
-                                    <label htmlFor={`alumno-${alumno.numero_control}`} style={{ marginLeft: '8px' }}>
-                                        {getNombreCompleto(alumno)} ({alumno.numero_control})
-                                    </label>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No hay alumnos disponibles para este nivel y ubicación, o que coincidan con la búsqueda.</p>
-                        )}
+                            }).length > 0 ? (
+                                alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).filter(a => {
+                                    if (!filtroAlumno) return true;
+                                    const filtroLower = filtroAlumno.toLowerCase();
+                                    const nombre = String(a.nombre || '').toLowerCase();
+                                    const numeroControl = String(a.numero_control || '').toLowerCase();
+                                    return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
+                                }).map(alumno => (
+                                    <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id={`alumno-${alumno.numero_control}`}
+                                            checked={alumnosSeleccionados.has(alumno.numero_control)}
+                                            onChange={() => handleAlumnoToggle(alumno.numero_control)}
+                                        />
+                                        <label htmlFor={`alumno-${alumno.numero_control}`} style={{ marginLeft: '8px', cursor: 'pointer' }}>
+                                            {getNombreCompleto(alumno)} ({alumno.numero_control})
+                                        </label>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ color: '#999', fontSize: 13 }}>No hay alumnos disponibles para este nivel y ubicación, o que coincidan con la búsqueda.</p>
+                            )}
+                        </div>
                     </fieldset>
-                    <p style={{ marginTop: 8 }}>Alumnos seleccionados: {alumnosSeleccionados.size}</p>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Grid item xs={12} md={6}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
                         <button className='createbutton' type='button' onClick={autoCompletar20}>Autocompletar hasta 20</button>
                     </div>
+                    <fieldset style={{ border: '1px solid #ccc', borderRadius: '8px', padding: 10 }}>
+                        <legend>Alumnos Seleccionados ({alumnosSeleccionados.size})</legend>
+                        <input
+                            type="text"
+                            placeholder="🔍 Buscar por nombre o N° control..."
+                            className="search-input"
+                            style={{ width: '100%', marginBottom: 8 }}
+                            value={filtroAlumno}
+                            onChange={(e) => setFiltroAlumno(e.target.value)}
+                        />
+                        <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
+                            {alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
+                                if (!filtroAlumno) return true;
+                                const filtroLower = filtroAlumno.toLowerCase();
+                                return String(getNombreCompleto(a) || '').toLowerCase().includes(filtroLower) || String(a.numero_control || '').toLowerCase().includes(filtroLower);
+                            }).length > 0 ? (
+                                alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
+                                    if (!filtroAlumno) return true;
+                                    const filtroLower = filtroAlumno.toLowerCase();
+                                    return String(getNombreCompleto(a) || '').toLowerCase().includes(filtroLower) || String(a.numero_control || '').toLowerCase().includes(filtroLower);
+                                }).map(alumno => (
+                                    <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id={`sel-${alumno.numero_control}`}
+                                            checked={true}
+                                            onChange={() => handleAlumnoToggle(alumno.numero_control)}
+                                        />
+                                        <label htmlFor={`sel-${alumno.numero_control}`} style={{ marginLeft: '8px', cursor: 'pointer' }}>
+                                            {getNombreCompleto(alumno)} ({alumno.numero_control})
+                                        </label>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ color: '#999', fontSize: 13 }}>{alumnosSeleccionados.size === 0 ? 'Ningún alumno seleccionado.' : 'Sin resultados.'}</p>
+                            )}
+                        </div>
+                    </fieldset>
                 </Grid>
             </Grid>
         </form>

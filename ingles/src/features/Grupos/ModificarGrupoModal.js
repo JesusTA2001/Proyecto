@@ -17,7 +17,9 @@ export default function ModificarGrupoModal({ open, onClose, grupo, actualizarGr
         </IconButton>
       </DialogTitle>
       <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '100vh', px: 3, py: 2 }}>
-        <ModificarGrupo grupo={grupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} actualizarGrupo={(g) => { actualizarGrupo(g); onClose(); }} onClose={onClose} />
+        <div style={{ width: '100%', maxWidth: 1125, margin: '0 auto', background: '#fff', borderRadius: 12, padding: 16 }}>
+          <ModificarGrupo grupo={grupo} niveles={niveles} periodos={periodos} profesores={profesores} alumnos={alumnos} actualizarGrupo={(g) => { actualizarGrupo(g); onClose(); }} onClose={onClose} />
+        </div>
       </DialogContent>
     </Dialog>
   );
