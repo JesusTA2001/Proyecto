@@ -163,7 +163,22 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
         {activeStep === 1 && (
           <Box>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  value={admin.ubicacion}
+                  onChange={handleChange('ubicacion')}
+                  size="small"
+                  displayEmpty
+                  required
+                  sx={{ mt: 0.5 }}
+                >
+                  <MenuItem value="">Seleccionar Campus</MenuItem>
+                  <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
+                  <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
+                </Select>
+              </Grid>
+              <Grid item xs={12} sm={6}>
                 <Select
                   fullWidth
                   value={admin.gradoEstudio}

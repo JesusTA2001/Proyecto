@@ -267,10 +267,11 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
         
         setGrupo(prev => {
             const newState = { ...prev, [name]: value };
-             if (name === 'ubicacion' || name === 'nivel') {
-                 setAlumnosSeleccionados(new Set());
-             }
-             return newState;
+            if (name === 'ubicacion' || name === 'nivel') {
+                setAlumnosSeleccionados(new Set());
+                newState.profesorId = '';
+            }
+            return newState;
         });
     };
 
@@ -366,7 +367,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={3}>
-                    <Select name="profesorId" value={grupo.profesorId} onChange={handleChange} fullWidth size="small" displayEmpty>
+                    <Select name="profesorId" value={grupo.profesorId || ''} onChange={handleChange} fullWidth size="small" displayEmpty>
                         <MenuItem value="">Selecciona un Profesor</MenuItem>
                         {(profesoresDisponibles || []).map(p => <MenuItem key={p.numero_empleado} value={p.numero_empleado}>{getNombreCompleto(p)} ({p.numero_empleado})</MenuItem>)}
                     </Select>
@@ -410,7 +411,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                 {/* ── LISTAS DE ALUMNOS ABAJO ── */}
                 <Grid item xs={12} md={6}>
                     <fieldset style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px' }}>
-                        <legend>Alumnos Disponibles ({alumnosDisponibles.length})</legend>
+                        <legend>Alumnos Disponibles ({alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).length})</legend>
                         <input
                             type="text"
                             placeholder="🔍 Buscar por nombre o N° control..."
@@ -420,12 +421,12 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                             onChange={e => setFiltroDisponibles(e.target.value)}
                         />
                         <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
-                            {alumnosDisponibles.filter(a => {
+                            {alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).filter(a => {
                                 if (!filtroDisponibles) return true;
                                 const f = normalizar(filtroDisponibles);
                                 return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
                             }).length > 0 ? (
-                                alumnosDisponibles.filter(a => {
+                                alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).filter(a => {
                                     if (!filtroDisponibles) return true;
                                     const f = normalizar(filtroDisponibles);
                                     return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
@@ -434,7 +435,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                                         <input
                                             type="checkbox"
                                             id={`disp-${alumno.numero_control}`}
-                                            checked={alumnosSeleccionados.has(alumno.numero_control)}
+                                            checked={false}
                                             onChange={() => handleAlumnoToggle(alumno)}
                                         />
                                         <label htmlFor={`disp-${alumno.numero_control}`} style={{ marginLeft: '8px', cursor: 'pointer' }}>

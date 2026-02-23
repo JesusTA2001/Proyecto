@@ -28,8 +28,10 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
 
   const filtered = (administradores || [])
     .filter(a => {
-      const term = (searchTerm || '').toLowerCase();
-      const matchesSearch = !term || (a.nombreCompleto || '').toLowerCase().includes(term) || String(a.numero_empleado || '').toLowerCase().includes(term);
+      // Función para quitar acentos
+      const normalize = str => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const term = normalize(searchTerm);
+      const matchesSearch = !term || normalize(a.nombreCompleto).includes(term) || normalize(String(a.numero_empleado)).includes(term);
       const matchesStatus = !selectedStatus || a.estado === selectedStatus;
       return matchesSearch && matchesStatus;
     })

@@ -263,7 +263,11 @@ function ControlAsistencia({ profesor, alumnos = [], grupos = [] }) {
                         <span>{getInitials(alumno.nombre)}</span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-800 text-sm">{alumno.nombre}</p>
+                        <p className="font-medium text-gray-800 text-sm">{
+                          [alumno.nombre, alumno.apellidoPaterno, alumno.apellidoMaterno]
+                            .filter(Boolean)
+                            .join(' ')
+                        }</p>
                         <p className="text-xs text-gray-500">ID: {alumno.numero_control}</p>
                       </div>
                     </div>

@@ -173,6 +173,7 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
                   required
                   sx={{ mt: 0.5 }}
                 >
+                  <MenuItem value="">Seleccionar Campus</MenuItem>
                   <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
                   <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
                 </Select>

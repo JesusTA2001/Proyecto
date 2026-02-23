@@ -197,21 +197,9 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
                   size="small"
                   displayEmpty
                 >
+                  <MenuItem value="">Seleccionar Campus</MenuItem>
                   <MenuItem value="Tecnologico">Tecnológico</MenuItem>
                   <MenuItem value="Centro de Idiomas">Centro de Idiomas</MenuItem>
-                </Select>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Select
-                  fullWidth
-                  value={alumno.modalidad}
-                  onChange={handleChange('modalidad')}
-                  size="small"
-                  displayEmpty
-                >
-                  <MenuItem value="">Selecciona una modalidad</MenuItem>
-                  {initialModalidades.map(m => <MenuItem key={m.id} value={m.nombre}>{m.nombre}</MenuItem>)}
                 </Select>
               </Grid>
 
@@ -262,7 +250,6 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
               
               <h4 style={{ marginBottom: 12 }}>Academia</h4>
               <p><strong>Ubicación:</strong> {alumno.ubicacion}</p>
-              <p><strong>Modalidad:</strong> {alumno.modalidad}</p>
               <p><strong>Nivel:</strong> {alumno.nivel}</p>
               <p><strong>Carrera:</strong> {alumno.carrera || 'No Aplica'}</p>
             </Box>

@@ -28,8 +28,10 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
 
   // --- Lógica de Filtrado (Simplificada) ---
   const filtered = (profesores || []).filter(p => {
-    const term = (searchTerm || '').toLowerCase();
-    const textMatch = !term || (p.nombreCompleto || '').toLowerCase().includes(term) || String(p.numero_empleado || '').toLowerCase().includes(term);
+    // Función para quitar acentos
+    const normalize = str => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const term = normalize(searchTerm);
+    const textMatch = !term || normalize(p.nombreCompleto).includes(term) || normalize(String(p.numero_empleado)).includes(term);
     // Se eliminaron locationMatch y statusMatch
     return textMatch;
   });

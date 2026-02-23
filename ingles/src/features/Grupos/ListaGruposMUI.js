@@ -23,8 +23,15 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
   const [selectedGrupo, setSelectedGrupo] = React.useState(null);
 
   const filtered = (grupos || []).filter(g => {
-    const term = (searchTerm || '').toLowerCase();
-    return !term || (g.nombre || '').toLowerCase().includes(term) || (g.nivel || '').toLowerCase().includes(term);
+    // Función para quitar acentos
+    const normalize = str => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const term = normalize(searchTerm);
+    return (
+      !term ||
+      normalize(g.nombre).includes(term) ||
+      normalize(g.nivel).includes(term) ||
+      normalize(g.profesor_nombre).includes(term)
+    );
   });
 
   console.log('Grupos filtrados:', filtered.map(g => ({ 
@@ -90,7 +97,7 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
     <div className="lista-container">
       <div className="lista-header">
         <div className="header-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <input className="search-input" placeholder="🔍 Buscar por nombre o nivel..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
+          <input className="search-input" placeholder="🔍 Buscar por grupo, nivel o profesor..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
           {!isDirectivo && (
             <button className='createbutton' onClick={()=>setOpenCreate(true)} style={{ marginLeft: 8 }}>Nuevo Grupo</button>
           )}

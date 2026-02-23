@@ -24,15 +24,17 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
 
   // --- Filtros personalizados ---
   const filteredAlumnos = (alumnos || []).filter(alumno => {
-    const term = (searchTerm || '').toLowerCase();
+    // Función para quitar acentos
+    const normalize = str => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const term = normalize(searchTerm);
     const nombreCompleto = alumno.nombreCompleto || `${alumno.nombre || ''} ${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''}`.trim();
     const matchesSearch =
       !term ||
-      nombreCompleto.toLowerCase().includes(term) ||
-      (alumno.nombre || '').toLowerCase().includes(term) ||
-      (alumno.apellidoPaterno || '').toLowerCase().includes(term) ||
-      (alumno.apellidoMaterno || '').toLowerCase().includes(term) ||
-      String(alumno.numero_control || '').toLowerCase().includes(term);
+      normalize(nombreCompleto).includes(term) ||
+      normalize(alumno.nombre).includes(term) ||
+      normalize(alumno.apellidoPaterno).includes(term) ||
+      normalize(alumno.apellidoMaterno).includes(term) ||
+      normalize(String(alumno.numero_control)).includes(term);
     const matchesStatus = !selectedStatus || alumno.estado === selectedStatus;
     const matchesCareer = !selectedCareer || alumno.carrera === selectedCareer;
     const matchesLocation = !selectedLocation || alumno.ubicacion === selectedLocation;
@@ -46,6 +48,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     nombre: alumno.nombreCompleto || `${alumno.nombre || ''} ${alumno.apellidoPaterno || ''} ${alumno.apellidoMaterno || ''}`.trim(),
     carrera: alumno.carrera === '' ? 'No Aplica' : alumno.carrera,
     ubicacion: alumno.ubicacion,
+    nivel: alumno.nivel || 'Sin nivel',
     estado: alumno.estado,
   }));
 
@@ -75,10 +78,10 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
       return;
     }
     
+
     // Usar las cabeceras y campos del DataGrid (rows)
-    const headers = ['N° Control', 'Nombre', 'Carrera', 'Ubicación', 'Estado'];
-    // Asegurarse de que los datos de 'rows' se mapean correctamente
-    const rowsData = exportRows.map(row => [row.numero_control, row.nombre, row.carrera, row.ubicacion, row.estado]);
+    const headers = ['N° Control', 'Nombre', 'Carrera', 'Ubicación', 'Nivel', 'Estado'];
+    const rowsData = exportRows.map(row => [row.numero_control, row.nombre, row.carrera, row.ubicacion, row.nivel, row.estado]);
     // -------------------------------------------------------------------------------
 
     const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
@@ -100,6 +103,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 200 },
     { field: 'carrera', headerName: 'Carrera', width: 180 },
     { field: 'ubicacion', headerName: 'Ubicación', width: 180 },
+    { field: 'nivel', headerName: 'Nivel', width: 140 },
     {
       field: 'estado',
       headerName: 'Estado',

@@ -27,7 +27,7 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
       PaperProps={{
         sx: {
           // Limitar la altura del modal para evitar scroll de la página
-          maxHeight: fullScreen ? '100vh' : '80vh',
+          maxHeight: '95vh',
         }
       }}
       aria-labelledby="ver-grupo-title"
@@ -40,15 +40,37 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
       </DialogTitle>
       <DialogContent dividers sx={{ overflowY: 'auto', px: 2, py: 2 }}>
         <div className="detail-container">
-          <h3>{grupo.nombre}</h3>
-          <p><strong>Nivel:</strong> {grupo.nivel}</p>
-          <p><strong>Periodo:</strong> {periodo.nombre}</p>
-          <p><strong>Ubicación:</strong> {grupo.ubicacion}</p>
-          <p><strong>Profesor:</strong> {profesor.nombre}</p>
-          <p><strong># Alumnos:</strong> {grupo.num_alumnos || 0}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', fontSize: 18 }}>Grupo:</span>
+              <span style={{ fontSize: 18 }}>{grupo.nombre}</span>
+              <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}>Nivel:</span>
+              <span>{grupo.nivel}</span>
+              <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}>Periodo:</span>
+              <span>{periodo.nombre}</span>
+              <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}>Ubicación:</span>
+              <span>{grupo.ubicacion}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 8 }}>
+              <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase' }}>Profesor:</span>
+              <span>{
+                grupo.profesor_nombre
+                  ? grupo.profesor_nombre
+                  : (
+                      profesor.nombre_completo
+                        ? profesor.nombre_completo
+                        : [profesor.nombre, profesor.apellido_paterno, profesor.apellido_materno]
+                            .filter(Boolean)
+                            .join(' ')
+                    )
+              }</span>
+              <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}># Alumnos:</span>
+              <span>{grupo.num_alumnos || 0}</span>
+            </div>
+          </div>
 
           <div style={{ marginTop: 12 }}>
-            <h4 style={{ marginBottom: 8 }}>Alumnos del grupo</h4>
+            <h4 style={{ marginBottom: 8, textAlign: 'center', width: '100%', color: 'purple', textTransform: 'uppercase', letterSpacing: 1 }}>ALUMNOS DEL GRUPO</h4>
             {alumnosDelGrupo.length === 0 ? (
               <p>No hay alumnos asignados a este grupo.</p>
             ) : (

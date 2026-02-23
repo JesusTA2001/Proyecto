@@ -248,7 +248,7 @@ function AsignarCalificaciones({ profesor, alumnos = [], grupos = [], periodos =
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <p className="text-sm text-gray-600">Profesor</p>
-                <p className="text-base font-semibold">{profesor?.nombre || 'N/A'}</p>
+                <p className="text-base font-semibold">{profesor?.nombreCompleto || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Periodo</p>
