@@ -356,6 +356,8 @@ function App() {
           telefono: a.telefono,
           direccion: a.direccion,
           ubicacion: a.ubicacion,
+          nivel: a.nivel_nombre || `Nivel ${a.id_Nivel}`,
+          id_Nivel: a.id_Nivel,
           estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
         }));
         setAlumnos(alumnosMapeados);
