@@ -323,6 +323,8 @@ function App() {
         telefono: alumno.telefono,
         direccion: alumno.direccion,
         ubicacion: alumno.ubicacion,
+        nivel: alumno.nivel,
+        carrera: alumno.carrera,
         usuario: alumno.email || alumno.correo,
         contraseña: alumno.CURP || alumno.curp
       });

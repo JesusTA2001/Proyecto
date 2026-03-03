@@ -131,6 +131,8 @@ exports.createAlumno = async (req, res) => {
       telefono,
       direccion,
       ubicacion,
+      nivel,
+      carrera,
       usuario,
       contraseña
     } = req.body;
@@ -149,11 +151,23 @@ exports.createAlumno = async (req, res) => {
       ? parseInt(`21${Math.floor(10000 + Math.random() * 90000)}`)
       : parseInt(`22${Math.floor(10000 + Math.random() * 90000)}`);
 
-    // 3. Insertar estudiante
+    // 2.5. Obtener id_Nivel si se proporcionó el nivel
+    let id_Nivel = null;
+    if (nivel) {
+      const [nivelResult] = await connection.query(
+        'SELECT id_Nivel FROM Nivel WHERE nivel = ?',
+        [nivel]
+      );
+      if (nivelResult.length > 0) {
+        id_Nivel = nivelResult[0].id_Nivel;
+      }
+    }
+
+    // 3. Insertar estudiante con nivel
     await connection.query(
-      `INSERT INTO Estudiante (nControl, id_dp, estado, ubicacion)
-       VALUES (?, ?, 'activo', ?)`,
-      [nControl, id_dp, ubicacion]
+      `INSERT INTO Estudiante (nControl, id_dp, estado, ubicacion, id_Nivel)
+       VALUES (?, ?, 'activo', ?, ?)`,
+      [nControl, id_dp, ubicacion, id_Nivel]
     );
 
     // 4. Crear usuario automáticamente con credenciales por defecto
