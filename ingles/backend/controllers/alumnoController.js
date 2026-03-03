@@ -154,12 +154,17 @@ exports.createAlumno = async (req, res) => {
     // 2.5. Obtener id_Nivel si se proporcionó el nivel
     let id_Nivel = null;
     if (nivel) {
+      console.log('Buscando nivel:', nivel);
       const [nivelResult] = await connection.query(
         'SELECT id_Nivel FROM Nivel WHERE nivel = ?',
         [nivel]
       );
+      console.log('Resultado de búsqueda de nivel:', nivelResult);
       if (nivelResult.length > 0) {
         id_Nivel = nivelResult[0].id_Nivel;
+        console.log('id_Nivel encontrado:', id_Nivel);
+      } else {
+        console.log('No se encontró el nivel:', nivel);
       }
     }
 
