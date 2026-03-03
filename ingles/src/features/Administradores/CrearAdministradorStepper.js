@@ -77,10 +77,15 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
 
   const handleBack = () => setActiveStep(prev => Math.max(prev - 1, 0));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    agregarAdministrador(admin);
-    navigate('/lista-administradores');
+    try {
+      await agregarAdministrador(admin);
+      navigate('/lista-administradores');
+    } catch (error) {
+      console.error('Error al crear administrador:', error);
+      // No navegamos si hay error, dejamos al usuario en el formulario
+    }
   };
 
   return (

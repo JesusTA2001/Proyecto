@@ -143,6 +143,7 @@ function App() {
 
         // Mapear los datos de la BD al formato del frontend
         const alumnosMapeados = (alumnosRes.data || []).map(a => ({
+          id: a.nControl,
           numero_control: a.nControl,
           nombre: a.nombre, // Solo el nombre, no concatenar apellidos
           nombreCompleto: `${a.nombre || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim(), // Nombre Apellido Paterno Apellido Materno
@@ -163,6 +164,7 @@ function App() {
         }));
 
         const profesoresMapeados = (profesoresRes.data || []).map(p => ({
+          id: p.id_Profesor,
           numero_empleado: p.id_Profesor,
           id_profesor: p.id_Profesor,
           nombreCompleto: construirNombreCompleto(p.nombre, p.apellidoPaterno, p.apellidoMaterno),
@@ -186,6 +188,7 @@ function App() {
         const administradoresMapeados = (administradoresRes.data || []).map(a => {
           const nombreSolo = extraerNombreSolo(a.nombre, a.apellidoPaterno, a.apellidoMaterno);
           return {
+            id: a.id_Administrador,
             numero_empleado: a.id_Administrador,
             id_administrador: a.id_Administrador,
             nombre: nombreSolo,
@@ -342,6 +345,7 @@ function App() {
         // Recargar la lista de alumnos
         const alumnosRes = await api.get('/alumnos');
         const alumnosMapeados = alumnosRes.data.map(a => ({
+          id: a.nControl,
           numero_control: a.nControl,
           // nombre aquí es usado en algunos modales como título, mantener nombre y nombreCompleto
           nombre: a.nombre,
@@ -434,8 +438,9 @@ function App() {
       if (response.data.success) {
         const profesoresRes = await api.get('/profesores');
         const profesoresMapeados = profesoresRes.data.map(p => ({
-          numero_empleado: p.numero_empleado,
-          id_profesor: p.id_profesor,
+          id: p.id_Profesor || p.id_profesor || p.numero_empleado,
+          numero_empleado: p.id_Profesor || p.numero_empleado,
+          id_profesor: p.id_Profesor || p.id_profesor,
           nombre: p.nombre || '',
           nombreCompleto: construirNombreCompleto(p.nombre, p.apellidoPaterno, p.apellidoMaterno),
           apellidoPaterno: p.apellidoPaterno,
@@ -524,6 +529,7 @@ function App() {
         const administradoresMapeados = administradoresRes.data.map(a => {
             const nombreSolo = extraerNombreSolo(a.nombre, a.apellidoPaterno, a.apellidoMaterno);
             return {
+            id: a.id_Administrador || a.id_administrador,
             numero_empleado: a.id_Administrador || a.id_administrador,
             id_administrador: a.id_Administrador || a.id_administrador,
             nombre: nombreSolo,
