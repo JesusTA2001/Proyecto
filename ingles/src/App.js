@@ -509,7 +509,7 @@ function App() {
 
   const agregarAdministrador = async (admin) => {
     try {
-      const response = await api.post('/administradores', {
+      const payload = {
         apellidoPaterno: admin.apellidoPaterno,
         apellidoMaterno: admin.apellidoMaterno,
         nombre: admin.nombre,
@@ -523,9 +523,13 @@ function App() {
         gradoEstudio: admin.gradoEstudio,
         usuario: admin.email || admin.correo,
         contraseña: admin.CURP || admin.curp
-      });
+      };
+      
+      console.log('📤 Datos que se enviarán al backend:', payload);
+      const response = await api.post('/administradores', payload);
 
       if (response.data.success) {
+        console.log('✅ Administrador creado exitosamente:', response.data);
         const administradoresRes = await api.get('/administradores');
         const administradoresMapeados = administradoresRes.data.map(a => {
             const nombreSolo = extraerNombreSolo(a.nombre, a.apellidoPaterno, a.apellidoMaterno);
@@ -550,7 +554,9 @@ function App() {
         return response.data;
       }
     } catch (error) {
-      console.error('Error al agregar administrador:', error);
+      console.error('❌ Error al agregar administrador:', error);
+      console.error('❌ Response data:', error.response?.data);
+      console.error('❌ Response status:', error.response?.status);
       alert('Error al agregar administrador. Por favor, intenta de nuevo.');
       throw error;
     }
