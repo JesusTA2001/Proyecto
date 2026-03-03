@@ -77,10 +77,15 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
 
   const handleBack = () => setActiveStep(prev => Math.max(prev - 1, 0));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    agregarProfesor(profesor);
-    navigate('/lista-profesores');
+    try {
+      await agregarProfesor(profesor);
+      navigate('/lista-profesores');
+    } catch (error) {
+      console.error('Error al crear profesor:', error);
+      // No navegamos si hay error, dejamos al usuario en el formulario
+    }
   };
 
   return (
