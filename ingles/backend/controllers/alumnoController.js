@@ -152,7 +152,7 @@ exports.createAlumno = async (req, res) => {
       : parseInt(`22${Math.floor(10000 + Math.random() * 90000)}`);
 
     // 2.5. Obtener id_Nivel si se proporcionó el nivel
-    let id_Nivel = null;
+    let id_Nivel = 0; // Default a Intro (id 0) si no se encuentra el nivel
     if (nivel) {
       console.log('Buscando nivel:', nivel);
       const [nivelResult] = await connection.query(
@@ -164,7 +164,7 @@ exports.createAlumno = async (req, res) => {
         id_Nivel = nivelResult[0].id_Nivel;
         console.log('id_Nivel encontrado:', id_Nivel);
       } else {
-        console.log('No se encontró el nivel:', nivel);
+        console.log('ADVERTENCIA: No se encontró el nivel:', nivel, '- Se usará Intro (0) como default');
       }
     }
 
