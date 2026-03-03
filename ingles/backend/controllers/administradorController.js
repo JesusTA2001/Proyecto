@@ -28,7 +28,7 @@ exports.getAdministradorById = async (req, res) => {
     const { id } = req.params;
     const [administradores] = await pool.query(`
       SELECT a.id_administrador, a.gradoEstudio,
-             e.id_empleado, e.ubicacion, e.estado,
+             e.id_empleado, e.estado,
              dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
              dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion
       FROM Administrador a
@@ -89,11 +89,11 @@ exports.createAdministrador = async (req, res) => {
     console.log('✅ DatosPersonales creado con id_dp:', id_dp);
 
     // 2. Insertar empleado
-    console.log('📝 Insertando empleado con ubicacion:', ubicacion, 'RFC:', RFC);
+    console.log('📝 Insertando empleado con RFC:', RFC);
     const [empleadoResult] = await connection.query(
-      `INSERT INTO Empleado (id_dp, ubicacion, estado, RFC)
-       VALUES (?, ?, 'activo', ?)`,
-      [id_dp, ubicacion, RFC]
+      `INSERT INTO Empleado (id_dp, estado, RFC)
+       VALUES (?, 'activo', ?)`,
+      [id_dp, RFC]
     );
 
     const id_empleado = empleadoResult.insertId;
@@ -192,9 +192,9 @@ exports.updateAdministrador = async (req, res) => {
     // 3. Actualizar empleado
     await connection.query(
       `UPDATE Empleado 
-       SET estado = ?, RFC = ?, ubicacion = ?
+       SET estado = ?, RFC = ?
        WHERE id_empleado = ?`,
-      [estado, RFC, ubicacion, id_empleado]
+      [estado, RFC, id_empleado]
     );
 
     // 4. Actualizar administrador (solo estado)
