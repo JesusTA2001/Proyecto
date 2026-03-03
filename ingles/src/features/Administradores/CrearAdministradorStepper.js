@@ -81,10 +81,16 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('🔍 Datos del administrador antes de enviar:', admin);
+      console.log('🔍 RFC:', admin.rfc);
+      console.log('🔍 CURP:', admin.curp);
+      console.log('🔍 Ubicacion:', admin.ubicacion);
+      console.log('🔍 GradoEstudio:', admin.gradoEstudio);
       await agregarAdministrador(admin);
       navigate('/lista-administradores');
     } catch (error) {
-      console.error('Error al crear administrador:', error);
+      console.error('❌ Error al crear administrador:', error);
+      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
       // No navegamos si hay error, dejamos al usuario en el formulario
     }
   };
