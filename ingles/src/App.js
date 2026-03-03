@@ -313,7 +313,10 @@ function App() {
 
   const agregarAlumno = async (alumno) => {
     try {
-      const response = await api.post('/alumnos', {
+      console.log('=== DATOS DEL ALUMNO A ENVIAR ===');
+      console.log('Alumno recibido:', alumno);
+      
+      const payload = {
         apellidoPaterno: alumno.apellidoPaterno,
         apellidoMaterno: alumno.apellidoMaterno,
         nombre: alumno.nombre,
@@ -327,7 +330,13 @@ function App() {
         carrera: alumno.carrera,
         usuario: alumno.email || alumno.correo,
         contraseña: alumno.CURP || alumno.curp
-      });
+      };
+      
+      console.log('Payload a enviar:', payload);
+      console.log('Nivel específico:', payload.nivel);
+      console.log('¿Nivel está vacío?', !payload.nivel);
+      
+      const response = await api.post('/alumnos', payload);
 
       if (response.data.success) {
         // Recargar la lista de alumnos
@@ -353,8 +362,14 @@ function App() {
         return response.data;
       }
     } catch (error) {
-      console.error('Error al agregar alumno:', error);
-      alert('Error al agregar alumno. Por favor, intenta de nuevo.');
+      console.error('=== ERROR AL AGREGAR ALUMNO ===');
+      console.error('Error completo:', error);
+      console.error('Response data:', error.response?.data);
+      console.error('Response status:', error.response?.status);
+      console.error('Request data:', error.config?.data);
+      
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message;
+      alert(`Error al agregar alumno: ${errorMsg}\n\nRevisa la consola para más detalles.`);
       throw error;
     }
   };
