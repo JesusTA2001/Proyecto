@@ -12,7 +12,6 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import '../../styles/listaEstudiante.css';
 import { carrerasOptions } from '../../data/mapping';
-import { initialModalidades } from '../../data/modalidad';
 import { initialNiveles } from '../../data/niveles';
 
 const steps = ['Datos Personales', 'Academia', 'Crear y Revisar'];
@@ -30,7 +29,6 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
     curp: '',
     telefono: '',
     direccion: '',
-    modalidad: '',
     nivel: '',
     carrera: '',
     estado: 'Activo',
@@ -89,8 +87,8 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
         alert('Selecciona una carrera para alumnos del Tecnológico.');
         return;
       }
-      if (!alumno.modalidad || !alumno.nivel) {
-        alert('Selecciona modalidad y nivel.');
+      if (!alumno.nivel) {
+        alert('Selecciona un nivel.');
         return;
       }
     }
@@ -99,14 +97,19 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
 
   const handleBack = () => setActiveStep(prev => Math.max(prev - 1, 0));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Asegurar valores finales (si Centro de Idiomas y no tiene carrera -> No Aplica)
-    const finalAlumno = { ...alumno };
-    if (finalAlumno.ubicacion === 'Centro de Idiomas' && !finalAlumno.carrera) finalAlumno.carrera = 'No Aplica';
+    try {
+      // Asegurar valores finales (si Centro de Idiomas y no tiene carrera -> No Aplica)
+      const finalAlumno = { ...alumno };
+      if (finalAlumno.ubicacion === 'Centro de Idiomas' && !finalAlumno.carrera) finalAlumno.carrera = 'No Aplica';
 
-    agregarAlumno(finalAlumno);
-    navigate('/lista-estudiantes');
+      await agregarAlumno(finalAlumno);
+      navigate('/lista-estudiantes');
+    } catch (error) {
+      console.error('Error al crear alumno:', error);
+      // No navegamos si hay error, dejamos al usuario en el formulario
+    }
   };
 
   return (
