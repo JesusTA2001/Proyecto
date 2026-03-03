@@ -26,6 +26,7 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
     correo: '',
     genero: '',
     curp: '',
+    rfc: '',
     telefono: '',
     direccion: '',
     ubicacion: 'Tecnologico',
@@ -142,6 +143,18 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
                   inputProps={{ maxLength: 18 }}
                   helperText={errors.curp || '18 caracteres (alfanumérico)'}
                   error={Boolean(errors.curp)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="RFC"
+                  value={admin.rfc}
+                  onChange={handleChange('rfc')}
+                  margin="dense"
+                  inputProps={{ maxLength: 13 }}
+                  helperText="13 caracteres (alfanumérico)"
                 />
               </Grid>
 

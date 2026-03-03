@@ -63,6 +63,7 @@ exports.createAdministrador = async (req, res) => {
       email,
       genero,
       CURP,
+      RFC,
       telefono,
       direccion,
       ubicacion,
@@ -72,7 +73,7 @@ exports.createAdministrador = async (req, res) => {
     } = req.body;
 
     console.log('✅ Datos extraídos:', {
-      apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, 
+      apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, RFC,
       telefono, direccion, ubicacion, gradoEstudio
     });
 
@@ -88,11 +89,11 @@ exports.createAdministrador = async (req, res) => {
     console.log('✅ DatosPersonales creado con id_dp:', id_dp);
 
     // 2. Insertar empleado
-    console.log('📝 Insertando empleado con ubicacion:', ubicacion);
+    console.log('📝 Insertando empleado con ubicacion:', ubicacion, 'RFC:', RFC);
     const [empleadoResult] = await connection.query(
-      `INSERT INTO Empleado (id_dp, ubicacion, estado)
-       VALUES (?, ?, 'activo')`,
-      [id_dp, ubicacion]
+      `INSERT INTO Empleado (id_dp, ubicacion, estado, RFC)
+       VALUES (?, ?, 'activo', ?)`,
+      [id_dp, ubicacion, RFC]
     );
 
     const id_empleado = empleadoResult.insertId;
@@ -156,6 +157,7 @@ exports.updateAdministrador = async (req, res) => {
       email,
       genero,
       CURP,
+      RFC,
       telefono,
       direccion,
       ubicacion,
@@ -187,12 +189,12 @@ exports.updateAdministrador = async (req, res) => {
       [apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion, id_dp]
     );
 
-    // 3. Actualizar empleado (solo estado)
+    // 3. Actualizar empleado
     await connection.query(
       `UPDATE Empleado 
-       SET estado = ?
+       SET estado = ?, RFC = ?, ubicacion = ?
        WHERE id_empleado = ?`,
-      [estado, id_empleado]
+      [estado, RFC, ubicacion, id_empleado]
     );
 
     // 4. Actualizar administrador (solo estado)
