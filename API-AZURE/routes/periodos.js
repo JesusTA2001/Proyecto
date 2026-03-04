@@ -14,4 +14,3 @@ router.put('/:id', periodoController.updatePeriodo);
 router.delete('/:id', periodoController.deletePeriodo);
 
 module.exports = router;
-

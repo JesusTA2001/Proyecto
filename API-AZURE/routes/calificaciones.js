@@ -18,4 +18,3 @@ router.post('/guardar-individual', calificacionesController.guardarCalificacionI
 router.delete('/:id', calificacionesController.eliminarCalificacion);
 
 module.exports = router;
-

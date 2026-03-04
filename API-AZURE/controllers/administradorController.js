@@ -28,7 +28,7 @@ exports.getAdministradorById = async (req, res) => {
     const { id } = req.params;
     const [administradores] = await pool.query(`
       SELECT a.id_administrador, a.gradoEstudio,
-             e.id_empleado, e.ubicacion, e.estado,
+             e.id_empleado, e.estado,
              dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
              dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion
       FROM Administrador a
@@ -53,6 +53,7 @@ exports.createAdministrador = async (req, res) => {
   const connection = await pool.getConnection();
   
   try {
+    console.log('📥 Datos recibidos para crear administrador:', req.body);
     await connection.beginTransaction();
 
     const {
@@ -62,6 +63,7 @@ exports.createAdministrador = async (req, res) => {
       email,
       genero,
       CURP,
+      RFC,
       telefono,
       direccion,
       ubicacion,
@@ -70,7 +72,13 @@ exports.createAdministrador = async (req, res) => {
       contraseña
     } = req.body;
 
+    console.log('✅ Datos extraídos:', {
+      apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, RFC,
+      telefono, direccion, ubicacion, gradoEstudio
+    });
+
     // 1. Insertar datos personales
+    console.log('📝 Insertando datos personales...');
     const [dpResult] = await connection.query(
       `INSERT INTO DatosPersonales (apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -78,17 +86,21 @@ exports.createAdministrador = async (req, res) => {
     );
 
     const id_dp = dpResult.insertId;
+    console.log('✅ DatosPersonales creado con id_dp:', id_dp);
 
     // 2. Insertar empleado
+    console.log('📝 Insertando empleado con RFC:', RFC);
     const [empleadoResult] = await connection.query(
-      `INSERT INTO Empleado (id_dp, ubicacion, estado)
-       VALUES (?, ?, 'activo')`,
-      [id_dp, ubicacion]
+      `INSERT INTO Empleado (id_dp, estado, RFC)
+       VALUES (?, 'activo', ?)`,
+      [id_dp, RFC]
     );
 
     const id_empleado = empleadoResult.insertId;
+    console.log('✅ Empleado creado con id_empleado:', id_empleado);
 
     // 3. Insertar administrador
+    console.log('📝 Insertando administrador con gradoEstudio:', gradoEstudio);
     const [adminResult] = await connection.query(
       `INSERT INTO Administrador (id_empleado, gradoEstudio)
        VALUES (?, ?)`,
@@ -96,9 +108,11 @@ exports.createAdministrador = async (req, res) => {
     );
 
     const id_administrador = adminResult.insertId;
+    console.log('✅ Administrador creado con id_administrador:', id_administrador);
 
     // 4. Crear usuario automáticamente con credenciales por defecto
     // Usuario: email, Contraseña: 123456
+    console.log('📝 Creando usuario con email:', email);
     const defaultPassword = '123456';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
     await connection.query(
@@ -106,8 +120,10 @@ exports.createAdministrador = async (req, res) => {
        VALUES (?, ?, 'ADMINISTRADOR', ?)`,
       [email, hashedPassword, id_administrador]
     );
+    console.log('✅ Usuario creado exitosamente');
 
     await connection.commit();
+    console.log('🎉 Transacción completada exitosamente');
 
     res.status(201).json({
       success: true,
@@ -118,7 +134,8 @@ exports.createAdministrador = async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error al crear administrador:', error);
+    console.error('❌ Error al crear administrador:', error);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({ message: 'Error al crear administrador', error: error.message });
   } finally {
     connection.release();
@@ -140,6 +157,7 @@ exports.updateAdministrador = async (req, res) => {
       email,
       genero,
       CURP,
+      RFC,
       telefono,
       direccion,
       ubicacion,
@@ -174,17 +192,17 @@ exports.updateAdministrador = async (req, res) => {
     // 3. Actualizar empleado
     await connection.query(
       `UPDATE Empleado 
-       SET ubicacion = ?, estado = ?
+       SET estado = ?, RFC = ?
        WHERE id_empleado = ?`,
-      [ubicacion, estado, id_empleado]
+      [estado, RFC, id_empleado]
     );
 
-    // 4. Actualizar administrador
+    // 4. Actualizar administrador (solo estado)
     await connection.query(
       `UPDATE Administrador 
-       SET gradoEstudio = ?
+       SET estado = ?
        WHERE id_administrador = ?`,
-      [gradoEstudio, id]
+      [estado, id]
     );
 
     await connection.commit();

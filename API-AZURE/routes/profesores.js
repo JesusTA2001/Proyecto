@@ -22,4 +22,3 @@ router.delete('/:id', deleteProfesor);
 router.patch('/:id/toggle-estado', toggleEstadoProfesor);
 
 module.exports = router;
-

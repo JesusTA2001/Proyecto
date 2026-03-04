@@ -15,4 +15,3 @@ router.patch('/:id/reactivar', estadoGrupoController.reactivarGrupo);
 router.get('/inactivos', estadoGrupoController.getGruposInactivos);
 
 module.exports = router;
-

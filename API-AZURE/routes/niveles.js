@@ -11,4 +11,3 @@ router.get('/', nivelController.getNiveles);
 router.get('/:id', nivelController.getNivelById);
 
 module.exports = router;
-

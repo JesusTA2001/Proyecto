@@ -21,4 +21,3 @@ router.get('/estadisticas/:id_Grupo', asistenciaController.obtenerEstadisticasGr
 router.get('/historial/:nControl', asistenciaController.obtenerHistorialAlumno);
 
 module.exports = router;
-

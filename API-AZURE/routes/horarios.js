@@ -15,4 +15,3 @@ router.delete('/:id', horarioController.deleteHorario);
 router.patch('/:id/toggle-estado', horarioController.toggleEstadoHorario);
 
 module.exports = router;
-

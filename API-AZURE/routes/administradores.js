@@ -22,4 +22,3 @@ router.delete('/:id', deleteAdministrador);
 router.patch('/:id/toggle-estado', toggleEstadoAdministrador);
 
 module.exports = router;
-

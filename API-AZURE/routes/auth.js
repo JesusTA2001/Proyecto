@@ -9,4 +9,3 @@ router.post('/login', login);
 router.get('/verify', verifyToken);
 
 module.exports = router;
-

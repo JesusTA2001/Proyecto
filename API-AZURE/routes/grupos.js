@@ -19,4 +19,3 @@ router.post('/:id/estudiantes', grupoController.agregarAlumnos);
 router.delete('/:id/estudiantes/:nControl', grupoController.quitarAlumno);
 
 module.exports = router;
-

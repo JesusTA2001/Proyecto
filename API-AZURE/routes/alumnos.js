@@ -28,4 +28,3 @@ router.delete('/:id', deleteAlumno);
 router.patch('/:id/toggle-estado', toggleEstadoAlumno);
 
 module.exports = router;
-

@@ -119,6 +119,9 @@ exports.createAlumno = async (req, res) => {
   const connection = await pool.getConnection();
   
   try {
+    console.log('=== INICIANDO CREACIÓN DE ALUMNO ===');
+    console.log('Body recibido:', JSON.stringify(req.body, null, 2));
+    
     await connection.beginTransaction();
 
     const {
@@ -131,9 +134,20 @@ exports.createAlumno = async (req, res) => {
       telefono,
       direccion,
       ubicacion,
+      nivel,
+      carrera,
       usuario,
       contraseña
     } = req.body;
+
+    // Validación básica
+    if (!apellidoPaterno || !apellidoMaterno || !nombre || !email || !ubicacion) {
+      throw new Error('Faltan campos obligatorios: apellidoPaterno, apellidoMaterno, nombre, email, ubicacion');
+    }
+
+    console.log('Datos a insertar en DatosPersonales:', {
+      apellidoPaterno, apellidoMaterno, nombre, email, genero, CURP, telefono, direccion
+    });
 
     // 1. Insertar datos personales
     const [dpResult] = await connection.query(
@@ -143,30 +157,61 @@ exports.createAlumno = async (req, res) => {
     );
 
     const id_dp = dpResult.insertId;
+    console.log('DatosPersonales insertado con id_dp:', id_dp);
 
     // 2. Generar número de control
     const nControl = ubicacion === 'Tecnologico'
       ? parseInt(`21${Math.floor(10000 + Math.random() * 90000)}`)
       : parseInt(`22${Math.floor(10000 + Math.random() * 90000)}`);
+    console.log('Número de control generado:', nControl);
 
-    // 3. Insertar estudiante
+    // 2.5. Obtener id_Nivel si se proporcionó el nivel
+    let id_Nivel = 0; // Default a Intro (id 0) si no se encuentra el nivel
+    if (nivel) {
+      console.log('Buscando nivel:', nivel);
+      try {
+        const [nivelResult] = await connection.query(
+          'SELECT id_Nivel FROM Nivel WHERE nivel = ?',
+          [nivel]
+        );
+        console.log('Resultado de búsqueda de nivel:', nivelResult);
+        if (nivelResult.length > 0) {
+          id_Nivel = nivelResult[0].id_Nivel;
+          console.log('id_Nivel encontrado:', id_Nivel);
+        } else {
+          console.log('ADVERTENCIA: No se encontró el nivel:', nivel, '- Se usará Intro (0) como default');
+        }
+      } catch (nivelError) {
+        console.error('Error al buscar nivel:', nivelError);
+        console.log('Usando id_Nivel = 0 por defecto');
+      }
+    }
+
+    console.log('Insertando estudiante con:', { nControl, id_dp, ubicacion, id_Nivel });
+
+    // 3. Insertar estudiante con nivel
     await connection.query(
-      `INSERT INTO Estudiante (nControl, id_dp, estado, ubicacion)
-       VALUES (?, ?, 'activo', ?)`,
-      [nControl, id_dp, ubicacion]
+      `INSERT INTO Estudiante (nControl, id_dp, estado, ubicacion, id_Nivel)
+       VALUES (?, ?, 'activo', ?, ?)`,
+      [nControl, id_dp, ubicacion, id_Nivel]
     );
+    console.log('Estudiante insertado correctamente');
 
     // 4. Crear usuario automáticamente con credenciales por defecto
     // Usuario: nControl, Contraseña: 123456
     const defaultPassword = '123456';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    console.log('Insertando usuario con:', { usuario: nControl.toString(), rol: 'ESTUDIANTE', id_relacion: nControl });
+    
     await connection.query(
       `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
        VALUES (?, ?, 'ESTUDIANTE', ?)`,
       [nControl.toString(), hashedPassword, nControl]
     );
-
+    console.log('Usuario insertado correctamente');
+    
     await connection.commit();
+    console.log('=== ALUMNO CREADO EXITOSAMENTE ===');
 
     res.status(201).json({
       success: true,
