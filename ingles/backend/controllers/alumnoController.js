@@ -208,18 +208,8 @@ exports.createAlumno = async (req, res) => {
        VALUES (?, ?, 'ESTUDIANTE', ?)`,
       [nControl.toString(), hashedPassword, nControl]
     );
-    console.log('Us=== ERROR AL CREAR ALUMNO ===');
-    console.error('Tipo de error:', error.name);
-    console.error('Mensaje:', error.message);
-    console.error('Stack:', error.stack);
-    console.error('Error completo:', error);
+    console.log('Usuario insertado correctamente');
     
-    res.status(500).json({ 
-      success: false,
-      message: 'Error al crear alumno', 
-      error: error.message,
-      details: error.sqlMessage || error.toString()
-   
     await connection.commit();
     console.log('=== ALUMNO CREADO EXITOSAMENTE ===');
 

@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware CORS - Configuración para desarrollo local y Azure
 app.use(cors({
-  origin: ["https://gray-beach-0cdc4470f3.azurestaticapps.net", "http://localhost:3000"],
+  origin: ["https://gray-beach-0cdc4470f.3.azurestaticapps.net", "http://localhost:3000"],
   methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
   allowedHeaders: "Content-Type, Authorization",
   credentials: true
