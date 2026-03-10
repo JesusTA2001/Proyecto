@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -10,14 +10,18 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
-import { gradoEstudioOptions } from '../../data/mapping';
+import GestionEstudios from './GestionEstudios';
 
-const steps = ['Datos Personales', 'Academia', 'Crear y Revisar'];
+const steps = ['Datos Personales', 'Ubicación', 'Preparación Académica', 'Crear y Revisar'];
 
 export default function CrearProfesorStepper({ agregarProfesor }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
+  const [catalogoEstudios, setCatalogoEstudios] = useState([]);
+  const [estudios, setEstudios] = useState([]);
 
   const [profesor, setProfesor] = useState({
     apellidoPaterno: '',
@@ -29,11 +33,23 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
     telefono: '',
     direccion: '',
     ubicacion: 'Tecnologico',
-    gradoEstudio: '',
     estado: 'Activo',
   });
 
   const [errors, setErrors] = useState({ curp: '', telefono: '' });
+
+  // Cargar catálogo de estudios al montar el componente
+  useEffect(() => {
+    const cargarCatalogo = async () => {
+      try {
+        const response = await api.get('/estudios/catalogo');
+        setCatalogoEstudios(response.data);
+      } catch (error) {
+        console.error('Error al cargar catálogo de estudios:', error);
+      }
+    };
+    cargarCatalogo();
+  }, []);
 
   const handleChange = (field) => (e) => {
     let value = e.target.value;
@@ -56,8 +72,14 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
         alert('Por favor completa los apellidos, nombre y correo.');
         return;
       }
+      // CURP es obligatorio
+      if (!profesor.curp || profesor.curp.trim() === '') {
+        alert('La CURP es obligatoria para crear el usuario.');
+        return;
+      }
       // Validaciones de formato
-      if (profesor.curp && profesor.curp.length !== 18) {
+      if (profesor.curp.length !== 18) {
+        alert('La CURP debe tener exactamente 18 caracteres.');
         setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
         return;
       }
@@ -67,11 +89,12 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
       }
     }
     if (activeStep === 1) {
-      if (!profesor.ubicacion || !profesor.gradoEstudio) {
-        alert('Por favor completa Ubicación y Nivel de estudio.');
+      if (!profesor.ubicacion) {
+        alert('Por favor selecciona una ubicación.');
         return;
       }
     }
+    // Step 2 es Preparación Académica - opcional, no validamos
     setActiveStep(prev => prev + 1);
   };
 
@@ -80,7 +103,17 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await agregarProfesor(profesor);
+      // Agregar estudios al objeto profesor
+      const profesorConEstudios = {
+        ...profesor,
+        estudios: estudios.filter(e => e._nuevo).map(e => ({
+          id_Estudio: e.id_Estudio,
+          titulo: e.titulo,
+          institucion: e.institucion || null,
+          año_obtencion: e.año_obtencion || null
+        }))
+      };
+      await agregarProfesor(profesorConEstudios);
       navigate('/lista-profesores');
     } catch (error) {
       console.error('Error al crear profesor:', error);
@@ -140,8 +173,9 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
                   onChange={handleChange('curp')}
                   margin="dense"
                   inputProps={{ maxLength: 18 }}
-                  helperText={errors.curp || '18 caracteres (alfanumérico)'}
+                  helperText={errors.curp || '18 caracteres (alfanumérico) - OBLIGATORIO'}
                   error={Boolean(errors.curp)}
+                  required
                 />
               </Grid>
 
@@ -168,7 +202,7 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
         {activeStep === 1 && (
           <Box>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <Select
                   fullWidth
                   value={profesor.ubicacion}
@@ -183,26 +217,24 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
                   <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
                 </Select>
               </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Select
-                  fullWidth
-                  value={profesor.gradoEstudio}
-                  onChange={handleChange('gradoEstudio')}
-                  size="small"
-                  displayEmpty
-                  required
-                  sx={{ mt: 0.5 }}
-                >
-                  <MenuItem value="">Selecciona nivel de estudio</MenuItem>
-                  {gradoEstudioOptions.map(g => <MenuItem key={g.value} value={g.value}>{g.label}</MenuItem>)}
-                </Select>
-              </Grid>
             </Grid>
           </Box>
         )}
 
         {activeStep === 2 && (
+          <Box>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Agrega los estudios académicos del profesor. Este paso es opcional, puedes agregarlo después.
+            </Alert>
+            <GestionEstudios
+              estudios={estudios}
+              catalogoEstudios={catalogoEstudios}
+              onEstudiosChange={setEstudios}
+            />
+          </Box>
+        )}
+
+        {activeStep === 3 && (
           <Box>
             <h3>Revisa los datos antes de crear</h3>
             <Box sx={{ backgroundColor: '#f5f5f5', p: 2, borderRadius: 1 }}>
@@ -216,9 +248,24 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
               <p><strong>Teléfono:</strong> {profesor.telefono || 'No proporcionado'}</p>
               <p><strong>Dirección:</strong> {profesor.direccion || 'No proporcionado'}</p>
               
-              <h4 style={{ marginBottom: 12 }}>Academia</h4>
-              <p><strong>Ubicación:</strong> {profesor.ubicacion}</p>
-              <p><strong>Nivel de estudio:</strong> {profesor.gradoEstudio}</p>
+              <h4 style={{ marginBottom: 12 }}>Ubicación</h4>
+              <p><strong>Campus:</strong> {profesor.ubicacion}</p>
+              
+              <h4 style={{ marginBottom: 12 }}>Preparación Académica</h4>
+              {estudios.length === 0 ? (
+                <p style={{ color: '#6b7280', fontStyle: 'italic' }}>Sin estudios registrados (se puede agregar después)</p>
+              ) : (
+                <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+                  {estudios.map((estudio, idx) => (
+                    <li key={idx}>
+                      <strong>{estudio.nivelEstudio}:</strong> {estudio.titulo}
+                      {estudio.institucion && ` - ${estudio.institucion}`}
+                      {estudio.año_obtencion && ` (${estudio.año_obtencion})`}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              
               <p style={{ fontSize: '0.875rem', color: '#6b7280', fontStyle: 'italic', marginTop: '12px' }}>
                 * El número de empleado se asignará automáticamente al crear el profesor
               </p>

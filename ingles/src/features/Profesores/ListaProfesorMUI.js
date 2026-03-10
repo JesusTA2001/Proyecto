@@ -39,7 +39,7 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
   // --- Filas para el DataGrid ---
   const rows = filtered.map(p => {
     const cantidadGrupos = (grupos || []).filter(g => g.profesorId === p.numero_empleado).length;
-    return { id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombreCompleto, ubicacion: p.ubicacion, grado: p.gradoEstudio, estado: p.estado, cantidadGrupos };
+    return { id: p.numero_empleado, numero_empleado: p.numero_empleado, nombre: p.nombreCompleto, ubicacion: p.ubicacion, estado: p.estado, cantidadGrupos };
   });
 
   // --- Lógica de Exportación (Mejorada para usar la vista del DataGrid) ---
@@ -56,8 +56,8 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
 
     if (!exportRows || exportRows.length === 0) { alert('No hay registros para exportar.'); return; }
 
-    const headers = ['N° Empleado', 'Nombre', 'Ubicación', 'Grado', 'Estado'];
-    const rowsData = exportRows.map(a => [a.numero_empleado, a.nombreCompleto || a.nombre, a.ubicacion, a.grado, a.estado]);
+    const headers = ['N° Empleado', 'Nombre', 'Ubicación', 'Estado'];
+    const rowsData = exportRows.map(a => [a.numero_empleado, a.nombreCompleto || a.nombre, a.ubicacion, a.estado]);
     const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -76,7 +76,6 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
     { field: 'numero_empleado', headerName: 'N° Empleado', width: 150 },
     { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 200 },
     { field: 'ubicacion', headerName: 'Ubicación', width: 160 },
-    { field: 'grado', headerName: 'Grado de Estudio', width: 160 },
     { field: 'cantidadGrupos', headerName: 'Grupos Asignados', width: 140, align: 'center', headerAlign: 'center' },
     {
       field: 'estado', headerName: 'Estado', width: 130,

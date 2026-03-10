@@ -68,7 +68,8 @@ exports.createProfesor = async (req, res) => {
       RFC,
       nivelEstudio,
       usuario,
-      contraseña
+      contraseña,
+      estudios // Array de estudios académicos
     } = req.body;
 
     // 1. Insertar datos personales
@@ -88,24 +89,66 @@ exports.createProfesor = async (req, res) => {
 
     const id_empleado = empleadoResult.insertId;
 
-    // 3. Insertar profesor
+    // 3. Insertar profesor (nivelEstudio ya no se usa, pero lo dejamos por compatibilidad)
     const [profesorResult] = await connection.query(
       `INSERT INTO Profesor (id_empleado, ubicacion, estado, nivelEstudio)
        VALUES (?, ?, 'activo', ?)`,
-      [id_empleado, ubicacion, nivelEstudio]
+      [id_empleado, ubicacion, nivelEstudio || null]
     );
 
     const id_profesor = profesorResult.insertId;
 
-    // 4. Crear usuario automáticamente con credenciales por defecto
-    // Usuario: RFC, Contraseña: 123456
+    // 4. Insertar estudios académicos si se proporcionaron
+    if (estudios && Array.isArray(estudios) && estudios.length > 0) {
+      for (const estudio of estudios) {
+        await connection.query(
+          `INSERT INTO Preparacion (id_Profesor, id_Estudio, titulo, institucion, año_obtencion)
+           VALUES (?, ?, ?, ?, ?)`,
+          [
+            id_profesor,
+            estudio.id_Estudio,
+            estudio.titulo,
+            estudio.institucion || null,
+            estudio.año_obtencion || null
+          ]
+        );
+      }
+    }
+
+    // 5. Crear usuario automáticamente con credenciales por defecto
+    // Usuario: Primeros 10 dígitos de CURP (RFC sin homoclave), Contraseña: 123456
+    if (!CURP || CURP.length < 10) {
+      throw new Error('La CURP debe tener al menos 10 caracteres para generar el usuario');
+    }
+    const usuarioProfesor = CURP.substring(0, 10).toUpperCase();
     const defaultPassword = '123456';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-    await connection.query(
-      `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
-       VALUES (?, ?, 'PROFESOR', ?)`,
-      [RFC, hashedPassword, id_profesor]
+    
+    // Verificar si el usuario ya existe
+    const [existeUsuario] = await connection.query(
+      `SELECT id_usuario, rol FROM Usuarios WHERE usuario = ?`,
+      [usuarioProfesor]
     );
+
+    if (existeUsuario.length > 0) {
+      // Si el usuario existe y es PROFESOR, actualizar la relación
+      if (existeUsuario[0].rol === 'PROFESOR') {
+        await connection.query(
+          `UPDATE Usuarios SET id_relacion = ? WHERE usuario = ?`,
+          [id_profesor, usuarioProfesor]
+        );
+      } else {
+        // Si el usuario existe pero con otro rol, error
+        throw new Error(`El usuario ${usuarioProfesor} ya existe con rol ${existeUsuario[0].rol}. No se puede crear el profesor.`);
+      }
+    } else {
+      // Si no existe, crear nuevo usuario
+      await connection.query(
+        `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
+         VALUES (?, ?, 'PROFESOR', ?)`,
+        [usuarioProfesor, hashedPassword, id_profesor]
+      );
+    }
 
     await connection.commit();
 
@@ -114,7 +157,8 @@ exports.createProfesor = async (req, res) => {
       message: 'Profesor creado exitosamente',
       id_profesor,
       id_empleado,
-      id_dp
+      id_dp,
+      estudios_creados: estudios ? estudios.length : 0
     });
   } catch (error) {
     await connection.rollback();
@@ -188,6 +232,29 @@ exports.updateProfesor = async (req, res) => {
        WHERE id_profesor = ?`,
       [ubicacion, nivelEstudio, estado, id]
     );
+
+    // 5. Actualizar usuario si se modificó la CURP
+    if (CURP && CURP.length >= 10) {
+      const nuevoUsuario = CURP.substring(0, 10).toUpperCase();
+      console.log('🔄 Intentando actualizar usuario profesor...');
+      console.log('   Nuevo usuario:', nuevoUsuario);
+      console.log('   id_profesor (id_relacion):', id);
+      console.log('   CURP completa:', CURP);
+      
+      const [updateResult] = await connection.query(
+        `UPDATE Usuarios 
+         SET usuario = ?
+         WHERE rol = 'PROFESOR' AND id_relacion = ?`,
+        [nuevoUsuario, id]
+      );
+      
+      console.log('✅ Filas afectadas:', updateResult.affectedRows);
+      if (updateResult.affectedRows > 0) {
+        console.log('✅ Usuario actualizado exitosamente a:', nuevoUsuario);
+      } else {
+        console.log('⚠️ No se encontró ningún usuario para actualizar');
+      }
+    }
 
     await connection.commit();
 

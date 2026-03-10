@@ -1,11 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
+import GestionEstudios from './GestionEstudios';
 
 export default function VerProfesorModal({ open, onClose, profesor }) {
+  const [estudios, setEstudios] = useState([]);
+  const [cargando, setCargando] = useState(false);
+
+  useEffect(() => {
+    if (open && profesor) {
+      cargarEstudios();
+    }
+  }, [open, profesor]);
+
+  const cargarEstudios = async () => {
+    try {
+      setCargando(true);
+      const idProfesor = profesor.id_Profesor || profesor.id_profesor || profesor.id;
+      const response = await api.get(`/estudios/profesor/${idProfesor}`);
+      setEstudios(response.data);
+    } catch (error) {
+      console.error('Error al cargar estudios:', error);
+      setEstudios([]);
+    } finally {
+      setCargando(false);
+    }
+  };
+
   if (!profesor) return null;
 
   return (
@@ -25,9 +52,21 @@ export default function VerProfesorModal({ open, onClose, profesor }) {
             <p><strong>CURP:</strong> {profesor.CURP}</p>
             <p><strong>Dirección:</strong> {profesor.direccion}</p>
             <p><strong>Ubicación:</strong> {profesor.ubicacion}</p>
-            <p><strong>Grado de Estudio:</strong> {profesor.gradoEstudio}</p>
             <p><strong>Estado:</strong> <span className={profesor.estado === 'Activo' ? 'estado-activo' : 'estado-inactivo'}>{profesor.estado}</span></p>
           </div>
+
+          <Box sx={{ mt: 3 }}>
+            {cargando ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <GestionEstudios
+                estudios={estudios}
+                readOnly={true}
+              />
+            )}
+          </Box>
         </div>
       </DialogContent>
     </Dialog>

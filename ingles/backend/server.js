@@ -53,6 +53,7 @@ const nivelesRoutes = require('./routes/niveles');
 const asistenciasRoutes = require('./routes/asistencias');
 const calificacionesRoutes = require('./routes/calificaciones');
 const estadoGrupoRoutes = require('./routes/estadoGrupo');
+const estudiosRoutes = require('./routes/estudios');
 
 // Registrar rutas
 app.use('/api/auth', authRoutes);
@@ -66,6 +67,7 @@ app.use('/api/niveles', nivelesRoutes);
 app.use('/api/asistencias', asistenciasRoutes);
 app.use('/api/calificaciones', calificacionesRoutes);
 app.use('/api/estado-grupo', estadoGrupoRoutes);
+app.use('/api/estudios', estudiosRoutes);
 
 // Manejador de errores global
 app.use((err, req, res, next) => {

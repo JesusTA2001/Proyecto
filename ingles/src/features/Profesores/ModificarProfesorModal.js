@@ -7,16 +7,45 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
 import { generoOptions, gradoEstudioOptions } from '../../data/mapping';
+import GestionEstudios from './GestionEstudios';
 
 export default function ModificarProfesorModal({ open, onClose, profesor, actualizarProfesor }) {
   const [form, setForm] = useState(null);
   const [errors, setErrors] = useState({ curp: '', telefono: '' });
+  const [estudios, setEstudios] = useState([]);
+  const [estudiosOriginales, setEstudiosOriginales] = useState([]);
+  const [catalogoEstudios, setCatalogoEstudios] = useState([]);
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     if (profesor) setForm({ ...profesor });
-  }, [profesor]);
+    if (open && profesor) {
+      cargarDatos();
+    }
+  }, [profesor, open]);
+
+  const cargarDatos = async () => {
+    try {
+      setCargando(true);
+      const idProfesor = profesor.id_Profesor || profesor.id_profesor || profesor.id;
+      const [catalogoRes, estudiosRes] = await Promise.all([
+        api.get('/estudios/catalogo'),
+        api.get(`/estudios/profesor/${idProfesor}`)
+      ]);
+      setCatalogoEstudios(catalogoRes.data);
+      setEstudios(estudiosRes.data);
+      setEstudiosOriginales(JSON.parse(JSON.stringify(estudiosRes.data)));
+    } catch (error) {
+      console.error('Error al cargar datos:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   if (!form) return null;
 
@@ -34,7 +63,7 @@ export default function ModificarProfesorModal({ open, onClose, profesor, actual
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Validaciones de formato
     if (form.CURP && form.CURP.length !== 18) {
@@ -45,8 +74,50 @@ export default function ModificarProfesorModal({ open, onClose, profesor, actual
       setErrors(prev => ({ ...prev, telefono: 'Teléfono debe tener 10 dígitos' }));
       return;
     }
-    actualizarProfesor(form);
-    onClose();
+
+    try {
+      // Actualizar datos básicos del profesor
+      await actualizarProfesor(form);
+
+      // Detectar cambios en estudios
+      const idProfesor = form.id_Profesor || form.id_profesor || form.id;
+      
+      // 1. Crear estudios nuevos
+      const nuevos = estudios.filter(e => e._nuevo);
+      for (const estudio of nuevos) {
+        const { _nuevo, id_prep, nivelEstudio, created_at, id_Profesor, ...estudioData } = estudio;
+        await api.post(`/estudios/profesor/${idProfesor}`, estudioData);
+      }
+
+      // 2. Detectar estudios eliminados
+      const eliminados = estudiosOriginales.filter(
+        original => !estudios.some(actual => actual.id_prep === original.id_prep)
+      );
+      for (const estudio of eliminados) {
+        await api.delete(`/estudios/${estudio.id_prep}`);
+      }
+
+      // 3. Actualizar estudios modificados
+      const modificados = estudios.filter(e => {
+        if (e._nuevo) return false;
+        const original = estudiosOriginales.find(o => o.id_prep === e.id_prep);
+        if (!original) return false;
+        // Comparar solo los campos editables
+        return original.id_Estudio !== e.id_Estudio ||
+               original.titulo !== e.titulo ||
+               original.institucion !== e.institucion ||
+               original.año_obtencion !== e.año_obtencion;
+      });
+      for (const estudio of modificados) {
+        const { id_prep, nivelEstudio, created_at, id_Profesor, ...estudioData } = estudio;
+        await api.put(`/estudios/${id_prep}`, estudioData);
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error al actualizar profesor y estudios:', error);
+      alert('Error al actualizar los datos');
+    }
   };
 
   return (
@@ -102,11 +173,21 @@ export default function ModificarProfesorModal({ open, onClose, profesor, actual
               </Select>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Select name="gradoEstudio" value={form.gradoEstudio || ''} onChange={handleChange} fullWidth size="small" displayEmpty>
-                <MenuItem value="">Selecciona nivel de estudio</MenuItem>
-                {gradoEstudioOptions.map(g => <MenuItem key={g.value} value={g.value}>{g.label}</MenuItem>)}
-              </Select>
+            <Grid item xs={12}>
+              <Box sx={{ mt: 2 }}>
+                {cargando ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  <GestionEstudios
+                    estudios={estudios}
+                    catalogoEstudios={catalogoEstudios}
+                    onEstudiosChange={setEstudios}
+                    readOnly={false}
+                  />
+                )}
+              </Box>
             </Grid>
 
             <Grid item xs={12}>

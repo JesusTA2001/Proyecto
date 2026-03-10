@@ -160,6 +160,7 @@ function App() {
           ubicacion: a.ubicacion,
           nivel: a.nivel_nombre || `Nivel ${a.id_Nivel}`,
           id_Nivel: a.id_Nivel,
+          grupo_nombre: a.grupo_nombre,
           estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
         }));
 
@@ -362,6 +363,7 @@ function App() {
           ubicacion: a.ubicacion,
           nivel: a.nivel_nombre || `Nivel ${a.id_Nivel}`,
           id_Nivel: a.id_Nivel,
+          grupo_nombre: a.grupo_nombre,
           estado: a.estado === 'activo' ? 'Activo' : 'Inactivo'
         }));
         setAlumnos(alumnosMapeados);
@@ -395,9 +397,13 @@ function App() {
         estado: alumnoActualizado.estado === 'Activo' ? 'activo' : 'inactivo'
       });
       
+      // Buscar el alumno original para preservar campos como grupo_nombre
+      const alumnoOriginal = alumnos.find(a => a.numero_control === alumnoActualizado.numero_control);
+      
       const alumnoConNombre = {
         ...alumnoActualizado,
-        nombreCompleto: `${alumnoActualizado.nombre || ''} ${alumnoActualizado.apellidoPaterno || ''} ${alumnoActualizado.apellidoMaterno || ''}`.trim()
+        nombreCompleto: `${alumnoActualizado.nombre || ''} ${alumnoActualizado.apellidoPaterno || ''} ${alumnoActualizado.apellidoMaterno || ''}`.trim(),
+        grupo_nombre: alumnoOriginal?.grupo_nombre // Preservar el nombre del grupo
       };
       setAlumnos(alumnos.map(a => a.numero_control === alumnoActualizado.numero_control ? alumnoConNombre : a));
     } catch (error) {
@@ -432,7 +438,8 @@ function App() {
         RFC: profesor.RFC,
         nivelEstudio: profesor.gradoEstudio,
         usuario: profesor.email || profesor.correo,
-        contraseña: profesor.CURP || profesor.curp
+        contraseña: profesor.CURP || profesor.curp,
+        estudios: profesor.estudios || [] // Array de estudios académicos
       });
 
       if (response.data.success) {
@@ -467,7 +474,8 @@ function App() {
 
   const actualizarProfesor = async (profesorActualizado) => {
     try {
-      await api.put(`/profesores/${profesorActualizado.id_profesor}`, {
+      const idProfesor = profesorActualizado.id_Profesor || profesorActualizado.id_profesor;
+      await api.put(`/profesores/${idProfesor}`, {
         apellidoPaterno: profesorActualizado.apellidoPaterno,
         apellidoMaterno: profesorActualizado.apellidoMaterno,
         nombre: profesorActualizado.nombre,
@@ -498,7 +506,8 @@ function App() {
     try {
       const profesor = profesores.find(p => p.numero_empleado === numero_empleado);
       if (profesor) {
-        await api.delete(`/profesores/${profesor.id_profesor}`);
+        const idProfesor = profesor.id_Profesor || profesor.id_profesor;
+        await api.delete(`/profesores/${idProfesor}`);
         setProfesores(profesores.filter(p => p.numero_empleado !== numero_empleado));
       }
     } catch (error) {
@@ -1035,11 +1044,17 @@ function App() {
               )
           } />
 
-          {/* Historial de Grupos (solo Administrador) */}
+          {/* Historial de Grupos (Administrador, Directivo, Coordinador) */}
           <Route path="/historial-grupos-admin" element={
-            currentUser && currentUser.role === 'administrador'
+            currentUser && (currentUser.role === 'administrador' || currentUser.role === 'directivo' || currentUser.role === 'coordinador')
               ? (
-                <Layout><HistorialGruposAdmin /></Layout>
+                currentUser.role === 'directivo' ? (
+                  <LayoutDirectivos><HistorialGruposAdmin /></LayoutDirectivos>
+                ) : currentUser.role === 'coordinador' ? (
+                  <LayoutCoordinador><HistorialGruposAdmin /></LayoutCoordinador>
+                ) : (
+                  <Layout><HistorialGruposAdmin /></Layout>
+                )
               ) : (
                 <Navigate to="/" replace />
               )
