@@ -16,12 +16,18 @@ function Login() {
     setError('');
     setCargando(true);
 
+    console.log('🔐 Iniciando proceso de login...');
+    console.log('Usuario:', usuario);
+    console.log('Contraseña length:', contrasena?.length);
+
     try {
+      console.log('📡 Enviando petición a /auth/login...');
       // Intentar autenticar con la API
       const response = await api.post('/auth/login', {
         usuario,
         contraseña: contrasena
       });
+      console.log('✅ Respuesta recibida:', response.data);
 
       if (response.data.success) {
         // Guardar token y datos del usuario
@@ -67,10 +73,13 @@ function Login() {
         return;
       }
     } catch (error) {
-      console.error('Error de autenticación:', error);
+      console.error('❌ Error de autenticación:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       setError('Usuario o contraseña incorrectos. Verifica tus credenciales.');
     } finally {
       setCargando(false);
+      console.log('🏁 Proceso de login finalizado');
     }
   };
 
