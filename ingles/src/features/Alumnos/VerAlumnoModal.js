@@ -124,9 +124,9 @@ export default function VerAlumnoModal({ open, onClose, alumno }) {
           <span style={{ fontSize: 20, lineHeight: 1, color: '#fff' }}>×</span>
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
-        <div className="detail-container">
-          <h3 className="detail-section-title">Datos Personales</h3>
+      <DialogContent dividers sx={{ pt: 0.5, pb: 2 }}>
+        <div className="detail-container" style={{ paddingTop: 0 }}>
+          <h3 className="detail-section-title" style={{ marginTop: '8px', marginBottom: '12px', fontSize: '1.3rem' }}>Datos Personales</h3>
           <div className="detail-grid">
             <p><strong>Número de Control:</strong> {alumno.numero_control}</p>
             <p><strong>Correo:</strong> {alumno.correo}</p>
@@ -141,12 +141,12 @@ export default function VerAlumnoModal({ open, onClose, alumno }) {
             <p><strong>Estado:</strong> <span className={alumno.estado === 'Activo' ? 'estado-activo' : 'estado-inactivo'}>{alumno.estado}</span></p>
           </div>
 
-          <h3 className="detail-section-title">Nivel Actual</h3>
+          <h3 className="detail-section-title" style={{ marginTop: '12px', marginBottom: '12px', fontSize: '1.3rem' }}>Nivel Actual</h3>
           <div className="detail-grid history-section">
             <p><strong>Nivel:</strong> {alumno.nivel || 'No asignado'}</p>
           </div>
 
-          <h3 className="detail-section-title">Plan de Estudios</h3>
+          <h3 className="detail-section-title" style={{ marginTop: '12px', marginBottom: '12px', fontSize: '1.3rem' }}>Plan de Estudios</h3>
           <div className='levels-path-container'>
             <ul className="levels-path-list">
               {nivelesPosibles.map((nivel, index) => {

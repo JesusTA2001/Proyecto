@@ -166,3 +166,63 @@ exports.verifyToken = async (req, res) => {
     res.status(500).json({ message: 'Error al verificar token' });
   }
 };
+
+// Cambiar contraseña
+exports.cambiarContrasena = async (req, res) => {
+  try {
+    const { usuario, nuevaContrasena } = req.body;
+
+    // Validar campos requeridos
+    if (!usuario || !nuevaContrasena) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Usuario y nueva contraseña son requeridos'
+      });
+    }
+
+    // Validar longitud mínima de contraseña
+    if (nuevaContrasena.length < 4) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'La contraseña debe tener al menos 4 caracteres'
+      });
+    }
+
+    // Verificar que el usuario existe
+    const [usuarios] = await pool.query(
+      'SELECT * FROM Usuarios WHERE usuario = ?',
+      [usuario]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
+
+    // Actualizar la contraseña en la base de datos
+    await pool.query(
+      'UPDATE Usuarios SET contraseña = ? WHERE usuario = ?',
+      [hashedPassword, usuario]
+    );
+
+    console.log(`Contraseña actualizada para usuario: ${usuario}`);
+
+    res.json({ 
+      success: true,
+      message: 'Contraseña actualizada exitosamente'
+    });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error en el servidor al cambiar la contraseña',
+      error: error.message 
+    });
+  }
+};
+

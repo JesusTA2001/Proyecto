@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import CambiarContrasenaModal from '../Auth/CambiarContrasenaModal';
 import '../../styles/perfil-usuario.css';
 
 
 function LayoutDirectivos({children}) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
   const getCurrentUserName = () => {
     try {
@@ -13,6 +15,16 @@ function LayoutDirectivos({children}) {
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       return parsed?.usuario || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const getCurrentUser = () => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (!raw) return null;
+      return JSON.parse(raw);
     } catch (e) {
       return null;
     }
@@ -101,6 +113,16 @@ function LayoutDirectivos({children}) {
                   </Link>
                   {/* --- FIN MODIFICADO --- */}
                 </li>
+                <li className="menu__inside">
+                  <Link to="/administrar-periodos" className="menu__link menu__link--inside" onClick={closeMenu}>
+                    Administrar Periodos
+                  </Link>
+                </li>
+                <li className="menu__inside">
+                  <Link to="/historial-grupos-admin" className="menu__link menu__link--inside" onClick={closeMenu}>
+                    Historial de Grupos
+                  </Link>
+                </li>
               </ul>
             </li>
 
@@ -110,6 +132,11 @@ function LayoutDirectivos({children}) {
                 Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
               </span>
               <ul className="menu__nesting">
+                <li className="menu__inside">
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); setOpenCambiarContrasena(true); closeMenu(); }}>
+                    Cambiar Contraseña
+                  </a>
+                </li>
                 <li className="menu__inside">
                   <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
@@ -126,6 +153,13 @@ function LayoutDirectivos({children}) {
           {children}
         </main>
       </div>
+
+      {/* Modal para cambiar contraseña */}
+      <CambiarContrasenaModal 
+        open={openCambiarContrasena} 
+        onClose={() => setOpenCambiarContrasena(false)} 
+        usuario={getCurrentUser()}
+      />
     </div>
   );
 }

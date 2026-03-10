@@ -8,10 +8,13 @@ exports.getAlumnos = async (req, res) => {
       SELECT e.nControl, e.estado, e.ubicacion, e.id_Nivel,
              n.nivel as nivel_nombre,
              dp.id_dp, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre,
-             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion
+             dp.email, dp.genero, dp.CURP, dp.telefono, dp.direccion,
+             g.grupo as grupo_nombre
       FROM Estudiante e
       JOIN DatosPersonales dp ON e.id_dp = dp.id_dp
       LEFT JOIN Nivel n ON e.id_Nivel = n.id_Nivel
+      LEFT JOIN EstudianteGrupo eg ON e.nControl = eg.nControl AND eg.estado = 'actual'
+      LEFT JOIN Grupo g ON eg.id_Grupo = g.id_Grupo
       ORDER BY dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre
     `);
     
@@ -198,15 +201,19 @@ exports.createAlumno = async (req, res) => {
     console.log('Estudiante insertado correctamente');
 
     // 4. Crear usuario automáticamente con credenciales por defecto
-    // Usuario: nControl, Contraseña: 123456
+    // Usuario: Primeros 10 dígitos de CURP (RFC sin homoclave), Contraseña: 123456
+    if (!CURP || CURP.length < 10) {
+      throw new Error('La CURP debe tener al menos 10 caracteres para generar el usuario');
+    }
+    const usuarioEstudiante = CURP.substring(0, 10).toUpperCase();
     const defaultPassword = '123456';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-    console.log('Insertando usuario con:', { usuario: nControl.toString(), rol: 'ESTUDIANTE', id_relacion: nControl });
+    console.log('Insertando usuario con primeros 10 dígitos de CURP:', { usuario: usuarioEstudiante, rol: 'ESTUDIANTE', id_relacion: nControl });
     
     await connection.query(
       `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
        VALUES (?, ?, 'ESTUDIANTE', ?)`,
-      [nControl.toString(), hashedPassword, nControl]
+      [usuarioEstudiante, hashedPassword, nControl]
     );
     console.log('Usuario insertado correctamente');
     
@@ -278,6 +285,29 @@ exports.updateAlumno = async (req, res) => {
        WHERE nControl = ?`,
       [ubicacion, estado, id]
     );
+
+    // 4. Actualizar usuario si se modificó la CURP
+    if (CURP && CURP.length >= 10) {
+      const nuevoUsuario = CURP.substring(0, 10).toUpperCase();
+      console.log('🔄 Intentando actualizar usuario...');
+      console.log('   Nuevo usuario:', nuevoUsuario);
+      console.log('   nControl (id_relacion):', id);
+      console.log('   CURP completa:', CURP);
+      
+      const [updateResult] = await connection.query(
+        `UPDATE Usuarios 
+         SET usuario = ?
+         WHERE rol = 'ESTUDIANTE' AND id_relacion = ?`,
+        [nuevoUsuario, id]
+      );
+      
+      console.log('✅ Filas afectadas:', updateResult.affectedRows);
+      if (updateResult.affectedRows > 0) {
+        console.log('✅ Usuario actualizado exitosamente a:', nuevoUsuario);
+      } else {
+        console.log('⚠️ No se encontró ningún usuario para actualizar');
+      }
+    }
 
     await connection.commit();
 

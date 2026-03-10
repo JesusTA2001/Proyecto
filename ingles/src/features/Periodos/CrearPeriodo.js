@@ -156,13 +156,15 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
             <div style={{ fontSize: '0.875rem', lineHeight: '1.5' }}>
               <strong>Formatos de periodo:</strong><br/>
               • Semestre: 2025-1, 2025-2<br/>
-              • Intensivo: 2025-I1, 2025-I2<br/>
+              • Intensivo: 2025-I1, 2025-I2, 2025-I3, 2025-I4<br/>
               • Verano: 2025-V<br/><br/>
               <strong>Semestre 1:</strong> Febrero - Junio<br/>
               <strong>Intensivo 1:</strong> Febrero - Junio (2 niveles)<br/>
+              <strong>Intensivo 2:</strong> Febrero - Junio (2 niveles)<br/>
               <strong>Verano:</strong> Julio (1 mes)<br/>
               <strong>Semestre 2:</strong> Agosto - Enero<br/>
-              <strong>Intensivo 2:</strong> Agosto - Enero (2 niveles)
+              <strong>Intensivo 3:</strong> Agosto - Enero (2 niveles)<br/>
+              <strong>Intensivo 4:</strong> Agosto - Enero (2 niveles)
             </div>
           }
           placement="right"
@@ -202,9 +204,11 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
             >
               <MenuItem value="1">Semestre 1 (Febrero - Junio)</MenuItem>
               <MenuItem value="I1">Intensivo 1 (Febrero - Junio)</MenuItem>
+              <MenuItem value="I2">Intensivo 2 (Febrero - Junio)</MenuItem>
               <MenuItem value="V">Verano (Julio)</MenuItem>
               <MenuItem value="2">Semestre 2 (Agosto - Enero)</MenuItem>
-              <MenuItem value="I2">Intensivo 2 (Agosto - Enero)</MenuItem>
+              <MenuItem value="I3">Intensivo 3 (Agosto - Enero)</MenuItem>
+              <MenuItem value="I4">Intensivo 4 (Agosto - Enero)</MenuItem>
             </Select>
           </div>
 
@@ -239,7 +243,7 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
               InputLabelProps={{ shrink: true }}
             />
             <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>
-              {periodo.descripcion === '1' || periodo.descripcion === 'I1'
+              {periodo.descripcion === '1' || periodo.descripcion === 'I1' || periodo.descripcion === 'I2'
                 ? 'Recomendado: 1 de Febrero'
                 : periodo.descripcion === 'V'
                 ? 'Recomendado: 1 de Julio'
@@ -261,7 +265,7 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
               InputLabelProps={{ shrink: true }}
             />
             <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>
-              {periodo.descripcion === '1' || periodo.descripcion === 'I1'
+              {periodo.descripcion === '1' || periodo.descripcion === 'I1' || periodo.descripcion === 'I2'
                 ? 'Recomendado: 30 de Junio'
                 : periodo.descripcion === 'V'
                 ? 'Recomendado: 31 de Julio'
@@ -282,8 +286,10 @@ function CrearPeriodo({ open, onClose, onPeriodoCreado, periodoEditar }) {
               periodo.descripcion === '1' ? 'Semestre 1 (Feb-Jun)' :
               periodo.descripcion === '2' ? 'Semestre 2 (Ago-Ene)' :
               periodo.descripcion === 'I1' ? 'Intensivo 1 (Feb-Jun) - 2 niveles' :
-              periodo.descripcion === 'I2' ? 'Intensivo 2 (Ago-Ene) - 2 niveles' :
+              periodo.descripcion === 'I2' ? 'Intensivo 2 (Feb-Jun) - 2 niveles' :
               periodo.descripcion === 'V' ? 'Verano (Jul) - 1 nivel' :
+              periodo.descripcion === 'I3' ? 'Intensivo 3 (Ago-Ene) - 2 niveles' :
+              periodo.descripcion === 'I4' ? 'Intensivo 4 (Ago-Ene) - 2 niveles' :
               'No definido'
             }
           </div>

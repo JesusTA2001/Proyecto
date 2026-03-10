@@ -72,8 +72,14 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
         alert('Por favor completa los apellidos, nombre y correo.');
         return;
       }
+      // CURP es obligatorio
+      if (!alumno.curp || alumno.curp.trim() === '') {
+        alert('La CURP es obligatoria para crear el usuario.');
+        return;
+      }
       // Validaciones de formato
-      if (alumno.curp && alumno.curp.length !== 18) {
+      if (alumno.curp.length !== 18) {
+        alert('La CURP debe tener exactamente 18 caracteres.');
         setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
         return;
       }
@@ -164,8 +170,9 @@ export default function CrearAlumnoStepper({ agregarAlumno }) {
                   onChange={handleChange('curp')}
                   margin="dense"
                   inputProps={{ maxLength: 18 }}
-                  helperText={errors.curp || '18 caracteres (alfanumérico)'}
+                  helperText={errors.curp || '18 caracteres (alfanumérico) - OBLIGATORIO'}
                   error={Boolean(errors.curp)}
+                  required
                 />
               </Grid>
 

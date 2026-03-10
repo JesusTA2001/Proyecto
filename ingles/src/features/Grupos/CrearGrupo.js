@@ -42,7 +42,16 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
     const [profesoresDisponibles, setProfesoresDisponibles] = useState([]);
     const [alumnosDisponibles, setAlumnosDisponibles] = useState([]); // Alumnos que cumplen requisitos
     const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(new Set()); // IDs seleccionados
-    const [filtroAlumno, setFiltroAlumno] = useState(''); // Filtro de búsqueda
+    const [filtroDisponibles, setFiltroDisponibles] = useState(''); // Filtro de búsqueda para disponibles
+    const [filtroSeleccionados, setFiltroSeleccionados] = useState(''); // Filtro de búsqueda para seleccionados
+
+    // Función para normalizar texto (quitar acentos)
+    const normalizarTexto = (texto) => {
+        return String(texto || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+    };
 
     // Opciones para el select de días
     const diasSemana = [
@@ -417,23 +426,23 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
                             placeholder="🔍 Buscar por nombre o N° Control..."
                             className="search-input"
                             style={{ width: '100%', marginBottom: 8 }}
-                            value={filtroAlumno}
-                            onChange={(e) => setFiltroAlumno(e.target.value)}
+                            value={filtroDisponibles}
+                            onChange={(e) => setFiltroDisponibles(e.target.value)}
                         />
                         <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
                             {alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).filter(a => {
-                                if (!filtroAlumno) return true;
-                                const filtroLower = filtroAlumno.toLowerCase();
-                                const nombre = String(a.nombre || '').toLowerCase();
-                                const numeroControl = String(a.numero_control || '').toLowerCase();
-                                return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
+                                if (!filtroDisponibles) return true;
+                                const filtroNormalizado = normalizarTexto(filtroDisponibles);
+                                const nombreNormalizado = normalizarTexto(getNombreCompleto(a));
+                                const numeroControl = normalizarTexto(a.numero_control);
+                                return nombreNormalizado.includes(filtroNormalizado) || numeroControl.includes(filtroNormalizado);
                             }).length > 0 ? (
                                 alumnosDisponibles.filter(a => !alumnosSeleccionados.has(a.numero_control)).filter(a => {
-                                    if (!filtroAlumno) return true;
-                                    const filtroLower = filtroAlumno.toLowerCase();
-                                    const nombre = String(a.nombre || '').toLowerCase();
-                                    const numeroControl = String(a.numero_control || '').toLowerCase();
-                                    return nombre.includes(filtroLower) || numeroControl.includes(filtroLower);
+                                    if (!filtroDisponibles) return true;
+                                    const filtroNormalizado = normalizarTexto(filtroDisponibles);
+                                    const nombreNormalizado = normalizarTexto(getNombreCompleto(a));
+                                    const numeroControl = normalizarTexto(a.numero_control);
+                                    return nombreNormalizado.includes(filtroNormalizado) || numeroControl.includes(filtroNormalizado);
                                 }).map(alumno => (
                                     <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
                                         <input
@@ -465,19 +474,23 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
                             placeholder="🔍 Buscar por nombre o N° control..."
                             className="search-input"
                             style={{ width: '100%', marginBottom: 8 }}
-                            value={filtroAlumno}
-                            onChange={(e) => setFiltroAlumno(e.target.value)}
+                            value={filtroSeleccionados}
+                            onChange={(e) => setFiltroSeleccionados(e.target.value)}
                         />
                         <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
                             {alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
-                                if (!filtroAlumno) return true;
-                                const filtroLower = filtroAlumno.toLowerCase();
-                                return String(getNombreCompleto(a) || '').toLowerCase().includes(filtroLower) || String(a.numero_control || '').toLowerCase().includes(filtroLower);
+                                if (!filtroSeleccionados) return true;
+                                const filtroNormalizado = normalizarTexto(filtroSeleccionados);
+                                const nombreNormalizado = normalizarTexto(getNombreCompleto(a));
+                                const numeroControl = normalizarTexto(a.numero_control);
+                                return nombreNormalizado.includes(filtroNormalizado) || numeroControl.includes(filtroNormalizado);
                             }).length > 0 ? (
                                 alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
-                                    if (!filtroAlumno) return true;
-                                    const filtroLower = filtroAlumno.toLowerCase();
-                                    return String(getNombreCompleto(a) || '').toLowerCase().includes(filtroLower) || String(a.numero_control || '').toLowerCase().includes(filtroLower);
+                                    if (!filtroSeleccionados) return true;
+                                    const filtroNormalizado = normalizarTexto(filtroSeleccionados);
+                                    const nombreNormalizado = normalizarTexto(getNombreCompleto(a));
+                                    const numeroControl = normalizarTexto(a.numero_control);
+                                    return nombreNormalizado.includes(filtroNormalizado) || numeroControl.includes(filtroNormalizado);
                                 }).map(alumno => (
                                     <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
                                         <input

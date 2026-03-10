@@ -27,6 +27,19 @@ function AdministrarPeriodos() {
   const [openCrear, setOpenCrear] = useState(false);
   const [periodoModificar, setPeriodoModificar] = useState(null);
 
+  // Detectar si es directivo
+  const getCurrentUser = () => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  };
+  const currentUser = getCurrentUser();
+  const isDirectivo = currentUser && currentUser.role === 'directivo';
+
   useEffect(() => {
     cargarPeriodos();
   }, []);
@@ -85,9 +98,13 @@ function AdministrarPeriodos() {
     } else if (descripcion?.includes('-I1')) {
       return { tipo: 'Intensivo 1', periodo: 'Feb - Jun (2 niveles)', color: '#f59e0b', icono: '⚡' };
     } else if (descripcion?.includes('-I2')) {
-      return { tipo: 'Intensivo 2', periodo: 'Ago - Ene (2 niveles)', color: '#ef4444', icono: '⚡' };
+      return { tipo: 'Intensivo 2', periodo: 'Feb - Jun (2 niveles)', color: '#ef4444', icono: '⚡' };
     } else if (descripcion?.includes('-V')) {
       return { tipo: 'Verano', periodo: 'Julio (1 nivel)', color: '#10b981', icono: '☀️' };
+    } else if (descripcion?.includes('-I3')) {
+      return { tipo: 'Intensivo 3', periodo: 'Ago - Ene (2 niveles)', color: '#a855f7', icono: '⚡' };
+    } else if (descripcion?.includes('-I4')) {
+      return { tipo: 'Intensivo 4', periodo: 'Ago - Ene (2 niveles)', color: '#ec4899', icono: '⚡' };
     }
     return { tipo: 'Desconocido', periodo: 'Sin definir', color: '#6b7280', icono: '❓' };
   };
@@ -110,27 +127,29 @@ function AdministrarPeriodos() {
             <h1>Administrar Periodos</h1>
             <p>Gestión de periodos escolares y semestres</p>
           </div>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenCrear(true)}
-            sx={{ 
-              fontSize: '1.01em',
-              fontWeight: 'bold',
-              padding: '10px 20px',
-              borderRadius: '10px',
-              border: '2px solid green',
-              boxShadow: '2px 2px 10px black',
-              color: 'white',
-              backgroundColor: '#00903D',
-              '&:hover': { 
-                backgroundColor: '#007a33',
-                cursor: 'pointer'
-              }
-            }}
-          >
-            Nuevo Periodo
-          </Button>
+          {!isDirectivo && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setOpenCrear(true)}
+              sx={{ 
+                fontSize: '1.01em',
+                fontWeight: 'bold',
+                padding: '10px 20px',
+                borderRadius: '10px',
+                border: '2px solid green',
+                boxShadow: '2px 2px 10px black',
+                color: 'white',
+                backgroundColor: '#00903D',
+                '&:hover': { 
+                  backgroundColor: '#007a33',
+                  cursor: 'pointer'
+                }
+              }}
+            >
+              Nuevo Periodo
+            </Button>
+          )}
         </div>
       </div>
 
@@ -202,19 +221,22 @@ function AdministrarPeriodos() {
                         />
                       </TableCell>
                       <TableCell align="center">
-                        <button
-                          onClick={() => setPeriodoModificar(periodo)}
-                          title="Modificar periodo"
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '1.2em',
-                            padding: '4px 8px'
-                          }}
-                        >
-                          ✏️
-                        </button>
+                        {!isDirectivo && (
+                          <button
+                            onClick={() => estado.label !== 'Finalizado' && setPeriodoModificar(periodo)}
+                            title={estado.label === 'Finalizado' ? 'No se pueden modificar periodos finalizados' : 'Modificar periodo'}
+                            disabled={estado.label === 'Finalizado'}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: estado.label === 'Finalizado' ? 'not-allowed' : 'pointer',
+                              fontSize: '1.2em',
+                              padding: '4px 8px'
+                            }}
+                          >
+                            ✏️
+                          </button>
+                        )}
                       </TableCell>
                     </TableRow>
                   );

@@ -49,6 +49,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     carrera: alumno.carrera === '' ? 'No Aplica' : alumno.carrera,
     ubicacion: alumno.ubicacion,
     nivel: alumno.nivel || 'Sin nivel',
+    grupo: alumno.grupo_nombre || 'Sin grupo',
     estado: alumno.estado,
   }));
 
@@ -80,8 +81,8 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     
 
     // Usar las cabeceras y campos del DataGrid (rows)
-    const headers = ['N° Control', 'Nombre', 'Carrera', 'Ubicación', 'Nivel', 'Estado'];
-    const rowsData = exportRows.map(row => [row.numero_control, row.nombre, row.carrera, row.ubicacion, row.nivel, row.estado]);
+    const headers = ['N° Control', 'Nombre', 'Carrera', 'Ubicación', 'Nivel', 'Grupo', 'Estado'];
+    const rowsData = exportRows.map(row => [row.numero_control, row.nombre, row.carrera, row.ubicacion, row.nivel, row.grupo, row.estado]);
     // -------------------------------------------------------------------------------
 
     const csvContent = [headers, ...rowsData].map(e => e.join(',')).join('\r\n');
@@ -99,15 +100,16 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
 
   // --- Columnas del DataGrid ---
   const columns = [
-    { field: 'numero_control', headerName: 'N° Control', width: 150 },
-    { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 200 },
-    { field: 'carrera', headerName: 'Carrera', width: 180 },
-    { field: 'ubicacion', headerName: 'Ubicación', width: 180 },
-    { field: 'nivel', headerName: 'Nivel', width: 140 },
+    { field: 'numero_control', headerName: 'N° Control', width: 120 },
+    { field: 'nombre', headerName: 'Nombre Completo', width: 230 },
+    { field: 'carrera', headerName: 'Carrera', width: 150 },
+    { field: 'ubicacion', headerName: 'Ubicación', width: 150 },
+    { field: 'nivel', headerName: 'Nivel', width: 120 },
+    { field: 'grupo', headerName: 'Grupo', width: 130 },
     {
       field: 'estado',
       headerName: 'Estado',
-      width: 130,
+      width: 110,
       renderCell: (params) => (
         <Chip
           label={params.value}
@@ -121,7 +123,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     {
       field: 'acciones',
       headerName: 'Acciones',
-      width: 230,
+      width: 150,
       sortable: false,
       renderCell: (params) => {
         const alum = (alumnos || []).find(x => x.numero_control === params.row.numero_control);

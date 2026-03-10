@@ -89,6 +89,17 @@
     box-shadow: 0 0 0 3px rgba(138, 47, 131, 0.2);
 }
 
+/* Ocultar ícono nativo del navegador para mostrar/ocultar contraseña */
+.password::-ms-reveal,
+.password::-ms-clear {
+    display: none;
+}
+
+.password::-webkit-credentials-auto-fill-button,
+.password::-webkit-contacts-auto-fill-button {
+    display: none;
+}
+
 .logo{
     width: 200px;
     height: auto;

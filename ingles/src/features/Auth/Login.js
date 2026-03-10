@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import '../../styles/Login.css';
 import api from '../../api/axios';
+import { IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 function Login() {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,7 +84,36 @@ function Login() {
             <label htmlFor="usuario">Usuario</label>
             <input className='usuario' type="text" id="usuario" name="usuario" placeholder="Ingresa tu usuario" value={usuario} onChange={e => setUsuario(e.target.value)} />
             <label htmlFor="contrasena">Contraseña</label>
-            <input className='password' type="password" id="contrasena" name="contrasena" placeholder="Ingresa tu contraseña" value={contrasena} onChange={e => setContrasena(e.target.value)} />
+            <div style={{ position: 'relative', width: '100%', display: 'flex', margin: '20px' }}>
+              <input 
+                className='password' 
+                type={showPassword ? 'text' : 'password'}
+                id="contrasena" 
+                name="contrasena" 
+                placeholder="Ingresa tu contraseña" 
+                value={contrasena} 
+                onChange={e => setContrasena(e.target.value)}
+                style={{
+                  WebkitTextSecurity: showPassword ? 'none' : 'disc',
+                  paddingRight: '40px',
+                  margin: '0',
+                  width: '100%'
+                }}
+              />
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                size="small"
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  padding: '4px'
+                }}
+              >
+                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+              </IconButton>
+            </div>
             {error && <div className='error-message'>{error}</div>}
             <button className='login-button' type="submit" disabled={cargando}>
               {cargando ? 'Iniciando sesión...' : 'Iniciar Sesión'}

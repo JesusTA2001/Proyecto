@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import CambiarContrasenaModal from '../Auth/CambiarContrasenaModal';
 import '../../styles/perfil-usuario.css';
 
 function LayoutCoordinador({ children }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
   const getCurrentUserName = () => {
     try {
@@ -91,6 +93,11 @@ function LayoutCoordinador({ children }) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); setOpenCambiarContrasena(true); closeMenu(); }}>
+                    Cambiar Contraseña
+                  </a>
+                </li>
+                <li className="menu__inside">
                   <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
                   </a>
@@ -104,6 +111,13 @@ function LayoutCoordinador({ children }) {
         {/* header title removed to simplify layout — pages provide headings when needed */}
         <main>{children}</main>
       </div>
+
+      {/* Modal para cambiar contraseña */}
+      <CambiarContrasenaModal 
+        open={openCambiarContrasena} 
+        onClose={() => setOpenCambiarContrasena(false)} 
+        usuario={getCurrentUser()}
+      />
     </div>
   );
 }

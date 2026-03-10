@@ -1,6 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/perfil-usuario.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
 // Dashboard adaptado: no incluye la barra superior del HTML original.
 function DashboardDirectivos({ alumnos = [], profesores = [], administradores = [], niveles = [], modalidades = [], grupos = [] }) {
@@ -13,26 +23,45 @@ function DashboardDirectivos({ alumnos = [], profesores = [], administradores = 
   const totalModalidades = Array.isArray(modalidades) ? modalidades.length : 0;
   const totalGrupos = Array.isArray(grupos) ? grupos.length : 0;
 
-  // Conteo por nivel y modalidad (se recalcula en cada render para reflejar cambios en tiempo real)
-  const conteoPorNivel = {};
-  (Array.isArray(niveles) ? niveles : []).forEach(n => { conteoPorNivel[n.nombre] = 0; });
+  // Conteo por ubicación (Tecnológico vs Centro de Idiomas)
+  const conteoPorUbicacion = {};
   (Array.isArray(alumnos) ? alumnos : []).forEach(al => {
-    if (al && al.nivel && Object.prototype.hasOwnProperty.call(conteoPorNivel, al.nivel)) {
-      conteoPorNivel[al.nivel] = (conteoPorNivel[al.nivel] || 0) + 1;
-    }
-  });
-
-  const conteoPorModalidad = {};
-  (Array.isArray(modalidades) ? modalidades : []).forEach(m => { conteoPorModalidad[m.nombre] = 0; });
-  (Array.isArray(alumnos) ? alumnos : []).forEach(al => {
-    if (al && al.modalidad && Object.prototype.hasOwnProperty.call(conteoPorModalidad, al.modalidad)) {
-      conteoPorModalidad[al.modalidad] = (conteoPorModalidad[al.modalidad] || 0) + 1;
-    }
+    const ubicacion = al.ubicacion || 'Sin ubicación';
+    conteoPorUbicacion[ubicacion] = (conteoPorUbicacion[ubicacion] || 0) + 1;
   });
 
   // Para las barras: calcular máximo para normalizar anchos
-  const nivelCounts = Object.values(conteoPorNivel);
-  const maxNivelCount = nivelCounts.length ? Math.max(...nivelCounts) : 1;
+  const ubicacionCounts = Object.values(conteoPorUbicacion);
+  const maxUbicacionCount = ubicacionCounts.length ? Math.max(...ubicacionCounts) : 1;
+
+  // --- Configuración gráfica horizontal (Estudiantes por Ubicación) ---
+  ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+  const ubicacionLabels = Object.keys(conteoPorUbicacion);
+  const ubicacionData = ubicacionLabels.map(l => conteoPorUbicacion[l] || 0);
+  const colores = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
+  const ubicacionChartData = {
+    labels: ubicacionLabels,
+    datasets: [
+      {
+        label: 'Estudiantes',
+        data: ubicacionData,
+        backgroundColor: ubicacionLabels.map((_, i) => colores[i % colores.length]),
+        borderRadius: 8,
+        maxBarThickness: 80,
+        barPercentage: 0.6,
+        categoryPercentage: 0.7
+      }
+    ]
+  };
+
+  const ubicacionChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, title: { display: false } },
+    layout: { padding: { top: 8, right: 12, bottom: 8, left: 12 } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#374151', font: { size: 12 } }, grid: { color: '#edf2f7' } }, x: { ticks: { autoSkip: false, color: '#374151', font: { size: 12 } }, grid: { color: '#f3f4f6' } } },
+    elements: { bar: { borderRadius: 8, borderSkipped: false } }
+  };
 
   return (
     <main className="dashboard-container">
@@ -102,41 +131,50 @@ function DashboardDirectivos({ alumnos = [], profesores = [], administradores = 
           </div>
         </Link>
 
-        {/* Horarios - ahora dirige a la lista de profesores donde se puede ver el horario */}
-        <Link to="/lista-profesores" className="stat-card-link">
-          <div className="stat-card" style={{ borderLeft: '4px solid #2b6cb0' }}>
+        {/* Administrar Periodos */}
+        <Link to="/administrar-periodos" className="stat-card-link">
+          <div className="stat-card" style={{ borderLeft: '4px solid #8b5cf6' }}>
             <div className="stat-card-info">
-              <p className="stat-card-title">HORARIOS</p>
-              <p className="stat-card-value">Ver</p>
-              <p className="stat-card-detail">Horarios de profesores</p>
+              <p className="stat-card-title">ADMINISTRAR PERIODOS</p>
+              <p className="stat-card-value">Gestionar</p>
+              <p className="stat-card-detail">Periodos escolares</p>
             </div>
             <div className="stat-card-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a1 1 0 011 1v1h2V3a1 1 0 112 0v1h1a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1h2V3a1 1 0 011-1zM7 9h6v2H7V9z" />
+                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </Link>
+
+        {/* Historial de Grupos */}
+        <Link to="/historial-grupos-admin" className="stat-card-link">
+          <div className="stat-card" style={{ borderLeft: '4px solid #059669' }}>
+            <div className="stat-card-info">
+              <p className="stat-card-title">HISTORIAL DE GRUPOS</p>
+              <p className="stat-card-value">Ver</p>
+              <p className="stat-card-detail">Grupos concluidos</p>
+            </div>
+            <div className="stat-card-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" className="stat-card-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm6 6H7v2h6v-2z" clipRule="evenodd" />
               </svg>
             </div>
           </div>
         </Link>
       </div>
 
-      {/* Barra dinámica: Estudiantes por Nivel (se actualiza en tiempo real según props) */}
+      {/* Barra dinámica: Estudiantes por Ubicación */}
       <div className="card academic-levels-card" style={{ marginTop: 20 }}>
-        <h3 className="card-section-title">Estudiantes por Nivel</h3>
-        <div className="levels-grid" style={{ display: 'block' }}>
-          {(Array.isArray(niveles) ? niveles : []).map((nivel) => {
-            const count = conteoPorNivel[nivel.nombre] || 0;
-            const pct = Math.round((count / (maxNivelCount || 1)) * 100);
-            return (
-              <div key={nivel.id} style={{ marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-                  <div style={{ width: 140, fontSize: 12, color: '#374151' }}>{nivel.nombre}</div>
-                  <div style={{ flex: 1, background: '#e6e6e6', borderRadius: 999, height: 24, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: 'var(--color-primary, #7A1F5C)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8, color: '#fff', fontSize: 12 }}>{count}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <h3 className="card-section-title">Estudiantes por Ubicación</h3>
+        <div style={{ width: '100%', marginTop: 8 }}>
+          {ubicacionLabels.length > 0 ? (
+            <div style={{ height: Math.min(Math.max(ubicacionLabels.length * 64, 300), 520), width: '100%' }}>
+              <Bar data={ubicacionChartData} options={ubicacionChartOptions} />
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center p-4">No hay datos para mostrar.</p>
+          )}
         </div>
       </div>
     </main>

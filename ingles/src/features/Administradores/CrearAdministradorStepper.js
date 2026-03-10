@@ -57,8 +57,14 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
         alert('Por favor completa los apellidos, nombre y correo.');
         return;
       }
+      // CURP es obligatorio
+      if (!admin.curp || admin.curp.trim() === '') {
+        alert('La CURP es obligatoria para crear el usuario.');
+        return;
+      }
       // Validaciones de formato
-      if (admin.curp && admin.curp.length !== 18) {
+      if (admin.curp.length !== 18) {
+        alert('La CURP debe tener exactamente 18 caracteres.');
         setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
         return;
       }
@@ -147,8 +153,9 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
                   onChange={handleChange('curp')}
                   margin="dense"
                   inputProps={{ maxLength: 18 }}
-                  helperText={errors.curp || '18 caracteres (alfanumérico)'}
+                  helperText={errors.curp || '18 caracteres (alfanumérico) - OBLIGATORIO'}
                   error={Boolean(errors.curp)}
+                  required
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

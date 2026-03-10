@@ -8,6 +8,7 @@ router.use(authMiddleware);
 
 // Rutas para niveles
 router.get('/', nivelController.getNiveles);
+router.get('/campus/:campus', nivelController.getNivelesByCampus);
 router.get('/:id', nivelController.getNivelById);
 
 module.exports = router;

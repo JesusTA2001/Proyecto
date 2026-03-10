@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import CambiarContrasenaModal from '../Auth/CambiarContrasenaModal';
 import '../../styles/perfil-usuario.css';
 
 function LayoutAlumnos({ children }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
   const getCurrentUserName = () => {
     try {
@@ -12,6 +14,16 @@ function LayoutAlumnos({ children }) {
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       return parsed?.usuario || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const getCurrentUser = () => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (!raw) return null;
+      return JSON.parse(raw);
     } catch (e) {
       return null;
     }
@@ -70,6 +82,11 @@ function LayoutAlumnos({ children }) {
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
+                  <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); setOpenCambiarContrasena(true); closeMenu(); }}>
+                    Cambiar Contraseña
+                  </a>
+                </li>
+                <li className="menu__inside">
                   <a href="#" className="menu__link menu__link--inside" onClick={(e) => { e.preventDefault(); handleLogout(); closeMenu(); }}>
                     Cerrar Sesión
                   </a>
@@ -83,6 +100,13 @@ function LayoutAlumnos({ children }) {
         {/* header title removed to simplify layout — pages provide headings when needed */}
         <main>{children}</main>
       </div>
+
+      {/* Modal para cambiar contraseña */}
+      <CambiarContrasenaModal 
+        open={openCambiarContrasena} 
+        onClose={() => setOpenCambiarContrasena(false)} 
+        usuario={getCurrentUser()}
+      />
     </div>
   );
 }

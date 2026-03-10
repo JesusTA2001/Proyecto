@@ -99,26 +99,30 @@ exports.createAdministrador = async (req, res) => {
     const id_empleado = empleadoResult.insertId;
     console.log('✅ Empleado creado con id_empleado:', id_empleado);
 
-    // 3. Insertar administrador
-    console.log('📝 Insertando administrador con gradoEstudio:', gradoEstudio);
+    // 3. Insertar administrador (sin gradoEstudio - la columna no existe en la BD)
+    console.log('📝 Insertando administrador...');
     const [adminResult] = await connection.query(
-      `INSERT INTO Administrador (id_empleado, gradoEstudio)
-       VALUES (?, ?)`,
-      [id_empleado, gradoEstudio]
+      `INSERT INTO Administrador (id_empleado)
+       VALUES (?)`,
+      [id_empleado]
     );
 
     const id_administrador = adminResult.insertId;
     console.log('✅ Administrador creado con id_administrador:', id_administrador);
 
     // 4. Crear usuario automáticamente con credenciales por defecto
-    // Usuario: email, Contraseña: 123456
-    console.log('📝 Creando usuario con email:', email);
+    // Usuario: Primeros 10 dígitos de CURP (RFC sin homoclave), Contraseña: 123456
+    if (!CURP || CURP.length < 10) {
+      throw new Error('La CURP debe tener al menos 10 caracteres para generar el usuario');
+    }
+    const usuarioAdmin = CURP.substring(0, 10).toUpperCase();
+    console.log('📝 Creando usuario con primeros 10 dígitos de CURP:', usuarioAdmin);
     const defaultPassword = '123456';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
     await connection.query(
       `INSERT INTO Usuarios (usuario, contraseña, rol, id_relacion)
        VALUES (?, ?, 'ADMINISTRADOR', ?)`,
-      [email, hashedPassword, id_administrador]
+      [usuarioAdmin, hashedPassword, id_administrador]
     );
     console.log('✅ Usuario creado exitosamente');
 
@@ -204,6 +208,29 @@ exports.updateAdministrador = async (req, res) => {
        WHERE id_administrador = ?`,
       [estado, id]
     );
+
+    // 5. Actualizar usuario si se modificó la CURP
+    if (CURP && CURP.length >= 10) {
+      const nuevoUsuario = CURP.substring(0, 10).toUpperCase();
+      console.log('🔄 Intentando actualizar usuario administrador...');
+      console.log('   Nuevo usuario:', nuevoUsuario);
+      console.log('   id_administrador (id_relacion):', id);
+      console.log('   CURP completa:', CURP);
+      
+      const [updateResult] = await connection.query(
+        `UPDATE Usuarios 
+         SET usuario = ?
+         WHERE rol = 'ADMINISTRADOR' AND id_relacion = ?`,
+        [nuevoUsuario, id]
+      );
+      
+      console.log('✅ Filas afectadas:', updateResult.affectedRows);
+      if (updateResult.affectedRows > 0) {
+        console.log('✅ Usuario actualizado exitosamente a:', nuevoUsuario);
+      } else {
+        console.log('⚠️ No se encontró ningún usuario para actualizar');
+      }
+    }
 
     await connection.commit();
 
