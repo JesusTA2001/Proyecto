@@ -100,50 +100,51 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Iniciar servidor
-const server = app.listen(PORT, async () => {
-  console.log('='.repeat(50));
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log('='.repeat(50));
-  
-  // Probar conexión a la base de datos al iniciar
-  await testConnection();
-  
-  console.log('='.repeat(50));
-  console.log('💡 Rutas disponibles:');
-  console.log(`   GET    http://localhost:${PORT}/`);
-  console.log(`   GET    http://localhost:${PORT}/api/test-db`);
-  console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
-  console.log(`   GET    http://localhost:${PORT}/api/auth/verify`);
-  console.log(`   GET    http://localhost:${PORT}/api/alumnos`);
-  console.log(`   POST   http://localhost:${PORT}/api/alumnos`);
-  console.log(`   GET    http://localhost:${PORT}/api/profesores`);
-  console.log(`   POST   http://localhost:${PORT}/api/profesores`);
-  console.log(`   GET    http://localhost:${PORT}/api/administradores`);
-  console.log(`   POST   http://localhost:${PORT}/api/administradores`);
-  console.log(`   GET    http://localhost:${PORT}/api/grupos`);
-  console.log(`   POST   http://localhost:${PORT}/api/grupos`);
-  console.log(`   GET    http://localhost:${PORT}/api/horarios`);
-  console.log(`   POST   http://localhost:${PORT}/api/horarios`);
-  console.log('='.repeat(50));
-});
+let server;
 
-// Manejo de señales para cierre graceful
-process.on('SIGTERM', () => {
-  console.log('SIGTERM recibido, cerrando servidor...');
-  server.close(() => {
-    console.log('Servidor cerrado');
-    process.exit(0);
-  });
-});
+if (require.main === module) {
+  server = app.listen(PORT, async () => {
+    console.log('='.repeat(50));
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log('='.repeat(50));
 
-process.on('SIGINT', () => {
-  console.log('\nSIGINT recibido, cerrando servidor...');
-  server.close(() => {
-    console.log('Servidor cerrado');
-    process.exit(0);
+    await testConnection();
+
+    console.log('='.repeat(50));
+    console.log('Rutas disponibles:');
+    console.log(`   GET    http://localhost:${PORT}/`);
+    console.log(`   GET    http://localhost:${PORT}/api/test-db`);
+    console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
+    console.log(`   GET    http://localhost:${PORT}/api/auth/verify`);
+    console.log(`   GET    http://localhost:${PORT}/api/alumnos`);
+    console.log(`   POST   http://localhost:${PORT}/api/alumnos`);
+    console.log(`   GET    http://localhost:${PORT}/api/profesores`);
+    console.log(`   POST   http://localhost:${PORT}/api/profesores`);
+    console.log(`   GET    http://localhost:${PORT}/api/administradores`);
+    console.log(`   POST   http://localhost:${PORT}/api/administradores`);
+    console.log(`   GET    http://localhost:${PORT}/api/grupos`);
+    console.log(`   POST   http://localhost:${PORT}/api/grupos`);
+    console.log(`   GET    http://localhost:${PORT}/api/horarios`);
+    console.log(`   POST   http://localhost:${PORT}/api/horarios`);
+    console.log('='.repeat(50));
   });
-});
+
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM recibido, cerrando servidor...');
+    server.close(() => {
+      console.log('Servidor cerrado');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('\nSIGINT recibido, cerrando servidor...');
+    server.close(() => {
+      console.log('Servidor cerrado');
+      process.exit(0);
+    });
+  });
+}
 
 // Exportar app para funciones serverless de Vercel
 module.exports = app;
