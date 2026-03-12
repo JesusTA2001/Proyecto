@@ -3,17 +3,18 @@ const router = express.Router();
 const estudioController = require('../controllers/estudioController');
 const { authMiddleware } = require('../middleware/auth');
 
-// Todas las rutas requieren autenticación
-router.use(authMiddleware);
-
 // ========================================
-// CATÁLOGO DE ESTUDIOS
+// CATÁLOGO DE ESTUDIOS (Público)
 // ========================================
+// Esta ruta es pública porque solo devuelve los niveles de estudio disponibles
 router.get('/catalogo', estudioController.getCatalogoEstudios);
 
 // ========================================
-// ESTUDIOS DE PROFESORES
+// ESTUDIOS DE PROFESORES (Requieren autenticación)
 // ========================================
+
+// Todas las rutas siguientes requieren autenticación
+router.use(authMiddleware);
 
 // Obtener todos los estudios de un profesor
 router.get('/profesor/:id', estudioController.getEstudiosProfesor);

@@ -5,9 +5,20 @@ const { testConnection } = require('./config/db');
 
 const app = express();
 
-// Middleware CORS - Configuración para desarrollo local y Azure
+// Middleware CORS - Configuración para desarrollo local y Vercel
 app.use(cors({
-  origin: ["https://gray-beach-0cdc4470f.3.azurestaticapps.net", "http://localhost:3000"],
+  origin: function(origin, callback) {
+    const allowed = [
+      'http://localhost:3000',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+    // Permitir requests sin origin (ej. Postman) y dominios de Vercel
+    if (!origin || allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
   methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
   allowedHeaders: "Content-Type, Authorization",
   credentials: true
@@ -133,6 +144,9 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
+
+// Exportar app para funciones serverless de Vercel
+module.exports = app;
 
 // Capturar errores no manejados
 process.on('uncaughtException', (error) => {

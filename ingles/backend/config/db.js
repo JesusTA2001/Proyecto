@@ -19,11 +19,11 @@ require('dotenv').config();
 // CONEXIÓN AZURE (ACTIVA)
 // ============================================
 const pool = mysql.createPool({
-  host: 'mysqlingles.mysql.database.azure.com',
-  user: 'admin_ingles',
-  password: 'Gui11ermo1',
-  database: 'proyectoIngles',
-  port: 3306,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: parseInt(process.env.DB_PORT) || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -37,8 +37,8 @@ const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
     console.log('✅ Conexión exitosa a MySQL Azure');
-    console.log(`📊 Base de datos: proyectoIngles`);
-    console.log(`🔌 Host: mysqlingles.mysql.database.azure.com:3306`);
+    console.log(`📊 Base de datos: ${process.env.DB_NAME}`);
+    console.log(`🔌 Host: ${process.env.DB_HOST}:${process.env.DB_PORT || 3306}`);
     connection.release();
     return true;
   } catch (error) {

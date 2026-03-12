@@ -11,6 +11,7 @@ import StepLabel from '@mui/material/StepLabel';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 import api from '../../api/axios';
 import '../../styles/listaEstudiante.css';
 import GestionEstudios from './GestionEstudios';
@@ -22,6 +23,7 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
   const [activeStep, setActiveStep] = useState(0);
   const [catalogoEstudios, setCatalogoEstudios] = useState([]);
   const [estudios, setEstudios] = useState([]);
+  const [cargandoCatalogo, setCargandoCatalogo] = useState(true);
 
   const [profesor, setProfesor] = useState({
     apellidoPaterno: '',
@@ -42,10 +44,15 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
   useEffect(() => {
     const cargarCatalogo = async () => {
       try {
+        setCargandoCatalogo(true);
         const response = await api.get('/estudios/catalogo');
+        console.log('Catálogo de estudios cargado:', response.data);
         setCatalogoEstudios(response.data);
       } catch (error) {
         console.error('Error al cargar catálogo de estudios:', error);
+        console.error('Detalles del error:', error.response?.data || error.message);
+      } finally {
+        setCargandoCatalogo(false);
       }
     };
     cargarCatalogo();
@@ -226,11 +233,21 @@ export default function CrearProfesorStepper({ agregarProfesor }) {
             <Alert severity="info" sx={{ mb: 2 }}>
               Agrega los estudios académicos del profesor. Este paso es opcional, puedes agregarlo después.
             </Alert>
-            <GestionEstudios
-              estudios={estudios}
-              catalogoEstudios={catalogoEstudios}
-              onEstudiosChange={setEstudios}
-            />
+            {cargandoCatalogo ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : catalogoEstudios.length === 0 ? (
+              <Alert severity="warning">
+                No se pudo cargar el catálogo de estudios. Por favor, verifica tu conexión.
+              </Alert>
+            ) : (
+              <GestionEstudios
+                estudios={estudios}
+                catalogoEstudios={catalogoEstudios}
+                onEstudiosChange={setEstudios}
+              />
+            )}
           </Box>
         )}
 
