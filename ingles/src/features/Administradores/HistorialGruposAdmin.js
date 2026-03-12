@@ -2,12 +2,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Paper, Typography, Modal, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import api from '../../api/axios';
+import '../../styles/listaEstudiante.css';
 
 export default function HistorialGruposAdmin() {
   const [periodos, setPeriodos] = useState([]);
   const [periodoSel, setPeriodoSel] = useState('');
   const [grupos, setGrupos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [exportandoPeriodo, setExportandoPeriodo] = useState(false);
   const [error, setError] = useState('');
   
   // Para el modal de ver calificaciones
@@ -86,14 +88,14 @@ export default function HistorialGruposAdmin() {
     setCalificacionesGrupo([]);
   };
 
-  // Exportar calificaciones a CSV (misma lógica que en AsignarCalificaciones)
-  const exportarCalificacionesCSV = (grupo) => {
-    if (!calificacionesGrupo || calificacionesGrupo.length === 0) {
+  // Exportar calificaciones de un grupo a CSV
+  const exportarCalificacionesCSV = (grupo, calificaciones = []) => {
+    if (!calificaciones || calificaciones.length === 0) {
       alert('No hay calificaciones para exportar');
       return;
     }
 
-    const rows = calificacionesGrupo.map((cal, idx) => ({
+    const rows = calificaciones.map((cal, idx) => ({
       No: String(idx + 1).padStart(2, '0'),
       Control: cal.nControl,
       Parcial1: cal.parcial1 || '-',
@@ -118,6 +120,103 @@ export default function HistorialGruposAdmin() {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportarCalificacionesGrupo = async (grupo) => {
+    try {
+      const res = await api.get(`/calificaciones/grupo/${grupo.id_Grupo}`);
+      const calificaciones = Array.isArray(res.data?.calificaciones) ? res.data.calificaciones : [];
+      exportarCalificacionesCSV(grupo, calificaciones);
+    } catch (e) {
+      console.error('Error al exportar calificaciones del grupo:', e);
+      alert('No se pudieron obtener las calificaciones del grupo');
+    }
+  };
+
+  const crearNombreHoja = (periodoNombre, grupoNombre, indice, usados) => {
+    const base = `${periodoNombre || 'Periodo'}_${grupoNombre || `Grupo_${indice + 1}`}`
+      .replace(/[\\/?*\[\]:]/g, '')
+      .trim() || `Grupo_${indice + 1}`;
+    let nombre = base.slice(0, 31);
+    let contador = 1;
+    while (usados.has(nombre)) {
+      contador += 1;
+      const sufijo = `_${contador}`;
+      nombre = `${base.slice(0, 31 - sufijo.length)}${sufijo}`;
+    }
+    usados.add(nombre);
+    return nombre;
+  };
+
+  const handleExportarPeriodoExcel = async () => {
+    setExportandoPeriodo(true);
+
+    try {
+      const XLSX = await import('xlsx');
+      const workbook = XLSX.utils.book_new();
+      const nombresUsados = new Set();
+
+      let gruposAExportar = grupos;
+      if (!gruposAExportar.length) {
+        const url = periodoSel ? `/grupos/historial?id_Periodo=${periodoSel}` : '/grupos/historial';
+        const res = await api.get(url);
+        if (res.data?.success) {
+          gruposAExportar = (res.data.grupos || []).filter(g => Array.isArray(g.alumnos) && g.alumnos.length > 0);
+        }
+      }
+
+      if (!gruposAExportar.length) {
+        alert('No hay grupos para exportar con el filtro actual.');
+        return;
+      }
+
+      const respuestas = await Promise.all(
+        gruposAExportar.map(async (grupo) => {
+          try {
+            const res = await api.get(`/calificaciones/grupo/${grupo.id_Grupo}`);
+            const calificaciones = Array.isArray(res.data?.calificaciones) ? res.data.calificaciones : [];
+            return { grupo, calificaciones };
+          } catch (e) {
+            console.error(`Error al obtener calificaciones del grupo ${grupo.grupo}:`, e);
+            return { grupo, calificaciones: [] };
+          }
+        })
+      );
+
+      respuestas.forEach(({ grupo, calificaciones }, idx) => {
+        const nombrePeriodoHoja = grupo.periodo_descripcion || grupo.periodo_nombre || `Periodo_${grupo.id_Periodo || ''}`;
+        const sheetName = crearNombreHoja(nombrePeriodoHoja, grupo.grupo, idx, nombresUsados);
+
+        const datosHoja = calificaciones.length > 0
+          ? calificaciones.map((cal, rowIdx) => ({
+              No: rowIdx + 1,
+              Control: cal.nControl || '-',
+              Parcial1: cal.parcial1 ?? '-',
+              Parcial2: cal.parcial2 ?? '-',
+              Parcial3: cal.parcial3 ?? '-',
+              Final: cal.final ?? '-',
+            }))
+          : [{ Mensaje: 'Sin calificaciones registradas para este grupo' }];
+
+        const worksheet = XLSX.utils.json_to_sheet(datosHoja);
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      });
+
+      const periodoNombre = periodos.find(p => String(p.id_Periodo) === String(periodoSel));
+      const nombrePeriodo = (periodoSel
+        ? (periodoNombre?.descripcion || periodoNombre?.nombre || `periodo_${periodoSel}`)
+        : 'todos_los_periodos')
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9_\-]/g, '');
+      const fecha = new Date().toISOString().slice(0, 10);
+
+      XLSX.writeFile(workbook, `calificaciones_${nombrePeriodo}_${fecha}.xlsx`);
+    } catch (e) {
+      console.error('Error al exportar Excel por período:', e);
+      alert('Ocurrió un error al generar el archivo Excel.');
+    } finally {
+      setExportandoPeriodo(false);
+    }
+  };
+
   // Preparar filas para DataGrid
   const rows = grupos.map((g, idx) => ({
     id: g.id_Grupo || idx,
@@ -135,23 +234,28 @@ export default function HistorialGruposAdmin() {
     { field: 'alumnosCount', headerName: 'Estudiantes', width: 140, flex: 0.8 },
     {
       field: 'actions',
-      headerName: 'Acciones',
-      width: 280,
-      flex: 1.2,
+      headerName: 'Calificaciones',
+      width: 180,
+      flex: 0.9,
       sortable: false,
       renderCell: (params) => {
         const g = grupos.find(x => (x.id_Grupo || x.id) === params.id);
         return (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              size="small"
+            <button
+              className='view-button icon-button'
+              title='Ver calificaciones'
               onClick={() => handleVerCalificaciones(g)}
-              style={{ whiteSpace: 'nowrap' }}
             >
-              👁️ Ver Calificaciones
-            </Button>
+              👁️
+            </button>
+            <button
+              className='createbutton icon-button'
+              title='Exportar calificaciones a Excel'
+              onClick={() => handleExportarCalificacionesGrupo(g)}
+            >
+              📥
+            </button>
           </div>
         );
       }
@@ -171,6 +275,14 @@ export default function HistorialGruposAdmin() {
             </Typography>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleExportarPeriodoExcel}
+              disabled={exportandoPeriodo || loading}
+            >
+              {exportandoPeriodo ? 'Exportando...' : 'Exportar Excel'}
+            </Button>
             <select 
               value={periodoSel} 
               onChange={(e) => setPeriodoSel(e.target.value)} 
@@ -250,7 +362,7 @@ export default function HistorialGruposAdmin() {
             <Button 
               variant="contained" 
               color="success" 
-              onClick={() => exportarCalificacionesCSV(grupoSeleccionado)}
+              onClick={() => exportarCalificacionesCSV(grupoSeleccionado, calificacionesGrupo)}
               style={{ marginRight: 8 }}
             >
               📥 Exportar Excel
