@@ -12,6 +12,7 @@ import Login from './features/Auth/Login';
 import ListaEstudiante from './features/Alumnos/ListaEstudianteMUI';
 import ListaProfesor from './features/Profesores/ListaProfesorMUI';
 import ListaAdministrador from './features/Administradores/ListaAdministradorMUI';
+import ListaDirectivos from './features/Directivos/ListaDirectivosMUI';
 import ListaGrupos from './features/Grupos/ListaGruposMUI';
 
 // Dashboard Profesor
@@ -31,7 +32,6 @@ import HistorialGrupoDetalle from './features/Profesores/HistorialGrupoDetalle';
 import ControlAsistencia from './features/Profesores/ControlAsistencia';
 // Administrar Periodos
 import AdministrarPeriodos from './features/Periodos/AdministrarPeriodos';
-import MisGrupos from './features/Profesores/MisGrupos';
 
 // CRUD Alumnos
 import CrearAlumno from './features/Alumnos/CrearAlumnoStepper';
@@ -61,6 +61,7 @@ function App() {
   const [alumnos, setAlumnos] = useState([]);
   const [profesores, setProfesores] = useState([]);
   const [administradores, setAdministradores] = useState([]);
+  const [directivosCoordinadores, setDirectivosCoordinadores] = useState([]);
   const [grupos, setGrupos] = useState([]);
   const [horarios, setHorarios] = useState([]);
 
@@ -100,7 +101,7 @@ function App() {
         console.log('Cargando datos desde la API...');
 
         // Cargar datos en paralelo
-        const [alumnosRes, profesoresRes, administradoresRes, gruposRes, horariosRes, periodosRes, nivelesRes] = await Promise.all([
+        const [alumnosRes, profesoresRes, administradoresRes, directivosCoordRes, gruposRes, horariosRes, periodosRes, nivelesRes] = await Promise.all([
           api.get('/alumnos').catch(err => {
             console.error('Error al cargar alumnos:', err);
             return { data: [] };
@@ -111,6 +112,10 @@ function App() {
           }),
           api.get('/administradores').catch(err => {
             console.error('Error al cargar administradores:', err);
+            return { data: [] };
+          }),
+          api.get('/directivos-coordinadores').catch(err => {
+            console.error('Error al cargar directivos/coordinadores:', err);
             return { data: [] };
           }),
           api.get('/grupos').catch(err => {
@@ -135,6 +140,7 @@ function App() {
           alumnos: alumnosRes.data.length,
           profesores: profesoresRes.data.length,
           administradores: administradoresRes.data.length,
+          directivosCoordinadores: directivosCoordRes.data.length,
           grupos: gruposRes.data.length,
           horarios: horariosRes.data.length,
           periodos: periodosRes.data.length,
@@ -206,6 +212,27 @@ function App() {
           };
         });
 
+        const directivosCoordinadoresMapeados = (directivosCoordRes.data || []).map(r => {
+          const nombreSolo = extraerNombreSolo(r.nombre, r.apellidoPaterno, r.apellidoMaterno);
+          return {
+            id: `${r.tipoRol}-${r.id_rol}`,
+            id_rol: r.id_rol,
+            tipoRol: r.tipoRol,
+            numero_empleado: r.id_empleado,
+            nombre: nombreSolo,
+            apellidoPaterno: r.apellidoPaterno,
+            apellidoMaterno: r.apellidoMaterno,
+            nombreCompleto: `${r.apellidoPaterno || ''} ${r.apellidoMaterno || ''} ${nombreSolo}`.trim(),
+            email: r.email,
+            genero: r.genero,
+            CURP: r.CURP,
+            telefono: r.telefono,
+            direccion: r.direccion,
+            RFC: r.RFC,
+            estado: r.estado === 'activo' ? 'Activo' : 'Inactivo'
+          };
+        });
+
         const gruposMapeados = (gruposRes.data || []).map(g => {
           // Separar la hora en horaInicio y horaFin
           let horaInicio = '';
@@ -261,6 +288,7 @@ function App() {
           alumnos: alumnosMapeados.length,
           profesores: profesoresMapeados.length,
           administradores: administradoresMapeados.length,
+          directivosCoordinadores: directivosCoordinadoresMapeados.length,
           grupos: gruposMapeados.length,
           horarios: horariosMapeados.length,
           periodos: periodosMapeados.length,
@@ -270,6 +298,7 @@ function App() {
         setAlumnos(alumnosMapeados);
         setProfesores(profesoresMapeados);
         setAdministradores(administradoresMapeados);
+        setDirectivosCoordinadores(directivosCoordinadoresMapeados);
         setGrupos(gruposMapeados);
         setHorarios(horariosMapeados);
         setPeriodos(periodosMapeados);
@@ -285,7 +314,7 @@ function App() {
   }, []);
 
   // --- Lógica de negocio - Modificada para usar API ---
-  const toggleEstado = async (id, tipo) => {
+  const toggleEstado = async (id, tipo, tipoRolHint = null) => {
     try {
       switch (tipo) {
         case 'alumno':
@@ -304,6 +333,13 @@ function App() {
           if (admin) {
             await api.patch(`/administradores/${admin.id_administrador}/toggle-estado`);
             setAdministradores(administradores.map(a => a.numero_empleado === id ? { ...a, estado: a.estado === 'Activo' ? 'Inactivo' : 'Activo' } : a));
+          }
+          break;
+        case 'directivo-coordinador':
+          const registro = directivosCoordinadores.find(r => r.id_rol === id && (!tipoRolHint || r.tipoRol === tipoRolHint));
+          if (registro) {
+            await api.patch(`/directivos-coordinadores/${registro.id_rol}/toggle-estado`, { tipoRol: registro.tipoRol });
+            setDirectivosCoordinadores(directivosCoordinadores.map(r => r.id_rol === id && r.tipoRol === registro.tipoRol ? { ...r, estado: r.estado === 'Activo' ? 'Inactivo' : 'Activo' } : r));
           }
           break;
         default:
@@ -609,6 +645,89 @@ function App() {
     } catch (error) {
       console.error('Error al eliminar administrador:', error);
       alert('Error al eliminar administrador. Por favor, intenta de nuevo.');
+    }
+  };
+
+  const agregarDirectivoCoordinador = async (registro) => {
+    try {
+      const payload = {
+        tipoRol: registro.tipoRol,
+        apellidoPaterno: registro.apellidoPaterno,
+        apellidoMaterno: registro.apellidoMaterno,
+        nombre: registro.nombre,
+        email: registro.email || registro.correo,
+        genero: registro.genero,
+        CURP: registro.CURP || registro.curp,
+        RFC: registro.RFC || registro.rfc,
+        telefono: registro.telefono,
+        direccion: registro.direccion
+      };
+
+      const response = await api.post('/directivos-coordinadores', payload);
+
+      if (response.data.success) {
+        const directivosCoordRes = await api.get('/directivos-coordinadores');
+        const recargados = directivosCoordRes.data.map(r => {
+          const nombreSolo = extraerNombreSolo(r.nombre, r.apellidoPaterno, r.apellidoMaterno);
+          return {
+            id: `${r.tipoRol}-${r.id_rol}`,
+            id_rol: r.id_rol,
+            tipoRol: r.tipoRol,
+            numero_empleado: r.id_empleado,
+            nombre: nombreSolo,
+            apellidoPaterno: r.apellidoPaterno,
+            apellidoMaterno: r.apellidoMaterno,
+            nombreCompleto: `${r.apellidoPaterno || ''} ${r.apellidoMaterno || ''} ${nombreSolo}`.trim(),
+            email: r.email,
+            genero: r.genero,
+            CURP: r.CURP,
+            telefono: r.telefono,
+            direccion: r.direccion,
+            RFC: r.RFC,
+            estado: r.estado === 'activo' ? 'Activo' : 'Inactivo'
+          };
+        });
+        setDirectivosCoordinadores(recargados);
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error al agregar directivo/coordinador:', error);
+      alert('Error al agregar directivo/coordinador. Por favor, intenta de nuevo.');
+      throw error;
+    }
+  };
+
+  const actualizarDirectivoCoordinador = async (registroActualizado) => {
+    try {
+      await api.put(`/directivos-coordinadores/${registroActualizado.id_rol}`, {
+        tipoRol: registroActualizado.tipoRol,
+        apellidoPaterno: registroActualizado.apellidoPaterno,
+        apellidoMaterno: registroActualizado.apellidoMaterno,
+        nombre: registroActualizado.nombre,
+        email: registroActualizado.email,
+        genero: registroActualizado.genero,
+        CURP: registroActualizado.CURP,
+        RFC: registroActualizado.RFC,
+        telefono: registroActualizado.telefono,
+        direccion: registroActualizado.direccion,
+        estado: registroActualizado.estado === 'Activo' ? 'activo' : 'inactivo'
+      });
+
+      const actualizadoConNombre = {
+        ...registroActualizado,
+        nombreCompleto: `${registroActualizado.apellidoPaterno || ''} ${registroActualizado.apellidoMaterno || ''} ${registroActualizado.nombre || ''}`.trim()
+      };
+
+      setDirectivosCoordinadores(
+        directivosCoordinadores.map(r =>
+          r.id_rol === registroActualizado.id_rol && r.tipoRol === registroActualizado.tipoRol
+            ? actualizadoConNombre
+            : r
+        )
+      );
+    } catch (error) {
+      console.error('Error al actualizar directivo/coordinador:', error);
+      alert('Error al actualizar directivo/coordinador. Por favor, intenta de nuevo.');
     }
   };
   const horaANumero = (horaStr) => {
@@ -972,6 +1091,46 @@ function App() {
                 </Layout>
               )
           } />
+
+          <Route path="/lista-directivos" element={
+            currentUser && (currentUser.role === 'administrador' || currentUser.role === 'directivo' || currentUser.role === 'coordinador')
+              ? (
+                currentUser.role === 'directivo'
+                  ? (
+                    <LayoutDirectivos>
+                      <ListaDirectivos
+                        registros={directivosCoordinadores}
+                        toggleEstadoDirectivo={(idRol, tipoRol) => toggleEstado(idRol, 'directivo-coordinador', tipoRol)}
+                        agregarDirectivoCoordinador={agregarDirectivoCoordinador}
+                        actualizarDirectivoCoordinador={actualizarDirectivoCoordinador}
+                      />
+                    </LayoutDirectivos>
+                  )
+                  : currentUser.role === 'coordinador'
+                    ? (
+                      <LayoutCoordinador>
+                        <ListaDirectivos
+                          registros={directivosCoordinadores}
+                          toggleEstadoDirectivo={(idRol, tipoRol) => toggleEstado(idRol, 'directivo-coordinador', tipoRol)}
+                          agregarDirectivoCoordinador={agregarDirectivoCoordinador}
+                          actualizarDirectivoCoordinador={actualizarDirectivoCoordinador}
+                        />
+                      </LayoutCoordinador>
+                    )
+                    : (
+                      <Layout>
+                        <ListaDirectivos
+                          registros={directivosCoordinadores}
+                          toggleEstadoDirectivo={(idRol, tipoRol) => toggleEstado(idRol, 'directivo-coordinador', tipoRol)}
+                          agregarDirectivoCoordinador={agregarDirectivoCoordinador}
+                          actualizarDirectivoCoordinador={actualizarDirectivoCoordinador}
+                        />
+                      </Layout>
+                    )
+              ) : (
+                <Navigate to="/" replace />
+              )
+          } />
           <Route path="/crear-administrador" element={
             currentUser && currentUser.role === 'administrador'
               ? (
@@ -1123,20 +1282,6 @@ function App() {
             } 
           />
 
-          {/* --- 2. AÑADIR LA NUEVA RUTA DE "MIS GRUPOS" --- */}
-          <Route 
-            path="/profesor/mis-grupos" 
-            element={
-              <LayoutProfesor>
-                <MisGrupos 
-                  profesor={profesorLogueado}
-                  gruposAsignados={gruposAsignados}
-                  alumnos={alumnos}
-                  profesores={profesores}
-                />
-              </LayoutProfesor>
-            } 
-          />
           {/* Redirección */}
           <Route path="*" element={<Navigate to="/" />} />
           {/* Rutas para nuevos dashboards por rol */}

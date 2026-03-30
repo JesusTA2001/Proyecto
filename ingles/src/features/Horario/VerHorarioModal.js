@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import html2canvas from 'html2canvas';
 import '../../styles/listaEstudiante.css';
 
 const horaANumero = (horaStr) => {
@@ -12,6 +15,7 @@ const horaANumero = (horaStr) => {
 };
 
 export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
+  const tableContainerRef = useRef(null);
   if (!profesor) return null;
   const gruposAsignados = (grupos || []).filter(g => g.profesorId === profesor.numero_empleado);
   const dias = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'];
@@ -46,6 +50,70 @@ export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
     return null;
   };
 
+  const handleDownloadPDF = () => {
+    const content = tableContainerRef.current;
+    if (!content) return;
+
+    const popup = window.open('', '_blank', 'width=1200,height=800');
+    if (!popup) {
+      alert('No se pudo abrir la ventana para generar PDF. Verifica bloqueador de ventanas.');
+      return;
+    }
+
+    const nombre = profesor.nombreCompleto || `${profesor.nombre || ''} ${profesor.apellidoPaterno || ''} ${profesor.apellidoMaterno || ''}`.trim() || 'Profesor';
+
+    popup.document.write(`
+      <html>
+        <head>
+          <title>Horario de ${nombre}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { margin: 0 0 16px 0; color: #8A2F83; font-size: 20px; }
+            table { border-collapse: collapse; width: 100%; min-width: 800px; }
+            th, td { border: 1px solid #000; padding: 6px; text-align: left; }
+            th { background: #8A2F83; color: #fff; }
+            small { color: #555; }
+          </style>
+        </head>
+        <body>
+          <h1>Horario de ${nombre}</h1>
+          ${content.innerHTML}
+        </body>
+      </html>
+    `);
+
+    popup.document.close();
+    popup.focus();
+    setTimeout(() => popup.print(), 300);
+  };
+
+  const handleDownloadPNG = async () => {
+    const content = tableContainerRef.current;
+    if (!content) return;
+
+    try {
+      const canvas = await html2canvas(content, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true
+      });
+
+      const image = canvas.toDataURL('image/png');
+      const nombre = (profesor.nombreCompleto || `${profesor.nombre || ''} ${profesor.apellidoPaterno || ''} ${profesor.apellidoMaterno || ''}`.trim() || 'profesor')
+        .toLowerCase()
+        .replace(/\s+/g, '_');
+
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `horario_${nombre}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      alert('No fue posible generar la imagen PNG del horario.');
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ m:0,p:2, backgroundColor: 'var(--color-primary)', color:'#fff' }}>
@@ -55,7 +123,7 @@ export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
         </IconButton>
       </DialogTitle>
       <DialogContent dividers sx={{ px: 0 }}>
-        <div className="schedule-grid-wrapper" style={{ overflowX: 'auto' }}>
+        <div ref={tableContainerRef} className="schedule-grid-wrapper" style={{ overflowX: 'auto' }}>
           <table className="schedule-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: 800, border: '1px solid #000' }}>
             <thead>
               <tr>
@@ -88,6 +156,11 @@ export default function VerHorarioModal({ open, onClose, profesor, grupos }) {
           <div style={{ padding:16, color: '#555' }}>No hay grupos asignados a este profesor.</div>
         )}
       </DialogContent>
+      <DialogActions>
+        <Button onClick={handleDownloadPNG} variant="outlined">Descargar PNG</Button>
+        <Button onClick={handleDownloadPDF} variant="outlined">Descargar PDF</Button>
+        <Button onClick={onClose} variant="contained" sx={{ backgroundColor: 'var(--color-primary)' }}>Cerrar</Button>
+      </DialogActions>
     </Dialog>
   );
 }

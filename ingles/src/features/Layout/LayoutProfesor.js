@@ -8,17 +8,6 @@ function LayoutProfesor({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
-  const getCurrentUserName = () => {
-    try {
-      const raw = localStorage.getItem('currentUser');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return parsed?.usuario || null;
-    } catch (e) {
-      return null;
-    }
-  };
-
   const getCurrentUser = () => {
     try {
       const raw = localStorage.getItem('currentUser');
@@ -27,6 +16,13 @@ function LayoutProfesor({ children }) {
     } catch (e) {
       return null;
     }
+  };
+
+  const getCurrentUserFullName = () => {
+    const user = getCurrentUser();
+    if (!user) return 'Usuario';
+    const fullName = `${user.nombre || ''} ${user.apellidoPaterno || ''} ${user.apellidoMaterno || ''}`.trim();
+    return fullName || user.usuario || 'Usuario';
   };
 
   const handleLogout = () => {
@@ -50,7 +46,7 @@ function LayoutProfesor({ children }) {
             alt="Logo"
             className="menu__logo-image"
           />
-          <h1 className="menu__logo">Profesor</h1>
+          <h1 className="menu__logo">{getCurrentUserFullName()}</h1>
 
           {/* Hamburger Menu Icon */}
           <div 
@@ -74,14 +70,6 @@ function LayoutProfesor({ children }) {
             <li className="menu__item menu__item--show">
               <span className="menu__link">Mis Clases</span>
               <ul className="menu__nesting">
-                
-                {/* --- ENLACE NUEVO AÑADIDO AQUÍ --- */}
-                <li className="menu__inside">
-                  <Link to="/profesor/mis-grupos" className="menu__link menu__link--inside" onClick={closeMenu}>
-                    Mis Grupos
-                  </Link>
-                </li>
-
                 <li className="menu__inside">
                   <Link to="/profesor/asistencia" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Asistencia
@@ -102,7 +90,7 @@ function LayoutProfesor({ children }) {
             {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>
-                Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
+                Cuenta
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">

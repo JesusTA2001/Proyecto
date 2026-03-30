@@ -9,17 +9,6 @@ function Layout({children}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
-  const getCurrentUserName = () => {
-    try {
-      const raw = localStorage.getItem('currentUser');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return parsed?.usuario || null;
-    } catch (e) {
-      return null;
-    }
-  };
-
   const getCurrentUser = () => {
     try {
       const raw = localStorage.getItem('currentUser');
@@ -28,6 +17,13 @@ function Layout({children}) {
     } catch (e) {
       return null;
     }
+  };
+
+  const getCurrentUserFullName = () => {
+    const user = getCurrentUser();
+    if (!user) return 'Usuario';
+    const fullName = `${user.nombre || ''} ${user.apellidoPaterno || ''} ${user.apellidoMaterno || ''}`.trim();
+    return fullName || user.usuario || 'Usuario';
   };
 
   const handleLogout = () => {
@@ -52,7 +48,7 @@ function Layout({children}) {
             alt="Logo" 
             className="menu__logo-image" 
           />
-          <h1 className="menu__logo">Administrador</h1>
+          <h1 className="menu__logo">{getCurrentUserFullName()}</h1>
 
           {/* Hamburger Menu Icon */}
           <div 
@@ -81,6 +77,11 @@ function Layout({children}) {
                 <li className="menu__inside">
                   <Link to="/lista-administradores" className="menu__link menu__link--inside" onClick={closeMenu}>
                     Lista Administradores
+                  </Link>
+                </li>
+                <li className="menu__inside">
+                  <Link to="/lista-directivos" className="menu__link menu__link--inside" onClick={closeMenu}>
+                    Lista Directivos
                   </Link>
                 </li>
               </ul>
@@ -130,7 +131,7 @@ function Layout({children}) {
             {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>
-                Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
+                Cuenta
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">

@@ -65,6 +65,7 @@ const asistenciasRoutes = require('./routes/asistencias');
 const calificacionesRoutes = require('./routes/calificaciones');
 const estadoGrupoRoutes = require('./routes/estadoGrupo');
 const estudiosRoutes = require('./routes/estudios');
+const directivosCoordinadoresRoutes = require('./routes/directivosCoordinadores');
 
 // Registrar rutas
 app.use('/api/auth', authRoutes);
@@ -79,6 +80,7 @@ app.use('/api/asistencias', asistenciasRoutes);
 app.use('/api/calificaciones', calificacionesRoutes);
 app.use('/api/estado-grupo', estadoGrupoRoutes);
 app.use('/api/estudios', estudiosRoutes);
+app.use('/api/directivos-coordinadores', directivosCoordinadoresRoutes);
 
 // Manejador de errores global
 app.use((err, req, res, next) => {
@@ -126,6 +128,8 @@ if (require.main === module) {
     console.log(`   POST   http://localhost:${PORT}/api/grupos`);
     console.log(`   GET    http://localhost:${PORT}/api/horarios`);
     console.log(`   POST   http://localhost:${PORT}/api/horarios`);
+    console.log(`   GET    http://localhost:${PORT}/api/directivos-coordinadores`);
+    console.log(`   POST   http://localhost:${PORT}/api/directivos-coordinadores`);
     console.log('='.repeat(50));
   });
 

@@ -8,17 +8,6 @@ function LayoutAlumnos({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
-  const getCurrentUserName = () => {
-    try {
-      const raw = localStorage.getItem('currentUser');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return parsed?.usuario || null;
-    } catch (e) {
-      return null;
-    }
-  };
-
   const getCurrentUser = () => {
     try {
       const raw = localStorage.getItem('currentUser');
@@ -27,6 +16,13 @@ function LayoutAlumnos({ children }) {
     } catch (e) {
       return null;
     }
+  };
+
+  const getCurrentUserFullName = () => {
+    const user = getCurrentUser();
+    if (!user) return 'Usuario';
+    const fullName = `${user.nombre || ''} ${user.apellidoPaterno || ''} ${user.apellidoMaterno || ''}`.trim();
+    return fullName || user.usuario || 'Usuario';
   };
 
   const handleLogout = () => {
@@ -50,7 +46,7 @@ function LayoutAlumnos({ children }) {
             alt="Logo"
             className="menu__logo-image"
           />
-          <h1 className="menu__logo">Estudiante</h1>
+          <h1 className="menu__logo">{getCurrentUserFullName()}</h1>
 
           {/* Hamburger Menu Icon */}
           <div 
@@ -78,7 +74,7 @@ function LayoutAlumnos({ children }) {
             {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>
-                Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
+                Cuenta
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">

@@ -1,12 +1,12 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
   Title,
-  Tooltip,
+  Tooltip as ChartTooltip,
   Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
@@ -23,15 +23,17 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import VerAlumnoModal from '../Alumnos/VerAlumnoModal';
+import VerHorarioModal from '../Horario/VerHorarioModal';
+import VerGrupoModal from '../Grupos/VerGrupoModal';
 
 
 function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
+  const nombreCompletoProfesor = `${profesor?.nombre || ''} ${profesor?.apellidoPaterno || ''} ${profesor?.apellidoMaterno || ''}`.trim() || profesor?.nombreCompleto || 'Profesor';
   
-  const [totalGrupos, setTotalGrupos] = useState(0);
   const [totalEstudiantes, setTotalEstudiantes] = useState(0);
-  const [promedioGeneral, setPromedioGeneral] = useState(0);
 
   // Dialog / DataGrid states para ver estudiantes
   const [openStudentsDialog, setOpenStudentsDialog] = useState(false);
@@ -40,23 +42,22 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
   const apiRef = useGridApiRef();
   const [openViewAlumno, setOpenViewAlumno] = useState(false);
   const [selectedAlumno, setSelectedAlumno] = useState(null);
+  const [openHorarioDialog, setOpenHorarioDialog] = useState(false);
+  const [openGrupoDialog, setOpenGrupoDialog] = useState(false);
+  const [selectedGrupo, setSelectedGrupo] = useState(null);
+  const [sortCriteria, setSortCriteria] = useState('name');
+
+  const handleViewGroup = (grupo) => {
+    setSelectedGrupo(grupo);
+    setOpenGrupoDialog(true);
+  };
 
   // Calcular valores dinámicos
   useEffect(() => {
-    setTotalGrupos(gruposAsignados.length); 
-
     // --- CORRECCIÓN: Usar 'gruposAsignados' para sumar estudiantes ---
     const totalEst = gruposAsignados.reduce((sum, g) => sum + (g.alumnoIds?.length || 0), 0);
     setTotalEstudiantes(totalEst);
     // setTotalEstudiantes(data.length); // Esto era incorrecto si 'data' es 'alumnosAsignados'
-
-    // Promedio general simulado (como lo tenías)
-    if (gruposAsignados.length > 0) {
-      const promedio = 8 + Math.random() * 1; 
-      setPromedioGeneral(promedio.toFixed(1));
-    } else {
-      setPromedioGeneral(0);
-    }
   }, [gruposAsignados]); // Depender solo de gruposAsignados
 
   // Construir lista de alumnos asignados a este profesor a partir de 'data' y 'gruposAsignados'
@@ -67,6 +68,30 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
 
   // Lista de opciones de grupos para filtro
   const grupoOptions = gruposAsignados.map(g => ({ id: g.id, nombre: g.nombre }));
+
+  const gruposOrdenados = useMemo(() => {
+    const arr = [...(gruposAsignados || [])];
+    const pseudoGrade = (g) => 7 + (((Number(g.id) || 0) * 13) % 21) / 10;
+    const pseudoAttendance = (g) => 85 + (((Number(g.id) || 0) * 17) % 16);
+
+    switch (sortCriteria) {
+      case 'students':
+        arr.sort((a, b) => (b.alumnoIds?.length || 0) - (a.alumnoIds?.length || 0));
+        break;
+      case 'grade':
+        arr.sort((a, b) => pseudoGrade(b) - pseudoGrade(a));
+        break;
+      case 'attendance':
+        arr.sort((a, b) => pseudoAttendance(b) - pseudoAttendance(a));
+        break;
+      case 'name':
+      default:
+        arr.sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
+        break;
+    }
+
+    return arr;
+  }, [gruposAsignados, sortCriteria]);
 
   // Filtrado y filas para la grilla de estudiantes
   const filteredAlumnosForGrid = (alumnosAsignados || []).filter(a => {
@@ -115,7 +140,7 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
   ];
 
   // --- Datos para gráfica horizontal de grupos ---
-  ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+  ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Legend);
 
   const gruposLabels = gruposAsignados.map(g => g.nombre);
   const gruposCounts = gruposAsignados.map(g => (g.alumnoIds || []).length);
@@ -155,18 +180,7 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
       <main className="flex-1 flex flex-col gap-6">
         <div className="stats-grid">
           
-          {/* Tarjeta 1: Total Grupos */}
-          <Link to="/profesor/mis-grupos" className="stat-card-link">
-            <div className="stat-card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
-              <div className="stat-card-info">
-                <p className="stat-card-title">TOTAL GRUPOS</p>
-                <p className="stat-card-value">{totalGrupos}</p>
-              </div>
-              <div className="stat-card-icon-wrapper" style={{ backgroundColor: 'var(--color-primary-light, #f3e8ff)', color: 'var(--color-primary, #7A1F5C)' }}>👥</div>
-            </div>
-          </Link>
-
-          {/* Tarjeta 2: Total Estudiantes (no link) */}
+          {/* Tarjeta 1: Total Estudiantes (no link) */}
           <div className="stat-card-link" style={{ cursor: 'pointer' }} onClick={() => setOpenStudentsDialog(true)}>
             <div className="stat-card" style={{ borderLeft: '4px solid #2563eb' }}>
               <div className="stat-card-info">
@@ -177,7 +191,7 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
             </div>
           </div>
 
-          {/* Tarjeta 3: Asistencia Hoy */}
+          {/* Tarjeta 2: Asistencia Hoy */}
           <Link to="/profesor/asistencia" className="stat-card-link">
             <div className="stat-card" style={{ borderLeft: '4px solid #16a34a' }}>
               <div className="stat-card-info">
@@ -188,7 +202,7 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
             </div>
           </Link>
 
-          {/* Tarjeta 4: Asignar Calificaciones */ }
+          {/* Tarjeta 3: Asignar Calificaciones */ }
           <Link to="/profesor/calificaciones" className="stat-card-link" style={{ marginLeft: 0 }}>
             <div className="stat-card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
               <div className="stat-card-info">
@@ -199,39 +213,69 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
             </div>
           </Link>
 
-          {/* Tarjeta 5: Promedio General (Simulado) */ }
-          <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
-            <div className="stat-card-info">
-              <p className="stat-card-title">PROMEDIO GENERAL (Sim.)</p>
-              <p className="stat-card-value">{promedioGeneral}</p>
+          {/* Tarjeta 4: Ver Horario */}
+          <div className="stat-card-link" style={{ cursor: 'pointer' }} onClick={() => setOpenHorarioDialog(true)}>
+            <div className="stat-card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
+              <div className="stat-card-info">
+                <p className="stat-card-title">MI HORARIO</p>
+                <p className="stat-card-value">Ver</p>
+              </div>
+              <div className="stat-card-icon-wrapper" style={{ backgroundColor: 'var(--color-primary-light, #f3e8ff)', color: 'var(--color-primary, #7A1F5C)' }}>🗓️</div>
             </div>
-            <div className="stat-card-icon-wrapper" style={{ backgroundColor: '#fef3c7', color: '#f59e0b' }}>⭐</div>
           </div>
-          
+
           {/* Portal de Alumnos eliminado del dashboard */}
         </div>
 
         {/* Sección de grupos (Lista en el dashboard) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card-white rounded-lg shadow-sm p-6 flex flex-col gap-3">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              📘 Mis Grupos Asignados
-            </h2>
-            {gruposAsignados.length > 0 ? (
-              gruposAsignados.map((grupo) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <h2 className="text-lg font-semibold text-gray-800" style={{ margin: 0 }}>
+                📘 Mis Grupos Asignados
+              </h2>
+              <select
+                value={sortCriteria}
+                onChange={(e) => setSortCriteria(e.target.value)}
+                style={{
+                  minWidth: 190,
+                  padding: '7px 10px',
+                  borderRadius: 8,
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#fff',
+                  color: '#111827',
+                  fontSize: '0.88rem'
+                }}
+              >
+                <option value="name">Ordenar por Nombre</option>
+                <option value="students">Ordenar por Estudiantes</option>
+                <option value="grade">Ordenar por Promedio (Sim.)</option>
+                <option value="attendance">Ordenar por Asistencia (Sim.)</option>
+              </select>
+            </div>
+            {gruposOrdenados.length > 0 ? (
+              gruposOrdenados.map((grupo) => (
                 <div
                   key={grupo.id}
                   className="flex justify-between items-center bg-gray-50 p-3 rounded-lg"
                 >
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <p className="font-medium text-gray-800">{grupo.nombre}</p>
-                    <p className="text-sm text-gray-600">
-                      {grupo.nivel} - {grupo.dia} {grupo.hora ? `(${grupo.hora})` : ''}
-                    </p>
+                    <div className="flex items-center" style={{ gap: '16px', flexWrap: 'wrap', marginTop: 4, fontSize: '0.95rem', color: '#4b5563' }}>
+                      <span>📍 {grupo.ubicacion || 'Sin ubicación'}</span>
+                      <span>🕒 {grupo.dia || 'Sin día'} {grupo.hora ? `${grupo.hora}` : ''}</span>
+                      <span>👥 {(grupo.alumnoIds || []).length} estudiantes</span>
+                      <Tooltip title="Ver detalles del grupo" arrow>
+                        <button
+                          className="view-button icon-button"
+                          onClick={() => handleViewGroup(grupo)}
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.55rem', padding: 0 }}
+                        >
+                          👁️
+                        </button>
+                      </Tooltip>
+                    </div>
                   </div>
-                  <span className="grade-badge" style={{ backgroundColor: '#f3e8ff', color: 'var(--color-primary)'}}>
-                    {(grupo.alumnoIds || []).length} estudiantes
-                  </span>
                 </div>
               ))
             ) : (
@@ -255,7 +299,9 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
         </div>
         {/* Dialog: Lista de Estudiantes del profesor */}
         <Dialog open={openStudentsDialog} onClose={() => setOpenStudentsDialog(false)} fullWidth maxWidth="lg">
-          <DialogTitle>Estudiantes de {profesor?.nombre || 'Profesor'}</DialogTitle>
+          <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'var(--color-primary)', color: '#fff', fontWeight: 700 }}>
+            Estudiantes de {nombreCompletoProfesor}
+          </DialogTitle>
           <DialogContent dividers>
             <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
               <TextField
@@ -303,6 +349,22 @@ function DashboardProfesor({ data, profesor, gruposAsignados = [] }) {
 
         {/* Modal ver alumno individual */}
         <VerAlumnoModal open={openViewAlumno} onClose={() => setOpenViewAlumno(false)} alumno={selectedAlumno} />
+
+        {/* Modal ver horario profesor */}
+        <VerHorarioModal
+          open={openHorarioDialog}
+          onClose={() => setOpenHorarioDialog(false)}
+          profesor={profesor}
+          grupos={gruposAsignados}
+        />
+
+        <VerGrupoModal
+          open={openGrupoDialog}
+          onClose={() => setOpenGrupoDialog(false)}
+          grupo={selectedGrupo}
+          profesores={profesor ? [profesor] : []}
+          alumnos={data || []}
+        />
       </main>
     </div>
   );

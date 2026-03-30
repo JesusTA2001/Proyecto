@@ -8,17 +8,6 @@ function LayoutCoordinador({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openCambiarContrasena, setOpenCambiarContrasena] = useState(false);
 
-  const getCurrentUserName = () => {
-    try {
-      const raw = localStorage.getItem('currentUser');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return parsed?.usuario || null;
-    } catch (e) {
-      return null;
-    }
-  };
-
   const getCurrentUser = () => {
     try {
       const raw = localStorage.getItem('currentUser');
@@ -28,21 +17,12 @@ function LayoutCoordinador({ children }) {
     }
   };
 
-  const currentUser = getCurrentUser();
-  const coordToCareer = {
-    COORD01: { code: 'ISC',  label: 'Ingeniería en Sistemas Computacionales' },
-    COORD02: { code: 'IE',   label: 'Ingeniería Electrónica' },
-    COORD03: { code: 'II',   label: 'Ingeniería Industrial' },
-    COORD04: { code: 'IIAS', label: 'Ingeniería Innovación Agrícola Sustentable' },
-    COORD05: { code: 'IIA',  label: 'Ingeniería en Industrias Alimentarias' },
-    COORD06: { code: 'IGE',  label: 'Ingeniería en Gestión Empresarial' },
-    COORD07: { code: 'A',    label: 'Arquitectura' },
-    COORD08: { code: 'CP',   label: 'Contador Público' },
-    COORD09: { code: 'ITIC', label: 'Ingeniería en Tecnologías de la Información y Comunicación' }
+  const getCurrentUserFullName = () => {
+    const user = getCurrentUser();
+    if (!user) return 'Usuario';
+    const fullName = `${user.nombre || ''} ${user.apellidoPaterno || ''} ${user.apellidoMaterno || ''}`.trim();
+    return fullName || user.usuario || 'Usuario';
   };
-  const carreraAsignada = (currentUser && currentUser.role === 'coordinador' && currentUser.numero_empleado)
-    ? (coordToCareer[currentUser.numero_empleado] || null)
-    : null;
 
   const handleLogout = () => {
     try { localStorage.removeItem('currentUser'); } catch (e) {}
@@ -65,7 +45,7 @@ function LayoutCoordinador({ children }) {
             alt="Logo"
             className="menu__logo-image"
           />
-          <h1 className="menu__logo">Coordinador{carreraAsignada ? ` — ${carreraAsignada.label}` : ''}</h1>
+          <h1 className="menu__logo">{getCurrentUserFullName()}</h1>
 
           {/* Hamburger Menu Icon */}
           <div 
@@ -89,7 +69,7 @@ function LayoutCoordinador({ children }) {
             {/* Cuenta / Cerrar sesión */}
             <li className="menu__item menu__item--show">
               <span className="menu__link" style={{ cursor: 'default' }}>
-                Cuenta{getCurrentUserName() ? ` — ${getCurrentUserName()}` : ''}
+                Cuenta
               </span>
               <ul className="menu__nesting">
                 <li className="menu__inside">
