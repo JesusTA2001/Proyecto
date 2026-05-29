@@ -8,7 +8,7 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import '../../styles/listaEstudiante.css';
-import { generoOptions, gradoEstudioOptions } from '../../data/mapping';
+import { generoOptions } from '../../data/mapping';
 
 export default function ModificarAdministradorModal({ open, onClose, admin, actualizarAdministrador }) {
   const [form, setForm] = useState(null);
@@ -102,13 +102,6 @@ export default function ModificarAdministradorModal({ open, onClose, admin, actu
                 <MenuItem value="">Seleccionar Campus</MenuItem>
                 <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
                 <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
-              </Select>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Select name="gradoEstudio" value={form.gradoEstudio || ''} onChange={handleChange} fullWidth size="small" displayEmpty>
-                <MenuItem value="">Selecciona nivel de estudio</MenuItem>
-                {gradoEstudioOptions.map(g => <MenuItem key={g.value} value={g.value}>{g.label}</MenuItem>)}
               </Select>
             </Grid>
 

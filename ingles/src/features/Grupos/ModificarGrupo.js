@@ -55,6 +55,14 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
     const [filtroDisponibles, setFiltroDisponibles] = useState('');
     const [filtroSeleccionados, setFiltroSeleccionados] = useState('');
 
+    const alumnosPorNumeroControl = React.useMemo(() => {
+        const mapa = new Map();
+        (alumnos || []).forEach((alumno) => {
+            mapa.set(String(alumno.numero_control), alumno);
+        });
+        return mapa;
+    }, [alumnos]);
+
     // Quitar acentos para búsqueda
     const normalizar = (str) => String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
@@ -288,6 +296,16 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
          });
     };
 
+    const alumnosSeleccionadosVisibles = (alumnosSeleccionados || new Set())
+        .map ? [] : Array.from(alumnosSeleccionados)
+            .map((numeroControl) => alumnosPorNumeroControl.get(String(numeroControl)) || alumnosDisponibles.find(a => String(a.numero_control) === String(numeroControl)))
+            .filter(Boolean)
+            .filter((a) => {
+                if (!filtroSeleccionados) return true;
+                const f = normalizar(filtroSeleccionados);
+                return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
+            });
+
     const autoCompletarHasta20 = () => {
         const disponibles = alumnosDisponibles.map(a => a.numero_control).filter(id => !alumnosSeleccionados.has(id));
         const seleccion = new Set(Array.from(alumnosSeleccionados));
@@ -462,16 +480,8 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                             onChange={e => setFiltroSeleccionados(e.target.value)}
                         />
                         <div style={{ maxHeight: '38vh', overflowY: 'auto' }}>
-                            {alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
-                                if (!filtroSeleccionados) return true;
-                                const f = normalizar(filtroSeleccionados);
-                                return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
-                            }).length > 0 ? (
-                                alumnosDisponibles.filter(a => alumnosSeleccionados.has(a.numero_control)).filter(a => {
-                                    if (!filtroSeleccionados) return true;
-                                    const f = normalizar(filtroSeleccionados);
-                                    return normalizar(getNombreCompleto(a)).includes(f) || normalizar(a.numero_control).includes(f);
-                                }).map(alumno => (
+                            {alumnosSeleccionadosVisibles.length > 0 ? (
+                                alumnosSeleccionadosVisibles.map(alumno => (
                                     <div key={alumno.numero_control} style={{ marginBottom: '6px' }}>
                                         <input
                                             type="checkbox"

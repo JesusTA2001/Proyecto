@@ -2,11 +2,14 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import '../../styles/listaEstudiante.css';
 import CrearProfesorModal from './CrearProfesorModal';
 import VerProfesorModal from './VerProfesorModal';
 import ModificarProfesorModal from './ModificarProfesorModal';
 import VerHorarioModal from '../Horario/VerHorarioModal';
+import RestablecerContrasenaModal from '../Auth/RestablecerContrasenaModal';
 
 export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleEstado, agregarProfesor, actualizarProfesor }) {
   // --- Estados de Filtro (Solo término de búsqueda) ---
@@ -24,6 +27,7 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
   const [openHorario, setOpenHorario] = React.useState(false);
+  const [openReset, setOpenReset] = React.useState(false);
   const [selectedProfesor, setSelectedProfesor] = React.useState(null);
 
   // --- Lógica de Filtrado (Simplificada) ---
@@ -74,9 +78,9 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
   // --- Definición de Columnas ---
   const columns = [
     { field: 'numero_empleado', headerName: 'N° Empleado', width: 150 },
-    { field: 'nombre', headerName: 'Nombre Completo', flex: 1, minWidth: 200 },
-    { field: 'ubicacion', headerName: 'Ubicación', width: 160 },
-    { field: 'cantidadGrupos', headerName: 'Grupos Asignados', width: 140, align: 'center', headerAlign: 'center' },
+    { field: 'nombre', headerName: 'Nombre Completo', flex: 0.9, minWidth: 170 },
+    { field: 'ubicacion', headerName: 'Ubicación', width: 130 },
+    { field: 'cantidadGrupos', headerName: 'Grupos Asignados', width: 130, align: 'center', headerAlign: 'center' },
     {
       field: 'estado', headerName: 'Estado', width: 130,
       renderCell: (params) => (
@@ -84,16 +88,26 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
       )
     },
     {
-      field: 'acciones', headerName: 'Acciones', width: 200, sortable: false,
+      field: 'acciones', headerName: 'Acciones', width: 240, sortable: false,
       renderCell: (params) => {
         const p = profesores.find(x => x.numero_empleado === params.row.id || x.numero_empleado === params.row.numero_empleado);
         return (
-          <div className='acciones-cell' style={{ display: 'flex', gap: '0.4rem' }}>
+          <div className='acciones-cell' style={{ display: 'flex', gap: '0.3rem' }}>
             <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedProfesor(p); setOpenView(true); }}>👁️</button>
             <button className='view-button icon-button' title='Ver Horario' onClick={() => { setSelectedProfesor(p); setOpenHorario(true); }}>📅</button>
             {!isDirectivo && (
               <>
                 <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedProfesor(p); setOpenEdit(true); }}>✏️</button>
+                <Tooltip title='Restablecer contraseña'>
+                  <button
+                    className='icon-button'
+                    title='Restablecer contraseña'
+                    onClick={() => { setSelectedProfesor(p); setOpenReset(true); }}
+                    style={{ color: '#d97706', background: 'none', border: 'none', boxShadow: 'none' }}
+                  >
+                    <VpnKeyIcon fontSize='small' />
+                  </button>
+                </Tooltip>
               </>
             )}
           </div>
@@ -155,6 +169,13 @@ export default function ListaProfesorMUI({ profesores = [], grupos = [], toggleE
       <VerProfesorModal open={openView} onClose={() => setOpenView(false)} profesor={selectedProfesor} />
       <ModificarProfesorModal open={openEdit} onClose={() => setOpenEdit(false)} profesor={selectedProfesor} actualizarProfesor={actualizarProfesor} />
       <VerHorarioModal open={openHorario} onClose={() => setOpenHorario(false)} profesor={selectedProfesor} grupos={grupos} />
+      <RestablecerContrasenaModal
+        open={openReset}
+        onClose={() => setOpenReset(false)}
+        tipoUsuario='profesor'
+        idRelacion={selectedProfesor?.numero_empleado}
+        nombreCompleto={selectedProfesor?.nombreCompleto}
+      />
     </div>
   );
 }

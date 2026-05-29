@@ -2,10 +2,13 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import '../../styles/listaEstudiante.css';
 import CrearDirectivoCoordinadorModal from './CrearDirectivoCoordinadorModal';
 import VerDirectivoCoordinadorModal from './VerDirectivoCoordinadorModal';
 import ModificarDirectivoCoordinadorModal from './ModificarDirectivoCoordinadorModal';
+import RestablecerContrasenaModal from '../Auth/RestablecerContrasenaModal';
 
 const normalize = (str) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
@@ -30,6 +33,7 @@ export default function ListaDirectivosMUI({
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
+  const [openReset, setOpenReset] = React.useState(false);
   const [selectedRegistro, setSelectedRegistro] = React.useState(null);
 
   const filtered = (registros || []).filter((r) => {
@@ -114,7 +118,19 @@ export default function ListaDirectivosMUI({
           <div className='acciones-cell' style={{ display: 'flex', gap: '0.5rem' }}>
             <button className='view-button icon-button' title='Ver' onClick={() => { setSelectedRegistro(original); setOpenView(true); }}>👁️</button>
             {!isDirectivo && (
-              <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedRegistro(original); setOpenEdit(true); }}>✏️</button>
+              <>
+                <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedRegistro(original); setOpenEdit(true); }}>✏️</button>
+                <Tooltip title='Restablecer contraseña'>
+                  <button
+                    className='icon-button'
+                    title='Restablecer contraseña'
+                    onClick={() => { setSelectedRegistro(original); setOpenReset(true); }}
+                    style={{ color: '#d97706', background: 'none', border: 'none', boxShadow: 'none' }}
+                  >
+                    <VpnKeyIcon fontSize='small' />
+                  </button>
+                </Tooltip>
+              </>
             )}
           </div>
         );
@@ -169,6 +185,13 @@ export default function ListaDirectivosMUI({
         onClose={() => setOpenEdit(false)}
         registro={selectedRegistro}
         actualizarDirectivoCoordinador={actualizarDirectivoCoordinador}
+      />
+      <RestablecerContrasenaModal
+        open={openReset}
+        onClose={() => setOpenReset(false)}
+        tipoUsuario={selectedRegistro?.tipoRol || 'directivo'}
+        idRelacion={selectedRegistro?.id_rol}
+        nombreCompleto={selectedRegistro?.nombreCompleto}
       />
     </div>
   );

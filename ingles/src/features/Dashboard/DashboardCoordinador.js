@@ -45,6 +45,14 @@ const getAvancePorNivel = (nivel) => {
   }
 };
 
+const normalizeText = (text) =>
+  (text || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
 function DashboardCoordinador() {
   // Estados
   const [alumnos] = useState(initialAlumnos);
@@ -81,10 +89,21 @@ function DashboardCoordinador() {
 
   // --- Cálculos y Filtrado ---
   const filteredStudents = useMemo(() => {
+    const normalizedSearchTerm = normalizeText(searchTerm);
+
     return alumnos.filter(student => {
+      const nombreCompleto = normalizeText(student.nombre);
+      const apellidoPaterno = normalizeText(student.apellidoPaterno);
+      const apellidoMaterno = normalizeText(student.apellidoMaterno);
+      const apellidos = normalizeText(student.apellidos);
+      const numeroControl = normalizeText(student.numero_control);
+
       const matchesSearch =
-        student.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.numero_control.toLowerCase().includes(searchTerm.toLowerCase());
+        nombreCompleto.includes(normalizedSearchTerm) ||
+        apellidoPaterno.includes(normalizedSearchTerm) ||
+        apellidoMaterno.includes(normalizedSearchTerm) ||
+        apellidos.includes(normalizedSearchTerm) ||
+        numeroControl.includes(normalizedSearchTerm);
 
       const matchesNivel = !nivelFilter || student.nivel === nivelFilter;
 
@@ -94,19 +113,6 @@ function DashboardCoordinador() {
       return matchesSearch && matchesNivel && matchesCarrera;
     });
   }, [alumnos, searchTerm, nivelFilter, carreraAsignadaCode]);
-
-  const stats = useMemo(() => {
-    const total = filteredStudents.length;
-    if (total === 0) return { total: 0, avgProgress: 0, completed: 0 };
-
-    const sumProgress = filteredStudents.reduce((acc, curr) => acc + getAvancePorNivel(curr.nivel), 0);
-    const avgProgress = Math.round(sumProgress / total);
-
-    // Consideramos "Completado" a quienes están en Nivel 6
-    const completed = filteredStudents.filter(s => s.nivel === 'Nivel 6').length;
-
-    return { total, avgProgress, completed };
-  }, [filteredStudents]);
 
   // Datos para el Gráfico
   const chartData = useMemo(() => {
@@ -184,41 +190,6 @@ function DashboardCoordinador() {
         <p>{carreraAsignada ? carreraAsignada.label : 'Carrera no asignada'}</p>
       </div>
 
-      {/* Grid de Estadísticas */}
-      <div className="coord-stats-grid">
-        <div className="coord-stat-card card-purple">
-          <div className="coord-stat-header">
-            <h3>Total Estudiantes</h3>
-            <div className="coord-stat-icon">👥</div>
-          </div>
-          <p className="coord-value">{stats.total}</p>
-        </div>
-
-        <div className="coord-stat-card card-blue">
-          <div className="coord-stat-header">
-            <h3>Avance Promedio</h3>
-            <div className="coord-stat-icon">📊</div>
-          </div>
-          <p className="coord-value">{stats.avgProgress}%</p>
-        </div>
-
-        <div className="coord-stat-card card-green">
-          <div className="coord-stat-header">
-            <h3>Nivel Completado</h3>
-            <div className="coord-stat-icon">✓</div>
-          </div>
-          <p className="coord-value">{stats.completed}</p>
-        </div>
-      </div>
-
-      {/* Sección de Gráfico */}
-      <div className="coord-section">
-        <h2>Distribución por Nivel de Inglés</h2>
-        <div className="coord-chart-container">
-          <Bar data={chartData} options={chartOptions} />
-        </div>
-      </div>
-
       {/* Sección de Tabla */}
       <div className="coord-section">
         <h2>Estudiantes Registrados</h2>
@@ -256,6 +227,14 @@ function DashboardCoordinador() {
               />
             </Box>
           </div>
+      </div>
+
+      {/* Sección de Gráfico */}
+      <div className="coord-section">
+        <h2>Distribución por Nivel de Inglés</h2>
+        <div className="coord-chart-container">
+          <Bar data={chartData} options={chartOptions} />
+        </div>
       </div>
 
       {/* Nota: la funcionalidad de agregar alumnos fue retirada por petición del usuario. */}

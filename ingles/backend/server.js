@@ -10,6 +10,7 @@ app.use(cors({
   origin: function(origin, callback) {
     const allowed = [
       'http://localhost:3000',
+      'http://localhost:3001',
       process.env.FRONTEND_URL
     ].filter(Boolean);
     // Permitir requests sin origin (ej. Postman) y dominios de Vercel

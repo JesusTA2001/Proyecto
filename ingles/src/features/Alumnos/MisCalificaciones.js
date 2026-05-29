@@ -61,30 +61,6 @@ function MisCalificaciones() {
         <p>{nombreCompleto}</p>
       </div>
 
-      {/* Datos Personales */}
-      <section className="da-section section-purple" style={{ marginBottom: '2rem' }}>
-        <div className="da-section-header">
-          <h2>
-            <div className="da-section-icon icon-bg-purple">👤</div>
-            Información del Estudiante
-          </h2>
-        </div>
-        <div className="da-info-grid">
-          <div className="da-info-item">
-            <span className="da-info-label">No. Control</span>
-            <span className="da-info-value">{datosPersonales?.numero_control || 'N/A'}</span>
-          </div>
-          <div className="da-info-item">
-            <span className="da-info-label">Nombre</span>
-            <span className="da-info-value">{nombreCompleto}</span>
-          </div>
-          <div className="da-info-item">
-            <span className="da-info-label">CURP</span>
-            <span className="da-info-value">{datosPersonales?.CURP || 'N/A'}</span>
-          </div>
-        </div>
-      </section>
-
       {/* Tabla de Calificaciones */}
       <section className="da-section section-blue">
         <div className="da-section-header">

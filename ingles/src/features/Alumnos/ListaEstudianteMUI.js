@@ -2,10 +2,13 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid'; // Importar useGridApiRef
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import '../../styles/listaEstudiante.css';
 import CrearAlumnoModal from './CrearAlumnoModal';
 import VerAlumnoModal from './VerAlumnoModal';
 import ModificarAlumnoModal from './ModificarAlumnoModal';
+import RestablecerContrasenaModal from '../Auth/RestablecerContrasenaModal';
 
 export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumno, actualizarAlumno }) {
   // --- Estados para filtros ---
@@ -101,11 +104,11 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   // --- Columnas del DataGrid ---
   const columns = [
     { field: 'numero_control', headerName: 'N° Control', width: 120 },
-    { field: 'nombre', headerName: 'Nombre Completo', width: 230 },
-    { field: 'carrera', headerName: 'Carrera', width: 150 },
-    { field: 'ubicacion', headerName: 'Ubicación', width: 150 },
-    { field: 'nivel', headerName: 'Nivel', width: 120 },
-    { field: 'grupo', headerName: 'Grupo', width: 130 },
+    { field: 'nombre', headerName: 'Nombre Completo', flex: 0.75, minWidth: 160 },
+    { field: 'carrera', headerName: 'Carrera', width: 105 },
+    { field: 'ubicacion', headerName: 'Ubicación', width: 120 },
+    { field: 'nivel', headerName: 'Nivel', width: 100 },
+    { field: 'grupo', headerName: 'Grupo', width: 110 },
     {
       field: 'estado',
       headerName: 'Estado',
@@ -123,12 +126,12 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
     {
       field: 'acciones',
       headerName: 'Acciones',
-      width: 150,
+      width: 210,
       sortable: false,
       renderCell: (params) => {
         const alum = (alumnos || []).find(x => x.numero_control === params.row.numero_control);
         return (
-          <div>
+          <div style={{ display: 'flex', gap: '0.15rem', alignItems: 'center' }}>
             <button
               className="accion-link view-button"
               title="Ver"
@@ -145,6 +148,16 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
                 >
                   ✏️
                 </button>
+                <Tooltip title="Restablecer contraseña">
+                  <button
+                    className="accion-link icon-button"
+                    title="Restablecer contraseña"
+                    onClick={() => { setSelectedAlumno(alum); setOpenReset(true); }}
+                    style={{ color: '#d97706', background: 'none', border: 'none', boxShadow: 'none' }}
+                  >
+                    <VpnKeyIcon fontSize="small" />
+                  </button>
+                </Tooltip>
               </>
             )}
           </div>
@@ -156,6 +169,7 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
   const [openModal, setOpenModal] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
+  const [openReset, setOpenReset] = React.useState(false);
   const [selectedAlumno, setSelectedAlumno] = React.useState(null);
 
   return (
@@ -197,6 +211,13 @@ export default function ListaEstudianteMUI({ alumnos, toggleEstado, agregarAlumn
       {/* Modales: ver y editar alumno (respetan colores institucionales) */}
       <VerAlumnoModal open={openView} onClose={() => setOpenView(false)} alumno={selectedAlumno} />
       <ModificarAlumnoModal open={openEdit} onClose={() => setOpenEdit(false)} alumno={selectedAlumno} actualizarAlumno={actualizarAlumno} />
+      <RestablecerContrasenaModal
+        open={openReset}
+        onClose={() => setOpenReset(false)}
+        tipoUsuario='alumno'
+        idRelacion={selectedAlumno?.numero_control}
+        nombreCompleto={selectedAlumno?.nombreCompleto || selectedAlumno?.nombre}
+      />
 
       {/* DataGrid con toolbar de Material UI */}
       <Box sx={{ height: 600, width: '100%', mt: 2 }}>

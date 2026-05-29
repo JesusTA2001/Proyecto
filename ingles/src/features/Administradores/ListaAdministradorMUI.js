@@ -2,10 +2,13 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import '../../styles/listaEstudiante.css';
 import CrearAdministradorModal from './CrearAdministradorModal';
 import VerAdministradorModal from './VerAdministradorModal';
 import ModificarAdministradorModal from './ModificarAdministradorModal';
+import RestablecerContrasenaModal from '../Auth/RestablecerContrasenaModal';
 
 export default function ListaAdministradorMUI({ administradores = [], toggleEstado, agregarAdministrador, actualizarAdministrador }) {
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -24,6 +27,7 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
+  const [openReset, setOpenReset] = React.useState(false);
   const [selectedAdmin, setSelectedAdmin] = React.useState(null);
 
   const filtered = (administradores || [])
@@ -116,6 +120,16 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
             {!isDirectivo && (
               <>
                 <button className='modifybutton icon-button' title='Modificar' onClick={() => { setSelectedAdmin(adminOriginal); setOpenEdit(true); }}>✏️</button>
+                <Tooltip title='Restablecer contraseña'>
+                  <button
+                    className='icon-button'
+                    title='Restablecer contraseña'
+                    onClick={() => { setSelectedAdmin(adminOriginal); setOpenReset(true); }}
+                    style={{ color: '#d97706', background: 'none', border: 'none', boxShadow: 'none' }}
+                  >
+                    <VpnKeyIcon fontSize='small' />
+                  </button>
+                </Tooltip>
               </>
             )}
           </div>
@@ -157,6 +171,13 @@ export default function ListaAdministradorMUI({ administradores = [], toggleEsta
       <CrearAdministradorModal open={openCreate} onClose={() => setOpenCreate(false)} agregarAdministrador={agregarAdministrador} />
       <VerAdministradorModal open={openView} onClose={() => setOpenView(false)} admin={selectedAdmin} />
       <ModificarAdministradorModal open={openEdit} onClose={() => setOpenEdit(false)} admin={selectedAdmin} actualizarAdministrador={actualizarAdministrador} />
+      <RestablecerContrasenaModal
+        open={openReset}
+        onClose={() => setOpenReset(false)}
+        tipoUsuario='administrador'
+        idRelacion={selectedAdmin?.numero_empleado}
+        nombreCompleto={selectedAdmin?.nombreCompleto}
+      />
 
     </div>
   );

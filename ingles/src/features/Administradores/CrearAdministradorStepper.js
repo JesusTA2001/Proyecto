@@ -11,9 +11,8 @@ import StepLabel from '@mui/material/StepLabel';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import '../../styles/listaEstudiante.css';
-import { gradoEstudioOptions } from '../../data/mapping';
 
-const steps = ['Datos Personales', 'Academia', 'Crear y Revisar'];
+const steps = ['Datos Personales', 'Crear y Revisar'];
 
 export default function CrearAdministradorStepper({ agregarAdministrador }) {
   const navigate = useNavigate();
@@ -29,56 +28,52 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
     rfc: '',
     telefono: '',
     direccion: '',
-    ubicacion: 'Tecnologico',
-    gradoEstudio: '',
-    estado: 'Activo',
+    ubicacion: '',
+    estado: 'Activo'
   });
 
   const [errors, setErrors] = useState({ curp: '', telefono: '' });
 
   const handleChange = (field) => (e) => {
     let value = e.target.value;
-    // Sanitizaciones específicas
+
     if (field === 'telefono') {
       value = String(value).replace(/\D/g, '').slice(0, 10);
       setErrors(prev => ({ ...prev, telefono: value && value.length !== 10 ? 'Debe tener 10 dígitos' : '' }));
     }
+
     if (field === 'curp') {
       value = String(value).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18);
       setErrors(prev => ({ ...prev, curp: value && value.length !== 18 ? 'CURP debe tener 18 caracteres' : '' }));
     }
+
     setAdmin(prev => ({ ...prev, [field]: value }));
   };
 
   const handleNext = () => {
-    // Validaciones por paso
     if (activeStep === 0) {
       if (!admin.apellidoPaterno || !admin.apellidoMaterno || !admin.nombre || !admin.correo) {
         alert('Por favor completa los apellidos, nombre y correo.');
         return;
       }
-      // CURP es obligatorio
+
       if (!admin.curp || admin.curp.trim() === '') {
         alert('La CURP es obligatoria para crear el usuario.');
         return;
       }
-      // Validaciones de formato
+
       if (admin.curp.length !== 18) {
         alert('La CURP debe tener exactamente 18 caracteres.');
         setErrors(prev => ({ ...prev, curp: 'CURP debe tener 18 caracteres' }));
         return;
       }
+
       if (admin.telefono && admin.telefono.length !== 10) {
         setErrors(prev => ({ ...prev, telefono: 'Teléfono debe tener 10 dígitos' }));
         return;
       }
     }
-    if (activeStep === 1) {
-      if (!admin.gradoEstudio) {
-        alert('Por favor completa el Nivel de estudio.');
-        return;
-      }
-    }
+
     setActiveStep(prev => prev + 1);
   };
 
@@ -87,17 +82,11 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log('🔍 Datos del administrador antes de enviar:', admin);
-      console.log('🔍 RFC:', admin.rfc);
-      console.log('🔍 CURP:', admin.curp);
-      console.log('🔍 Ubicacion:', admin.ubicacion);
-      console.log('🔍 GradoEstudio:', admin.gradoEstudio);
       await agregarAdministrador(admin);
       navigate('/lista-administradores');
     } catch (error) {
       console.error('❌ Error al crear administrador:', error);
       console.error('❌ Error completo:', JSON.stringify(error, null, 2));
-      // No navegamos si hay error, dejamos al usuario en el formulario
     }
   };
 
@@ -121,7 +110,7 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Apellido Materno" value={admin.apellidoMaterno} onChange={handleChange('apellidoMaterno')} margin="dense" required />
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Nombre(s)" value={admin.nombre} onChange={handleChange('nombre')} margin="dense" required />
               </Grid>
@@ -130,104 +119,38 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Select
-                  fullWidth
-                  value={admin.genero}
-                  onChange={handleChange('genero')}
-                  displayEmpty
-                  size="small"
-                  sx={{ mt: 0.5 }}
-                  required
-                >
+                <Select fullWidth value={admin.genero} onChange={handleChange('genero')} displayEmpty size="small" sx={{ mt: 0.5 }} required>
                   <MenuItem value="">Selecciona un género</MenuItem>
                   <MenuItem value="Masculino">Masculino</MenuItem>
                   <MenuItem value="Femenino">Femenino</MenuItem>
                 </Select>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="CURP"
-                  value={admin.curp}
-                  onChange={handleChange('curp')}
-                  margin="dense"
-                  inputProps={{ maxLength: 18 }}
-                  helperText={errors.curp || '18 caracteres (alfanumérico) - OBLIGATORIO'}
-                  error={Boolean(errors.curp)}
-                  required
-                />
+                <TextField fullWidth size="small" label="CURP" value={admin.curp} onChange={handleChange('curp')} margin="dense" inputProps={{ maxLength: 18 }} helperText={errors.curp || '18 caracteres (alfanumérico) - OBLIGATORIO'} error={Boolean(errors.curp)} required />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="RFC"
-                  value={admin.rfc}
-                  onChange={handleChange('rfc')}
-                  margin="dense"
-                  inputProps={{ maxLength: 13 }}
-                  helperText="13 caracteres (alfanumérico)"
-                />
+                <TextField fullWidth size="small" label="RFC" value={admin.rfc} onChange={handleChange('rfc')} margin="dense" inputProps={{ maxLength: 13 }} helperText="13 caracteres (alfanumérico)" />
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Número de Teléfono"
-                  value={admin.telefono}
-                  onChange={handleChange('telefono')}
-                  margin="dense"
-                  inputProps={{ maxLength: 10 }}
-                  helperText={errors.telefono || '10 dígitos'}
-                  error={Boolean(errors.telefono)}
-                />
+                <TextField fullWidth size="small" label="Número de Teléfono" value={admin.telefono} onChange={handleChange('telefono')} margin="dense" inputProps={{ maxLength: 10 }} helperText={errors.telefono || '10 dígitos'} error={Boolean(errors.telefono)} />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Dirección" value={admin.direccion} onChange={handleChange('direccion')} margin="dense" />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Select fullWidth value={admin.ubicacion} onChange={handleChange('ubicacion')} size="small" displayEmpty required sx={{ mt: 0.5 }}>
+                  <MenuItem value="">Seleccionar Campus</MenuItem>
+                  <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
+                  <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
+                </Select>
               </Grid>
             </Grid>
           </Box>
         )}
 
         {activeStep === 1 && (
-          <Box>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Select
-                  fullWidth
-                  value={admin.ubicacion}
-                  onChange={handleChange('ubicacion')}
-                  size="small"
-                  displayEmpty
-                  required
-                  sx={{ mt: 0.5 }}
-                >
-                  <MenuItem value="">Seleccionar Campus</MenuItem>
-                  <MenuItem value="Tecnologico">Tecnológico (Interno)</MenuItem>
-                  <MenuItem value="Centro de Idiomas">Centro de Idiomas (Externo)</MenuItem>
-                </Select>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Select
-                  fullWidth
-                  value={admin.gradoEstudio}
-                  onChange={handleChange('gradoEstudio')}
-                  size="small"
-                  displayEmpty
-                  required
-                  sx={{ mt: 0.5 }}
-                >
-                  <MenuItem value="">Selecciona nivel de estudio</MenuItem>
-                  {gradoEstudioOptions.map(g => <MenuItem key={g.value} value={g.value}>{g.label}</MenuItem>)}
-                </Select>
-              </Grid>
-            </Grid>
-          </Box>
-        )}
-
-        {activeStep === 2 && (
           <Box>
             <h3>Revisa los datos antes de crear</h3>
             <Box sx={{ backgroundColor: '#f5f5f5', p: 2, borderRadius: 1 }}>
@@ -238,11 +161,12 @@ export default function CrearAdministradorStepper({ agregarAdministrador }) {
               <p><strong>Email:</strong> {admin.correo}</p>
               <p><strong>Género:</strong> {admin.genero}</p>
               <p><strong>CURP:</strong> {admin.curp || 'No proporcionado'}</p>
+              <p><strong>RFC:</strong> {admin.rfc || 'No proporcionado'}</p>
               <p><strong>Teléfono:</strong> {admin.telefono || 'No proporcionado'}</p>
               <p><strong>Dirección:</strong> {admin.direccion || 'No proporcionado'}</p>
-              
-              <h4 style={{ marginBottom: 12 }}>Academia</h4>
-              <p><strong>Nivel de estudio:</strong> {admin.gradoEstudio}</p>
+              <p><strong>Ubicación:</strong> {admin.ubicacion || 'No proporcionado'}</p>
+              <p><strong>Usuario generado:</strong> {admin.curp ? admin.curp.substring(0, 10).toUpperCase() : ''}</p>
+              <p><strong>Contraseña inicial:</strong> 123456</p>
             </Box>
           </Box>
         )}

@@ -2,6 +2,16 @@ const { pool } = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const DEFAULT_RESET_PASSWORD = '123456';
+const ROLE_MAP = {
+  alumno: 'ESTUDIANTE',
+  estudiante: 'ESTUDIANTE',
+  profesor: 'PROFESOR',
+  administrador: 'ADMINISTRADOR',
+  coordinador: 'COORDINADOR',
+  directivo: 'DIRECTIVO'
+};
+
 // Login
 exports.login = async (req, res) => {
   try {
@@ -222,6 +232,53 @@ exports.cambiarContrasena = async (req, res) => {
       success: false,
       message: 'Error en el servidor al cambiar la contraseña',
       error: error.message 
+    });
+  }
+};
+
+// Restablecer contraseña de cualquier usuario a 123456
+exports.restablecerContrasena = async (req, res) => {
+  try {
+    const { tipoUsuario, idRelacion } = req.body;
+
+    if (!tipoUsuario || !idRelacion) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tipo de usuario e identificador son requeridos'
+      });
+    }
+
+    const rolBD = ROLE_MAP[String(tipoUsuario).toLowerCase()];
+    if (!rolBD) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tipo de usuario no válido'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(DEFAULT_RESET_PASSWORD, 10);
+    const [resultado] = await pool.query(
+      'UPDATE Usuarios SET contraseña = ? WHERE rol = ? AND id_relacion = ?',
+      [hashedPassword, rolBD, idRelacion]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No se encontró un usuario asociado para restablecer la contraseña'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Contraseña restablecida exitosamente'
+    });
+  } catch (error) {
+    console.error('Error al restablecer contraseña:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error en el servidor al restablecer la contraseña',
+      error: error.message
     });
   }
 };
