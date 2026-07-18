@@ -1,0 +1,12 @@
+export const initialProfesores = [
+    { numero_empleado: "EMP001", nombre: "Juan Carlos Pérez", correo: "juan.perez@teczamora.mx", curp: "PEJC800115HGRMNA01", telefono: "3511234567", direccion: "Av. Tecnológico 100", gradoEstudio: "Maestría", estado: "Activo" },
+    { numero_empleado: "EMP002", nombre: "María Rodriguez Lima", correo: "maria.rdz@teczamora.mx", curp: "ROLM850320MGRMNA02", telefono: "4432345678", direccion: "Calle Colón 210", gradoEstudio: "Doctorado", estado: "Inactivo" },
+    { numero_empleado: "EMP003", nombre: "Ana Lopez Pérez", correo: "juan.perez@teczamora.mx", curp: "PEJC800115HGRMNA01", telefono: "3511234567", direccion: "Av. Tecnológico 100", gradoEstudio: "Maestría", estado: "Activo" },
+    { numero_empleado: "EMP004", nombre: "Laura Rodriguez Lima", correo: "maria.rdz@teczamora.mx", curp: "ROLM850320MGRMNA02", telefono: "4432345678", direccion: "Calle Colón 210", gradoEstudio: "Doctorado", estado: "Inactivo" },
+    { numero_empleado: "EMP005", nombre: "Fabiola Lopez Pérez", correo: "juan.perez@teczamora.mx", curp: "PEJC800115HGRMNA01", telefono: "3511234567", direccion: "Av. Tecnológico 100", gradoEstudio: "Maestría", estado: "Activo" },
+    { numero_empleado: "EMP006", nombre: "Mercedes Rodriguez Lima", correo: "maria.rdz@teczamora.mx", curp: "ROLM850320MGRMNA02", telefono: "4432345678", direccion: "Calle Colón 210", gradoEstudio: "Doctorado", estado: "Inactivo" },
+    { numero_empleado: "EMP007", nombre: "Santiago Rocha Pérez", correo: "juan.perez@teczamora.mx", curp: "PEJC800115HGRMNA01", telefono: "3511234567", direccion: "Av. Tecnológico 100", gradoEstudio: "Maestría", estado: "Activo" },
+    { numero_empleado: "EMP008", nombre: "Sergio Rodriguez Lima", correo: "maria.rdz@teczamora.mx", curp: "ROLM850320MGRMNA02", telefono: "4432345678", direccion: "Calle Colón 210", gradoEstudio: "Doctorado", estado: "Inactivo" },
+    { numero_empleado: "EMP009", nombre: "Mario Samano Pérez", correo: "juan.perez@teczamora.mx", curp: "PEJC800115HGRMNA01", telefono: "3511234567", direccion: "Av. Tecnológico 100", gradoEstudio: "Maestría", estado: "Activo" },
+    { numero_empleado: "EMP010", nombre: "Carmen Rodriguez Lima", correo: "maria.rdz@teczamora.mx", curp: "ROLM850320MGRMNA02", telefono: "4432345678", direccion: "Calle Colón 210", gradoEstudio: "Doctorado", estado: "Inactivo" },
+];
