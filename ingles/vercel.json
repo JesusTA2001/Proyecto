@@ -25,5 +25,11 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/test-db",
+      "schedule": "0,30 * * * *"
+    }
   ]
 }
