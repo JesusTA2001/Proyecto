@@ -9,10 +9,10 @@ import {
   Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import api from '../../api/axios';
 
 // Importar estilos y datos
 import '../../styles/DashboardCoordinador.css';
-import { initialAlumnos } from '../../data/alumnos'; // Ajusta la ruta si es necesario
 import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/material';
 // import { initialNiveles } from '../../data/niveles'; // Opcional si quieres usar nombres reales de niveles
@@ -54,8 +54,8 @@ const normalizeText = (text) =>
     .trim();
 
 function DashboardCoordinador() {
-  // Estados
-  const [alumnos] = useState(initialAlumnos);
+  // --- Estados de Datos ---
+  const [alumnos] = useState([]); // Eliminada dependencia de static data
   const [searchTerm, setSearchTerm] = useState('');
   const [nivelFilter, setNivelFilter] = useState('');
 
