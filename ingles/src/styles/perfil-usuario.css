@@ -34,6 +34,9 @@ body {
 .layout-wrapper {
   min-height: 100vh;
   padding-top: 70px;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ===== Contenedor del contenido ===== */
@@ -41,10 +44,14 @@ body {
   padding: 0;
   margin: 0;
   background-color: var(--color-bg);
+  width: 100%;
 }
 
 .perfil-usuario main {
   padding: 0;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ===== Menú principal ===== */
@@ -252,7 +259,8 @@ body {
   .menu__links {
     top: 60px;
     height: calc(100vh - 60px);
-    width: 100%;
+    width: 280px; /* Cambiado de 100% a 280px para que no ocupe toda la pantalla */
+    max-width: 85vw; /* Asegura que deje un pequeño margen si la pantalla es ultra-pequeña */
   }
 }
 
