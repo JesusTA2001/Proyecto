@@ -38,8 +38,8 @@ app.get('/', (req, res) => {
 
 // Ruta para probar la conexión a la base de datos
 app.get('/api/test-db', async (req, res) => {
-  const isConnected = await testConnection();
-  if (isConnected) {
+  const result = await testConnection();
+  if (result.success) {
     res.json({ 
       success: true, 
       message: 'Conexión a MySQL exitosa',
@@ -48,7 +48,11 @@ app.get('/api/test-db', async (req, res) => {
   } else {
     res.status(500).json({ 
       success: false, 
-      message: 'Error al conectar con MySQL'
+      message: 'Error al conectar con MySQL',
+      error: result.error,
+      code: result.code,
+      host: process.env.DB_HOST ? 'Configurado' : 'Falta DB_HOST',
+      port: process.env.DB_PORT || 'Falta DB_PORT'
     });
   }
 });

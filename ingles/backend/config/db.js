@@ -34,11 +34,11 @@ const testConnection = async () => {
     console.log(`📊 Base de datos: ${dbConfig.database}`);
     console.log(`🔌 Host: ${dbConfig.host}:${dbConfig.port}`);
     connection.release();
-    return true;
+    return { success: true };
   } catch (error) {
     console.error('❌ Error al conectar con MySQL:', error.message);
-    return false;
+    return { success: false, error: error.message, code: error.code };
   }
 };
 
-module.exports = { pool, testConnection };
+module.exports = { pool, testConnection, dbConfig };
