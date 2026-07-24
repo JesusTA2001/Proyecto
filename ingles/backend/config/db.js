@@ -17,7 +17,8 @@ const dbConfig = {
 };
 
 // Si el proveedor exige SSL (como Aiven o Azure), se agrega a la configuración
-if (process.env.DB_SSL === 'true') {
+const sslValue = String(process.env.DB_SSL).toLowerCase().trim();
+if (sslValue === 'true' || sslValue === '1' || (dbConfig.host && dbConfig.host.includes('aivencloud.com'))) {
   dbConfig.ssl = {
     rejectUnauthorized: false // false es necesario para Aiven si no se provee el CA Certificate
   };
