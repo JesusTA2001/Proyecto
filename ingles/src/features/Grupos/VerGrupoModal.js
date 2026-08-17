@@ -12,7 +12,7 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   if (!grupo) return null;
   const profesor = (profesores || []).find(p => p.numero_empleado === grupo.profesorId) || { nombre: 'No asignado' };
-  const periodo = (periodos || []).find(p => p.id === grupo.id_Periodo) || { nombre: 'N/A' };
+  const periodo = (periodos || []).find(p => (p.id || p.id_Periodo) === grupo.id_Periodo) || { descripcion: 'N/A', nombre: 'N/A' };
   
   // Usar directamente el array de alumnos del grupo que viene del backend
   const alumnosDelGrupo = grupo.alumnos || [];
@@ -47,7 +47,7 @@ export default function VerGrupoModal({ open, onClose, grupo, profesores, alumno
               <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}>Nivel:</span>
               <span>{grupo.nivel}</span>
               <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}>Periodo:</span>
-              <span>{periodo.nombre}</span>
+              <span>{periodo.descripcion || periodo.nombre}</span>
               <span style={{ fontWeight: 'bold', color: 'purple', textTransform: 'uppercase', marginLeft: 16 }}>Ubicación:</span>
               <span>{grupo.ubicacion}</span>
             </div>

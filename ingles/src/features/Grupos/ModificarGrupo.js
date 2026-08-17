@@ -381,7 +381,7 @@ function ModificarGrupo({ grupos, grupo: grupoProp, actualizarGrupo, niveles, pe
                 <Grid item xs={12} md={3}>
                     <Select name="periodo" value={grupo.periodo} onChange={handleChange} fullWidth size="small" displayEmpty>
                         <MenuItem value="">Selecciona un Periodo</MenuItem>
-                        {(periodos || []).map(p => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
+                        {(periodos || []).map(p => <MenuItem key={p.id || p.id_Periodo} value={p.id || p.id_Periodo}>{p.descripcion || p.nombre}</MenuItem>)}
                     </Select>
                 </Grid>
                 <Grid item xs={12} md={3}>

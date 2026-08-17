@@ -45,7 +45,10 @@ export default function ListaGruposMUI({ grupos = [], profesores = [], alumnos =
     id: g.id, 
     nombre: g.nombre, 
     nivel: g.nivel, 
-    periodo: periodos.find(p => p.id === g.id_Periodo)?.nombre || periodos.find(p => p.id_Periodo === g.id_Periodo)?.nombre || 'N/A', 
+    periodo: (() => {
+      const p = periodos.find(p => (p.id || p.id_Periodo) === g.id_Periodo);
+      return p ? (p.descripcion || p.nombre) : 'N/A';
+    })(),
     ubicacion: g.ubicacion, 
     profesorId: g.profesorId, 
     profesor_nombre: g.profesor_nombre || 'No asignado',
