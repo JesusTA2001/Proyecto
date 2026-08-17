@@ -71,11 +71,11 @@ function CrearGrupo({ agregarGrupo, niveles, periodos, profesores, alumnos, onPe
     useEffect(() => {
         let filtered = [];
         if (grupo.ubicacion === 'Tecnologico') {
-            // Niveles 0-6 para Tecnológico (Intro, Nivel1-6)
-            filtered = niveles.filter(n => n.id >= 0 && n.id <= 6);
+            // Niveles 11-17 para Tecnológico (Intro, Nivel 1-6)
+            filtered = niveles.filter(n => n.id >= 11 && n.id <= 17);
         } else if (grupo.ubicacion === 'Centro de Idiomas') {
-            // Todos los niveles para Centro de Idiomas
-            filtered = niveles;
+            // Todos los niveles para Centro de Idiomas, excepto No Asignado (id: 0)
+            filtered = niveles.filter(n => n.id > 0);
         }
         setNivelesDisponibles(filtered);
         // Resetear nivel si el actual no es válido
