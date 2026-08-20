@@ -78,8 +78,8 @@ exports.getAlumnosDisponibles = async (req, res) => {
     }
     
     if (nivel) {
-      query += ' AND (e.id_Nivel = ? OR ultima_calif.id_nivel = ?)';
-      params.push(nivel, nivel);
+      query += ' AND e.id_Nivel = ?';
+      params.push(nivel);
     }
     
     query += ' ORDER BY dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre';
