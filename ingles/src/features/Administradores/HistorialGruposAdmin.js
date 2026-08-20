@@ -98,6 +98,7 @@ export default function HistorialGruposAdmin() {
     const rows = calificaciones.map((cal, idx) => ({
       No: String(idx + 1).padStart(2, '0'),
       Control: cal.nControl,
+      'Nombre Completo': cal.estudiante_nombre || '-',
       Parcial1: cal.parcial1 || '-',
       Parcial2: cal.parcial2 || '-',
       Parcial3: cal.parcial3 || '-',
@@ -189,6 +190,7 @@ export default function HistorialGruposAdmin() {
           ? calificaciones.map((cal, rowIdx) => ({
               No: rowIdx + 1,
               Control: cal.nControl || '-',
+              'Nombre Completo': cal.estudiante_nombre || '-',
               Parcial1: cal.parcial1 ?? '-',
               Parcial2: cal.parcial2 ?? '-',
               Parcial3: cal.parcial3 ?? '-',
@@ -378,6 +380,7 @@ export default function HistorialGruposAdmin() {
                 <TableHead>
                   <TableRow style={{ backgroundColor: '#00903D' }}>
                     <TableCell style={{ color: 'white', fontWeight: 'bold' }}>No. Control</TableCell>
+                    <TableCell style={{ color: 'white', fontWeight: 'bold' }}>Nombre Completo</TableCell>
                     <TableCell align="center" style={{ color: 'white', fontWeight: 'bold' }}>Parcial 1</TableCell>
                     <TableCell align="center" style={{ color: 'white', fontWeight: 'bold' }}>Parcial 2</TableCell>
                     <TableCell align="center" style={{ color: 'white', fontWeight: 'bold' }}>Parcial 3</TableCell>
@@ -388,6 +391,7 @@ export default function HistorialGruposAdmin() {
                   {calificacionesGrupo.map((cal, idx) => (
                     <TableRow key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#f9fafb' : 'white' }}>
                       <TableCell>{cal.nControl}</TableCell>
+                      <TableCell>{cal.estudiante_nombre || 'N/A'}</TableCell>
                       <TableCell align="center">{cal.parcial1 || '-'}</TableCell>
                       <TableCell align="center">{cal.parcial2 || '-'}</TableCell>
                       <TableCell align="center">{cal.parcial3 || '-'}</TableCell>
