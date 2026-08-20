@@ -200,7 +200,7 @@ exports.guardarCalificaciones = async (req, res) => {
       }
     }
 
-    // Verificar si los grupos afectados ya no tienen estudiantes 'actuales' y pasarlos a inactivo
+    // Verificar si los grupos afectados ya no tienen estudiantes 'actuales' y pasarlos a concluido
     for (const cal of calificaciones) {
       if (cal.id_Grupo) {
         const [estudiantesActuales] = await connection.query(
@@ -209,7 +209,7 @@ exports.guardarCalificaciones = async (req, res) => {
         );
         if (estudiantesActuales[0].count === 0) {
           await connection.query(
-            "UPDATE Grupo SET estado = 'inactivo' WHERE id_Grupo = ?",
+            "UPDATE Grupo SET estado = 'concluido' WHERE id_Grupo = ?",
             [cal.id_Grupo]
           );
         }
@@ -343,14 +343,14 @@ exports.guardarCalificacionIndividual = async (req, res) => {
       );
     }
 
-    // Verificar si el grupo ya no tiene estudiantes 'actuales' y pasarlo a inactivo
+    // Verificar si el grupo ya no tiene estudiantes 'actuales' y pasarlo a concluido
     const [estudiantesActuales] = await connection.query(
       "SELECT COUNT(*) as count FROM EstudianteGrupo WHERE id_Grupo = ? AND estado = 'actual'",
       [id_Grupo]
     );
     if (estudiantesActuales[0].count === 0) {
       await connection.query(
-        "UPDATE Grupo SET estado = 'inactivo' WHERE id_Grupo = ?",
+        "UPDATE Grupo SET estado = 'concluido' WHERE id_Grupo = ?",
         [id_Grupo]
       );
     }
