@@ -65,12 +65,12 @@ exports.verificarEstadoGrupos = async (req, res) => {
       }
     }
 
-    // Inactivar los grupos que cumplan las condiciones
+    // Inactivar/concluir los grupos que cumplan las condiciones
     if (gruposParaInactivar.length > 0) {
       const idsGrupos = gruposParaInactivar.map(g => g.id_Grupo);
       await pool.query(`
         UPDATE Grupo 
-        SET estado = 'inactivo' 
+        SET estado = 'concluido' 
         WHERE id_Grupo IN (?)
       `, [idsGrupos]);
     }
@@ -99,7 +99,7 @@ exports.inactivarGrupo = async (req, res) => {
 
     await pool.query(`
       UPDATE Grupo 
-      SET estado = 'inactivo' 
+      SET estado = 'concluido' 
       WHERE id_Grupo = ?
     `, [id]);
 
@@ -165,7 +165,7 @@ exports.getGruposInactivos = async (req, res) => {
       LEFT JOIN Empleado emp ON prof.id_empleado = emp.id_empleado
       LEFT JOIN DatosPersonales dp ON emp.id_dp = dp.id_dp
       LEFT JOIN GrupoEstudiante ge ON g.id_Grupo = ge.id_Grupo
-      WHERE g.estado = 'inactivo'
+      WHERE g.estado IN ('concluido', 'inactivo')
       GROUP BY g.id_Grupo, g.grupo, g.ubicacion, n.nivel, p.descripcion, 
                p.fecha_inicio, p.fecha_fin, dp.apellidoPaterno, dp.apellidoMaterno, dp.nombre
       ORDER BY p.fecha_fin DESC
